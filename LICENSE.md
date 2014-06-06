@@ -1,7 +1,3 @@
-
-<!-- saved from url=(0115)https://bitbucket.org/IntelliFactory/websharper.google.maps/raw/5e9e4494303385c51cc85da60348317b9213bce0/LICENSE.md -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-2"></head><body><pre style="word-wrap: break-word; white-space: pre-wrap;"># WebSharper.Google.Maps Licensing
-
 WebSharper.Google.Maps is licensed under [GNU Affer General Public License
 v3.0 (AGPLv3)][agpl] with an open-source exception (see below).
 
@@ -682,4 +678,4 @@ granted to you by the Exception and revert to the terms of AGPLv3.
 | University of Illinois/NCSA Open Source License        | -               |
 | W3C License                                            | 2001            |
 | X11 License                                            | 2001            |
-| Zlib/libpng License                                    | -               |</pre></body></html>
+| Zlib/libpng License                                    | -               |
