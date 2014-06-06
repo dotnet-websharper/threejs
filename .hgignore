@@ -6,3 +6,5 @@ ThreeJS/bin/*
 ThreeJS/obj/*
 tools/packages/*
 ThreeJS/backup/*
+packages/*
+*.suo
