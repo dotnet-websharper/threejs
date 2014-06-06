@@ -1,0 +1,8 @@
+syntax: glob
+Tests/bin/*
+Tests/Content/*
+Tests/obj/*
+ThreeJS/bin/*
+ThreeJS/obj/*
+tools/packages/*
+ThreeJS/backup/*
