@@ -1,0 +1,9 @@
+syntax: glob
+build/*
+packages/*
+Tests/bin/*
+Tests/Content/*
+Tests/obj/*
+ThreeJs/bin/*
+ThreeJs/obj/*
+*.suo
