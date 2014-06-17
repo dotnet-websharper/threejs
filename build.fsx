@@ -8,6 +8,7 @@ let bt =
 let main =
     bt.WebSharper.Extension("ThreeJs")
         .SourcesFromProject()
+        .Embed(["three.min.js"])
 
 let test =
     bt.WebSharper.BundleWebsite("Tests")
