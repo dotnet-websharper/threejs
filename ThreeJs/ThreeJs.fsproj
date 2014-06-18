@@ -8,7 +8,7 @@
     <WebSharperProject>InterfaceGenerator</WebSharperProject>
     <Name>ThreeJs</Name>
     <RootNamespace>ThreeJs</RootNamespace>
-    <AssemblyName>ThreeJs</AssemblyName>
+    <AssemblyName>IntelliFactory.WebSharper.ThreeJs</AssemblyName>
     <NuGetPackageImportStamp>e0d4ec72</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
