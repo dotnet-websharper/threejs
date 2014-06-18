@@ -6,13 +6,15 @@ let bt =
     |> fun bt -> bt.WithFramework(bt.Framework.Net40)
 
 let main =
-    bt.WebSharper.Extension("ThreeJs")
-        .SourcesFromProject()
+    (bt.WebSharper.Extension("IntelliFactory.WebSharper.ThreeJs")
+    |> FSharpConfig.BaseDir.Custom "ThreeJs")
+        .SourcesFromProject("ThreeJs.fsproj")
         .Embed(["three.min.js"])
 
 let test =
-    bt.WebSharper.BundleWebsite("Tests")
-        .SourcesFromProject()
+    (bt.WebSharper.BundleWebsite("IntelliFactory.WebSharper.ThreeJs.Tests")
+    |> FSharpConfig.BaseDir.Custom "Tests")
+        .SourcesFromProject("Tests.fsproj")
         .References(fun r -> [r.Project main])
 
 bt.Solution [
