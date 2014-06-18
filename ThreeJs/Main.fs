@@ -2739,7 +2739,7 @@ module Definition =
     let ShapeClass =
         Class "THREE.Shape"
         |=> Shape
-        |=> Inherits Path
+        |=> Inherits PathClass
 
     let EllipseCurve =
         Class "THREE.EllipseCurve"
