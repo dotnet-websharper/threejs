@@ -2658,6 +2658,9 @@ module Definition =
 
             "clone" => O ^-> DataTexture
         ]
+    
+    let Path  = Type.New ()
+    let Shape = Type.New ()
 
     let FontUtils =
         Class "THREE.FontUtils"
@@ -2672,7 +2675,8 @@ module Definition =
             "getFace" => O ^-> T<obj>
             "loadFace" => T<obj>?data ^-> T<obj>
             "drawText" => T<string>?text ^-> T<obj>
-            //...
+            "extractGlyphPoints" => T<int>?c * Face3?face * T<float>?scale * T<int>?offset * Path?path ^-> T<obj>
+            "generateShapes" => T<string>?text * !? T<obj>?parameters ^-> ArrayOf Shape
         ]
 
     let GeometryUtils =
@@ -2727,12 +2731,14 @@ module Definition =
         Class "THREE.Gyroscope"
         |=> Inherits Object3D
 
-    let Path =
+    let PathClass =
         Class "THREE.Path"
+        |=> Path
         |=> Inherits CurvePath
 
-    let Shape =
+    let ShapeClass =
         Class "THREE.Shape"
+        |=> Shape
         |=> Inherits Path
 
     let EllipseCurve =
@@ -3085,6 +3091,24 @@ module Definition =
                 AnimationHandler
                 KeyFrameAnimation
                 AnimationMorphTarget
+                CombiedCamera
+                CubeCamera
+                Curve
+                CurvePath
+                Gyroscope
+                PathClass
+                ShapeClass
+                ArcCurve
+                ClosedSplineCurve3
+                CubicBezierCurve
+                CubicBezierCurve3
+                EllipseCurve
+                LineCurve
+                LineCurve3
+                QuadraticBezierCurve
+                QuadraticBezierCurve3
+                SplineCurve
+                SplineCurve3
                 BoxGeometry
                 CircleGeometry
                 CylinderGeometry
