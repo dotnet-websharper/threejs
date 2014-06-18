@@ -12,7 +12,6 @@ module Definition =
     let Quaternion = Type.New ()
     let Matrix4    = Type.New ()
 
-    //[B]
     let EventDispatcher =
         Class "THREE.EventDispatcher"
         |+> [
@@ -26,7 +25,6 @@ module Definition =
             "dispatchEvent"       => T<string>?``type`` ^-> O
         ]
 
-    //[B]
     let Object3D =
         let Object3D = Type.New ()
         
@@ -86,7 +84,6 @@ module Definition =
             "clone"                     => !? Object3D?``object`` * !? T<bool>?``recursive`` ^-> Object3D
         ]
 
-    //[B]
     let Camera =
         let Camera = Type.New ()
         
@@ -104,7 +101,6 @@ module Definition =
             "clone"  => !? Camera?camera ^-> Camera
         ]
     
-    //[B]
     let OrthographicCamera =
         let OrthographicCamera = Type.New ()
         
@@ -126,7 +122,6 @@ module Definition =
             "clone"                  => O ^-> OrthographicCamera
         ]
     
-    //[B]
     let PerspectiveCamera =
         let PerspectiveCamera = Type.New ()
         
@@ -148,7 +143,6 @@ module Definition =
             "clone"                  => O ^-> PerspectiveCamera
         ]
 
-    //[B]
     let BufferAttribute =
         Class "THREE.BufferAttribute"
         |+> [
@@ -171,7 +165,6 @@ module Definition =
     
     open IntelliFactory.WebSharper.Html5
 
-    //[B]
     let BufferGeometry =
         let BufferGeometry = Type.New ()
         
@@ -209,7 +202,6 @@ module Definition =
             
         ]
     
-    //[B]
     let Clock =
         Class "THREE.Clock"
         |+> [
@@ -239,7 +231,6 @@ module Definition =
             ]
         }
     
-    //[B]
     let ColorClass =
         let Color = Type.New ()
 
@@ -281,7 +272,6 @@ module Definition =
             "clone"                => O ^-> Color
         ]
     
-    //[B]
     let Face3 =
         let Face3 = Type.New ()
         
@@ -336,7 +326,6 @@ module Definition =
     
     let Matrix3 = Type.New ()
 
-    //[B]
     let Geometry =
         let Geometry = Type.New ()
         
@@ -402,7 +391,6 @@ module Definition =
             "sprites"  =@ ArrayOf T<obj>
         ]
 
-    //[B]
     let Projector =
         Class "THREE.Projector"
         |+> [
@@ -430,7 +418,6 @@ module Definition =
             ]
         }
 
-    //[B]
     let RaycasterClass =
         Class "THREE.Raycaster"
         |=> Raycaster
@@ -451,7 +438,6 @@ module Definition =
     
     let Color = ColorClass + T<int> + T<string>
 
-    //[B]
     let LightClass =
         Class "THREE.Light"
         |=> Light
@@ -465,7 +451,6 @@ module Definition =
             "clone" => !? Light?light ^-> Light
         ]
     
-    //[B]
     let AmbientLight =
         let AmbientLight = Type.New ()
 
@@ -479,7 +464,6 @@ module Definition =
             "clone" => O ^-> AmbientLight
         ]
 
-    //[B]
     let AreaLight =
         Class "THREE.AreaLight"
         |=> Inherits LightClass
@@ -497,7 +481,6 @@ module Definition =
             "quadraticAttenuation" =@ T<float>
         ]
     
-    //[B]
     let DirectionalLight =
         let DirectionalLight = Type.New ()
 
@@ -540,7 +523,6 @@ module Definition =
             "clone" => O ^-> DirectionalLight
         ]
 
-    //[B]
     let HemisphereLight =
         let HemisphereLight = Type.New ()
         
@@ -557,7 +539,6 @@ module Definition =
             "clone" => O ^-> HemisphereLight
         ]
     
-    //[B]
     let PointLight =
         let PointLight = Type.New ()
 
@@ -574,7 +555,6 @@ module Definition =
             "clone" => O ^-> PointLight
         ]
     
-    //[B]
     let SpotLight =
         let SpotLight = Type.New ()
 
@@ -610,7 +590,6 @@ module Definition =
 
     let LoadingManager = Type.New ()
 
-    //[B]
     let BufferGeometryLoader =
         Class "THREE.BufferGeometryLoader"
         |+> [
@@ -625,7 +604,6 @@ module Definition =
             "parse"          => T<obj>?json ^-> BufferGeometry
         ]
     
-    //[B]
     let Cache =
         Class "THREE.Cache"
         |+> [
@@ -642,7 +620,6 @@ module Definition =
     
     open IntelliFactory.WebSharper.Dom
 
-    //[B]
     let ImageLoader =
         Class "THREE.ImageLoader"
         |+> [
@@ -659,7 +636,6 @@ module Definition =
         
     let Material = Type.New ()
 
-    //[B]
     let Loader =
         Class "THREE.Loader"
         |+> [
@@ -682,7 +658,6 @@ module Definition =
             "createMaterial"   => Material?m * T<string>?texturePath ^-> Material
         ]
 
-    //[B]
     let JSONLoader =
         let JSONLoader = Type.New ()
         
@@ -700,7 +675,6 @@ module Definition =
             "parse"        => T<obj>?json * T<string>?texturePath ^-> T<obj>
         ]
     
-    //[B]
     let LoadingManagerClass =
         Class "THREE.LoadingManager"
         |=> LoadingManager
@@ -716,7 +690,6 @@ module Definition =
             "itemEnd"   => T<string>?url ^-> O
         ]
     
-    //[B]
     let MaterialLoader =
         Class "THREE.MaterialLoader"
         |+> [
@@ -731,7 +704,6 @@ module Definition =
             "parse"          => T<obj>?json ^-> Material
         ]
 
-    //[B]
     let ObjectLoader =
         Class "THREE.ObjectLoader"
         |+> [
@@ -749,7 +721,6 @@ module Definition =
             "parseObject"              => T<obj>?data * (ArrayOf Geometry)?geometries * (ArrayOf Material)?materials ^-> Object3D
         ]
     
-    //[B]
     let SceneLoader =
         Class "THREE.SceneLoader"
         |+> [
@@ -774,7 +745,6 @@ module Definition =
     
     let Texture = Type.New ()
 
-    //[B]
     let TextureLoader =
         Class "THREE.TextureLoader"
         |=> Inherits EventDispatcher
@@ -789,7 +759,6 @@ module Definition =
             "setCrossOrigin" => T<string>?value ^-> O
         ]
 
-    //[B]
     let XHRLoader =
         Class "THREE.XHRLoader"
         |+> [
@@ -804,7 +773,6 @@ module Definition =
             "setCrossOrigin" => T<string>?value ^-> O
         ]
 
-    //[B]
     let MaterialClass =
         Class "THREE.Material"
         |=> Material
@@ -856,7 +824,6 @@ module Definition =
             ]
         }
 
-    //[B]
     let LineBasicMaterial =
         let LineBasicMaterial = Type.New ()
 
@@ -896,7 +863,6 @@ module Definition =
             ]
         }
 
-    //[B]
     let LineDashedMaterial =
         let LineDashedMaterial = Type.New ()
 
@@ -945,7 +911,6 @@ module Definition =
             ]
         }
 
-    //[B]
     let MeshBasicMaterial =
         let MeshBasicMaterial = Type.New ()
 
@@ -991,7 +956,6 @@ module Definition =
             ]
         }
 
-    //[B]
     let MeshDepthMaterial =
         let MeshDepthMaterial = Type.New ()
         
@@ -1008,7 +972,6 @@ module Definition =
             "clone" => O ^-> MeshDepthMaterial
         ]
 
-    //[B]
     let MeshFaceMaterial =
         let MeshFaceMaterial = Type.New ()
 
@@ -1055,7 +1018,6 @@ module Definition =
             ]
         }
 
-    //[B]
     let MeshLambertMaterial =
         let MeshLambertMaterial = Type.New ()
         
@@ -1107,7 +1069,6 @@ module Definition =
             ]
         }
     
-    //[B]
     let MeshNormalMaterial =
         let MeshNormalMaterial = Type.New ()
         
@@ -1164,7 +1125,6 @@ module Definition =
             ]
         }
 
-    //[B]
     let MeshPhongMaterial =
         let MeshPhongMaterial = Type.New ()
         
@@ -1225,7 +1185,6 @@ module Definition =
             ]
         }
 
-    //[B]
     let ParticleSystemMaterial =
         let ParticleSystemMaterial = Type.New ()
 
@@ -1278,7 +1237,6 @@ module Definition =
             "uv2"   =@ Tuple [T<float>; T<float>]
         ]
 
-    //[B]
     let ShaderMaterial =
         let ShaderMaterial = Type.New ()
 
@@ -1311,7 +1269,6 @@ module Definition =
             "clone" => O ^-> ShaderMaterial
         ]
 
-    //[B]
     let RawShaderMaterial =
         let RawShaderMaterial = Type.New ()
         
@@ -1337,7 +1294,6 @@ module Definition =
             ]
         }
 
-    //[B]
     let SpriteCanvasMaterial =
         let SpriteCanvasMaterial = Type.New ()
         
@@ -1371,7 +1327,6 @@ module Definition =
             ]
         }
 
-    //[B]
     let SpriteMaterial =
         let SpriteMaterial = Type.New ()
 
@@ -1390,7 +1345,6 @@ module Definition =
             "clone" => O ^-> SpriteMaterial
         ]
 
-    //[B]
     let Box2 =
         let Box2 = Type.New ()
         
@@ -1427,7 +1381,6 @@ module Definition =
             "clone"                => O ^-> Box2
         ]
     
-    //[B]
     let Box3Class =
         Class "THREE.Box3"
         |=> Box3
@@ -1466,7 +1419,6 @@ module Definition =
             "clone"                => O ^-> Box3
         ]
 
-    //[B]
     let EulerClass =
         Class "THREE.Euler"
         |=> Euler
@@ -1495,7 +1447,6 @@ module Definition =
 
     let Plane = Type.New ()
 
-    //[B]
     let Frustum =
         let Frustum = Type.New ()
         
@@ -1517,7 +1468,6 @@ module Definition =
             "clone"            => O ^-> Frustum
         ]
 
-    //[B]
     let Line3 =
         let Line3 = Type.New ()
         
@@ -1544,7 +1494,6 @@ module Definition =
             "clone"                        => O ^-> Line3
         ]
 
-    //[B]
     let Math =
         Class "THREE.Math"
         |+> [
@@ -1564,7 +1513,6 @@ module Definition =
             "isPowerOfTwo"    => T<float>?value ^-> T<bool>
         ]
     
-    //[B]
     let Matrix3Class =
         Class "THREE.Matrix3"
         |=> Matrix3
@@ -1590,7 +1538,6 @@ module Definition =
             "clone"                => O ^-> Matrix3
         ]
 
-    //[B]
     let Matrix4Class =
         Class "THREE.Matrix4"
         |=> Matrix4
@@ -1636,7 +1583,6 @@ module Definition =
             "clone"                      => O ^-> Matrix4
         ]
 
-    //[B]
     let PlaneClass =
         Class "THREE.Plane"
         |=> Plane
@@ -1667,7 +1613,6 @@ module Definition =
             "clone"                         => O ^-> Plane
         ]
 
-    //[B]
     let QuaternionClass =
         Class "THREE.Quaternion"
         |=> Quaternion
@@ -1967,7 +1912,6 @@ module Definition =
     
     let SkinnedMesh = Type.New ()
 
-    //[B]
     let Bone =
         Class "THREE.Bone"
         |=> Inherits Object3D
@@ -1984,7 +1928,6 @@ module Definition =
             "update" => Matrix4?parentSkinMatrix * !? T<bool>?forceUpdate ^-> O
         ]
 
-    //[B]
     let Line =
         let Line = Type.New ()
         
@@ -2002,7 +1945,6 @@ module Definition =
             "clone" => !? Line?``object`` ^-> Line
         ]
     
-    //[B]
     let LOD =
         let LOD = Type.New ()
         
@@ -2021,7 +1963,6 @@ module Definition =
             "clone"                => !? LOD?``object`` ^-> LOD
         ]
     
-    //[B]
     let Mesh =
         let Mesh = Type.New ()
 
@@ -2041,7 +1982,6 @@ module Definition =
             
         ]
 
-    //[B]
     let MorphAnimMesh =
         let MorphAnimMesh = Type.New ()
 
@@ -2066,7 +2006,6 @@ module Definition =
             "clone"                => !? MorphAnimMesh?``object`` ^-> MorphAnimMesh
         ]
 
-    //[B]
     let ParticleSystem =
         let ParticleSystem = Type.New ()
         
@@ -2087,7 +2026,6 @@ module Definition =
 
     let Skeleton = Type.New ()
 
-    //[B]
     let SkinnedMeshClass =
         Class "THREE.SkinnedMesh"
         |=> SkinnedMesh
@@ -2105,7 +2043,6 @@ module Definition =
             "clone"                => !? SkinnedMesh?``object`` ^-> SkinnedMesh
         ]
 
-    //[B]
     let Sprite =
         let Sprite = Type.New ()
         
@@ -2133,7 +2070,6 @@ module Definition =
             ]
         }
 
-    //[B]
     let CanvasRenderer =
         Class "THREE.CanvasRenderer"
         |+> [
@@ -2206,7 +2142,6 @@ module Definition =
             "render" =@ RenderInfo
         ]
 
-    //[B]
     let WebGLRenderer =
         Class "THREE.WebGLRenderer"
         |+> [
@@ -2277,7 +2212,6 @@ module Definition =
             "setRenderTarget"                 => WebGLRenderTarget?renderTarget ^-> O
         ]
     
-    //[B]
     let WebGLRenderTargetClass =
         Class "THREE.WebGLRenderTarget"
         |=> WebGLRenderTarget
@@ -2305,7 +2239,6 @@ module Definition =
             "dispose" => O ^-> O
         ]
     
-    //[B]
     let WebGLRenderTargetCube =
         Class "THREE.WebGLRenderTargetCube"
         |=> Inherits WebGLRenderTargetClass
@@ -2315,7 +2248,6 @@ module Definition =
 
     let RenderableVertex = Type.New ()
 
-    //[B]
     let RenderableFace =
         Class "THREE.RenderableFace"
         |+> [
@@ -2335,7 +2267,6 @@ module Definition =
             "z"                   =@ T<float>
         ]
     
-    //[B]
     let RenderableLine =
         Class "THREE.RenderableLine"
         |+> [
@@ -2351,7 +2282,6 @@ module Definition =
             
         ]
 
-    //[B]
     let RenderableObject =
         Class "THREE.RenderableObject"
         |+> [
@@ -2363,7 +2293,6 @@ module Definition =
             "z"      =@ T<float>
         ]
 
-    //[B]
     let RenderableSprite =
         Class "THREE.RenderableSprite"
         |+> [
@@ -2380,7 +2309,6 @@ module Definition =
             "material"     =@ Material
         ]
 
-    //[B]
     let RenderableVertexClass =
         Class "THREE.RenderableVertex"
         |=> RenderableVertex
@@ -2396,7 +2324,6 @@ module Definition =
             "copy" => RenderableVertex?vertex ^-> O
         ]
 
-    //[B]
     let ShaderChunk =
         Class "THREE.ShaderChunk"
         |+> [
@@ -2452,7 +2379,6 @@ module Definition =
             "logdepthbuf_fragment"       =? T<string>
         ]
 
-    //[B]
     let ShaderLib =
         let Info =
             Class "Info"
@@ -2487,7 +2413,6 @@ module Definition =
                 "value" =@ a
             ]
 
-    //[B]
     let UniformsLib =
         let Common =
             Class "Common"
@@ -2594,7 +2519,6 @@ module Definition =
             Shadowmap
         ]
 
-    //[B]
     let UniformsUtils =
         Class "THREE.UniformsUtils"
         |+> [
@@ -2602,7 +2526,6 @@ module Definition =
             "clone" => T<obj>?uniforms_src ^-> T<obj>
         ]
 
-    //[B]
     let WebGLProgram =
         Class "THREE.WebGLProgram"
         |+> [
@@ -2619,14 +2542,12 @@ module Definition =
             "fragementShader" =@ T<obj>
         ]
 
-    //[B]
     let WebGLShader =
         Class "THREE.WebGLShader"
         |+> [
             Constructor (T<obj>?gl * T<obj>?``type`` * T<string>?``string``)
         ]
     
-    //[B]
     let FogClass =
         Class "THREE.Fog"
         |=> Fog
@@ -2642,7 +2563,6 @@ module Definition =
             "clone" => O ^-> Fog
         ]
 
-    //[B]
     let FogExp2 =
         let FogExp2 = Type.New ()
         
@@ -2659,7 +2579,6 @@ module Definition =
             "clone" => O ^-> FogExp2
         ]
 
-    //[B]
     let SceneClass =
         Class "THREE.Scene"
         |=> Scene
@@ -2676,7 +2595,6 @@ module Definition =
             "clone" => !? Scene?``object`` ^-> Scene
         ]
 
-    //[B]
     let TextureClass =
         Class "THREE.Texture"
         |=> Texture
@@ -2711,7 +2629,6 @@ module Definition =
             "dispose" => O ^-> O
         ]
 
-    //[B]
     let CompressedTexture =
         let CompressedTexture = Type.New ()
         
@@ -2728,7 +2645,6 @@ module Definition =
             "clone" => O ^-> CompressedTexture
         ]
 
-    //[B]
     let DataTexture =
         let DataTexture = Type.New ()
 
@@ -2762,13 +2678,12 @@ module Definition =
     let GeometryUtils =
         Class "THREE.GeometryUtils" 
 
-    //[B]
     let ImageUtils =
         Class "THREE.ImageUtils"
         |+> [
             "crossOrigin" =@ T<string>
 
-            "loadTexture"               => T<string>?url * T<obj>?mapping * !? (!? Texture ^-> O)?onLoad * !? (!? T<obj> ^-> O)?onError ^-> Texture
+            "loadTexture"               => T<string>?url * !? T<obj>?mapping * !? (!? Texture ^-> O)?onLoad * !? (!? T<obj> ^-> O)?onError ^-> Texture
             "loadCompressedTexture"     => T<string>?url * T<obj>?mapping * !? (!? CompressedTexture ^-> O)?onLoad * !? (!? T<obj> ^-> O)?onError ^-> CompressedTexture
             "loadTextureCube"           => (ArrayOf T<string>)?array * T<obj>?mapping * !? (!? Texture ^-> O)?onLoad * !? (!? T<obj> ^-> O)?onError ^-> Texture
             "loadCompressedTextureCube" => (ArrayOf T<string>)?array * T<obj>?mapping * !? (!? CompressedTexture ^-> O)?onLoad * !? (!? T<obj> ^-> O)?onError ^-> Texture
@@ -2864,7 +2779,6 @@ module Definition =
         Class "THREE.SplineCurve3"
         |=> Inherits Curve
 
-    //[B]
     let BoxGeometry =
         Class "THREE.BoxGeometry"
         |=> Inherits Geometry
@@ -2872,12 +2786,12 @@ module Definition =
             Constructor (T<float>?width * T<float>?height * T<float>?depth * !? T<int>?widthSegments * !? T<int>?heightSegments * !? T<int>?depthSegments)
         ]
         |+> Protocol [
+            "parameters"     =? T<obj>
             "widthSegments"  =@ T<int>
             "heightSegments" =@ T<int>
             "depthSegments"  =@ T<int>
         ]
 
-    //[B]
     let CircleGeometry =
         Class "THREE.CircleGeometry"
         |=> Inherits Geometry
@@ -2885,10 +2799,9 @@ module Definition =
             Constructor (!? T<float>?radius * !? T<int>?segments * !? T<float>?thetaStart * !? T<float>?thetaLength)
         ]
         |+> Protocol [
-            "parameters" =@ T<obj>
+            "parameters" =? T<obj>
         ]
 
-    //[B]
     let CylinderGeometry =
         Class "THREE.CylinderGeometry"
         |=> Inherits Geometry
@@ -2896,10 +2809,9 @@ module Definition =
             Constructor (!? T<float>?radiusTop * !? T<float>?radiusBottom * !? T<float>?height * !? T<int>?radialSegments * !? T<int>?heightSegments * !? T<bool>?openEnded)
         ]
         |+> Protocol [
-            "parameters" =@ T<obj>
+            "parameters" =? T<obj>
         ]
 
-    //[B]
     let ExtrudeGeometry =
         Class "THREE.ExtrudeGeometry"
         |=> Inherits Geometry
@@ -2907,24 +2819,22 @@ module Definition =
             Constructor (!? (ArrayOf Shape)?shapes * !? T<obj>?options)
         ]
         |+> Protocol [
-            "shapebb" =@ Box3
+            "shapebb" =? Box3
 
             "addShapeList" => (ArrayOf Shape)?shapes * !? T<obj>?options ^-> O
             "addShape"     => Shape?shape * !? T<obj>?options ^-> O
         ]
 
-    //[B]
     let IcosahedronGeometry =
         Class "THREE.IcosahedronGeometry"
         |=> Inherits Geometry
         |+> [
-            Constructor (!? T<float>?radius * T<obj>?detail)
+            Constructor (!? T<float>?radius * !? T<float>?detail)
         ]
         |+> Protocol [
-            "parameters" =@ T<obj>
+            "parameters" =? T<obj>
         ]
 
-    //[B]
     let LatheGeometry =
         Class "THREE.LatheGeometry"
         |=> Inherits Geometry
@@ -2932,18 +2842,16 @@ module Definition =
             Constructor ((ArrayOf T<obj>)?points * !? T<int>?segments * !? T<float>?phiStart * !? T<float>?phiLength)
         ]
 
-    //[B]
     let OctahedronGeometry =
         Class "THREE.OctahedronGeometry"
         |=> Inherits Geometry
         |+> [
-            Constructor (T<float>?radius * T<obj>?detail)
+            Constructor (!? T<float>?radius * !? T<float>?detail)
         ]
         |+> Protocol [
-            "parameters" =@ T<obj>
+            "parameters" =? T<obj>
         ]
 
-    //[B]
     let ParametricGeometry =
         Class "THREE.ParametricGeometry"
         |=> Inherits Geometry
@@ -2951,34 +2859,36 @@ module Definition =
             Constructor ((T<obj> * T<obj> ^-> T<obj>)?func * T<int>?slices * T<int>?stacks)
         ]
 
-    //[B]
     let PlaneGeometry =
         Class "THREE.PlaneGeometry"
         |=> Inherits Geometry
         |+> [
-            Constructor (T<float>?width * T<float>?height * T<int>?widthSegments * T<int>?heightSegments)
+            Constructor (T<float>?width * T<float>?height * !? T<int>?widthSegments * !? T<int>?heightSegments)
         ]
         |+> Protocol [
-            "parameters" =@ T<obj>
+            "parameters" =? T<obj>
         ]
 
-    //[B]
     let PolyhedronGeometry =
         Class "THREE.PolyhedronGeometry"
         |=> Inherits Geometry
         |+> [
-            Constructor ((ArrayOf T<float>)?vertices * (ArrayOf T<float>)?indices * T<float>?radius * T<float>?detail)
+            Constructor ((ArrayOf T<float>)?vertices * (ArrayOf T<float>)?indices * !? T<float>?radius * !? T<float>?detail)
+        ]
+        |+> Protocol [
+            "boundingSphere" =? Sphere
         ]
 
-    //[B]
     let RingGeometry =
         Class "THREE.RingGeometry"
         |=> Inherits Geometry
         |+> [
-            Constructor (T<float>?innerRadius * T<float>?outerRadius * T<int>?thetaSegments * T<int>?phiSegments * T<float>?thetaLength * T<float>?phiLength)
+            Constructor (!? T<float>?innerRadius * !? T<float>?outerRadius * !? T<int>?thetaSegments * !? T<int>?phiSegments * !? T<float>?thetaLength * !? T<float>?phiLength)
+        ]
+        |+> Protocol [
+            "boundingSphere" =? Sphere
         ]
 
-    //[B]
     let ShapeGeometry =
         Class "THREE.ShapeGeometry"
         |=> Inherits Geometry
@@ -2986,29 +2896,28 @@ module Definition =
             Constructor (!? (ArrayOf Shape)?shapes * !? T<obj>?options)
         ]
         |+> Protocol [
-            "shapebb" =@ Box3
+            "shapebb" =? Box3
 
             "addShapeList" => (ArrayOf Shape)?shapes * !? T<obj>?options ^-> O
             "addShape"     => Shape?shape * !? T<obj>?options ^-> O
         ]
 
-    //[B]
     let SphereGeometry =
         Class "THREE.SphereGeometry"
         |=> Inherits Geometry
         |+> [
-            Constructor (!? T<float>?radius * !? T<int>?widthSegments * !? T<int>?heightSegments * T<float>?phiStart * T<float>?phiLength * T<float>?thetaStart * T<float>?thetaLength)
+            Constructor (!? T<float>?radius * !? T<int>?widthSegments * !? T<int>?heightSegments * !? T<float>?phiStart * !? T<float>?phiLength * !? T<float>?thetaStart * !? T<float>?thetaLength)
         ]
         |+> Protocol [
-            "parameters" =@ T<obj>
+            "parameters"     =? T<obj>
+            "boundingSphere" =? Sphere
         ]
 
-    //[B]
     let TetrahedronGeometry =
         Class "THREE.TetrahedronGeometry"
-        |=> Inherits PolyhedronGeometry
+        |=> Inherits Geometry
         |+> [
-            Constructor (T<float>?radius * T<obj>?detail)
+            Constructor (!? T<float>?radius * !? T<float>?detail)
         ]
 
     let TextGeometry =
@@ -3022,21 +2931,30 @@ module Definition =
         Class "THREE.TorusGeometry"
         |=> Inherits Geometry
         |+> [
-            Constructor (T<float>?radius * T<float>?tube * T<int>?radialSegments * T<int>?tubularSegments * T<float>?arc)
+            Constructor (!? T<float>?radius * !? T<float>?tube * !? T<int>?radialSegments * !? T<int>?tubularSegments * !? T<float>?arc)
+        ]
+        |+> Protocol [
+            "parameters" =? T<obj>
         ]
 
     let TorusKnotGeometry =
         Class "THREE.TorusKnotGeometry"
         |=> Inherits Geometry
         |+> [
-            Constructor (T<float>?radius * T<float>?tube * T<int>?radialSegments * T<int>?tubularSegments * T<float>?p * T<float>?q * T<float>?heightScale)
+            Constructor (!? T<float>?radius * !? T<float>?tube * !? T<int>?radialSegments * !? T<int>?tubularSegments * !? T<float>?p * !? T<float>?q * !? T<float>?heightScale)
+        ]
+        |+> Protocol [
+            "parameters" =? T<obj>
         ]
 
     let TubeGeometry =
         Class "THREE.TubeGeometry"
         |=> Inherits Geometry
         |+> [
-            Constructor (T<obj>?path * T<int>?segments * T<float>?radius * T<int>?radiusSegments * T<bool>?closed * T<bool>?debug)
+            Constructor (T<obj>?path * !? T<int>?segments * !? T<float>?radius * !? T<int>?radiusSegments * !? T<bool>?closed * !? T<bool>?debug)
+        ]
+        |+> Protocol [
+            "parameters" =? T<obj>
         ]
 
     let Assembly =
