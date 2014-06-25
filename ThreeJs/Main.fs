@@ -811,7 +811,7 @@ module Definition =
             Required = []
             Optional =
             [
-                "color"       , Color
+                "color"       , T<int>
                 "opacity"     , T<float>
                 "blending"    , T<int>
                 "depthTest"   , T<bool>
@@ -849,7 +849,7 @@ module Definition =
             Required = []
             Optional =
             [
-                "color"       , Color
+                "color"       , T<int>
                 "opacity"     , T<float>
                 "blending"    , T<int>
                 "depthTest"   , T<bool>
@@ -889,7 +889,7 @@ module Definition =
             Required = []
             Optional =
             [
-                "color"             , Color
+                "color"             , T<int>
                 "opacity"           , T<float>
                 "map"               , Texture
                 "lightMap"          , Texture
@@ -992,9 +992,9 @@ module Definition =
             Required = []
             Optional =
             [
-                "color"             , Color
-                "ambient"           , Color
-                "emissive"          , Color
+                "color"             , T<int>
+                "ambient"           , T<int>
+                "emissive"          , T<int>
                 "opacity"           , T<float>
                 "map"               , Texture
                 "lightMap"          , Texture
@@ -1094,10 +1094,10 @@ module Definition =
             Required = []
             Optional =
             [
-                "color"             , Color
-                "ambient"           , Color
-                "emissive"          , Color
-                "specular"          , Color
+                "color"             , T<int>
+                "ambient"           , T<int>
+                "emissive"          , T<int>
+                "specular"          , T<int>
                 "shininess"         , T<float>
                 "opacity"           , T<float>
                 "map"               , Texture
@@ -1173,7 +1173,7 @@ module Definition =
             Required = []
             Optional =
             [
-                "color"       , Color
+                "color"       , T<int>
                 "opacity"     , T<float>
                 "map"         , Texture
                 "size"        , T<float>
@@ -1287,7 +1287,7 @@ module Definition =
             Required = []
             Optional =
             [
-                "color"   , Color
+                "color"   , T<int>
                 "program" , (T<obj>?context * T<obj>?color ^-> O)
                 "opacity" , T<float>
                 "blending", T<int>
@@ -1315,7 +1315,7 @@ module Definition =
             Required = []
             Optional =
             [
-                "color"     , Color
+                "color"     , T<int>
                 "opacity"   , T<float>
                 "map"       , Texture
                 "blending"  , T<int>
@@ -1651,57 +1651,64 @@ module Definition =
         Class "THREE.Ray"
         |=> Ray
         |+> [
-            Constructor (Vector3?origin * Vector3?direction)
+            Constructor (!? Vector3?origin * !? Vector3?direction)
         ]
         |+> Protocol [
             "origin"    =@ Vector3
             "direction" =@ Vector3
 
-            "applyMatrix4"         => Matrix4?matrix4 ^-> Ray
-            "at"                   => T<float>?t * Vector3?optionalTarget ^-> Vector3
-            "clone"                => O ^-> Ray
-            "closestPointToPoint"  => Vector3?point * Vector3?optionalTarget ^-> Vector3
-            "copy"                 => Ray?ray ^-> Ray
-            "distanceSqToSegment"  => Vector3?v0 * Vector3?v1 * Vector3?optionalPointOnRay * Vector3?optionalPointOnSegment ^-> T<float>
-            "distanceToPlane"      => Plane?plane ^-> T<float>
-            "distanceToPoint"      => Vector3?point ^-> T<float>
-            "equals"               => Ray?ray ^-> T<bool>
-            "intersectBox"         => Box3?box * Vector3?optionalTarget ^-> Vector3
-            "intersectPlane"       => Plane?plane * Vector3?optionalTarget ^-> Vector3
-            "intersectTriangle"    => Vector3?a * Vector3?b * Vector3?c * T<bool>?backfaceCulling * Vector3?optionalTarget ^-> Vector3
-            "isIntersectionBox"    => Box3?box ^-> T<bool>
-            "isIntersectionPlane"  => Plane?plane ^-> T<bool>
-            "isIntersectionSphere" => Sphere?sphere ^-> T<bool>
-            "recast"               => T<float>?t ^-> O
             "set"                  => Vector3?origin * Vector3?direction ^-> Ray
+            "copy"                 => Ray?ray ^-> Ray
+            "at"                   => T<float>?t * !? Vector3?optionalTarget ^-> Vector3
+            "recast"               => T<float>?t ^-> O
+            "closestPointToPoint"  => Vector3?point * !? Vector3?optionalTarget ^-> Vector3
+            "distanceToPoint"      => Vector3?point ^-> T<float>
+            "distanceSqToSegment"  => Vector3?v0 * Vector3?v1 * !? Vector3?optionalPointOnRay * !? Vector3?optionalPointOnSegment ^-> T<float>
+            "isIntersectionSphere" => Sphere?sphere ^-> T<bool>
+            "isIntersectionPlane"  => Plane?plane ^-> T<bool>
+            "distanceToPlane"      => Plane?plane ^-> T<float>
+            "intersectPlane"       => Plane?plane * !? Vector3?optionalTarget ^-> Vector3
+            "isIntersectionBox"    => Box3?box ^-> T<bool>
+            "intersectBox"         => Box3?box * !? Vector3?optionalTarget ^-> Vector3
+            "intersectTriangle"    => Vector3?a * Vector3?b * Vector3?c * !? T<bool>?backfaceCulling * !? Vector3?optionalTarget ^-> Vector3
+            "applyMatrix4"         => Matrix4?matrix4 ^-> Ray
+            "equals"               => Ray?ray ^-> T<bool>
+            "clone"                => O ^-> Ray
         ]
 
     let SphereClass =
         Class "THREE.Sphere"
         |=> Sphere
         |+> [
-            Constructor (Vector3?center * T<float>?radius)
+            Constructor (!? Vector3?center * !? T<float>?radius)
         ]
         |+> Protocol [
             "center" =@ Vector3
             "radius" =@ T<float>
 
             "set"              => Vector3?center * T<float>?radius ^-> Sphere
-            "applyMatrix4"     => Matrix4?matrix ^-> Sphere
-            "clampPoint"       => Vector3?point * Vector3?optionalTarget ^-> Vector3
-            "translate"        => Vector3?offset ^-> Sphere
-            "clone"            => O ^-> Sphere
-            "equals"           => Sphere?sphere ^-> T<bool>
-            "setFromPoints"    => (ArrayOf Vector3)?points * Vector3?optionalCenter ^-> Sphere
-            "distanceToPoint"  => Vector3?point ^-> T<float>
-            "getBoundingBox"   => Box3?optionalTarget ^-> Box3
-            "containsPoint"    => Vector3?point ^-> T<bool>
+            "setFromPoints"    => (ArrayOf Vector3)?points * !? Vector3?optionalCenter ^-> Sphere
             "copy"             => Sphere?sphere ^-> Sphere
-            "intersectsSphere" => Sphere?sphere ^-> T<bool>
             "empty"            => O ^-> T<bool>
+            "containsPoint"    => Vector3?point ^-> T<bool>
+            "distanceToPoint"  => Vector3?point ^-> T<float>
+            "intersectsSphere" => Sphere?sphere ^-> T<bool>
+            "clampPoint"       => Vector3?point * !? Vector3?optionalTarget ^-> Vector3
+            "getBoundingBox"   => !? Box3?optionalTarget ^-> Box3
+            "applyMatrix4"     => Matrix4?matrix ^-> Sphere
+            "translate"        => Vector3?offset ^-> Sphere
+            "equals"           => Sphere?sphere ^-> T<bool>
+            "clone"            => O ^-> Sphere
         ]
 
     let Spline =
+        let Length =
+            Class "Length"
+            |+> Protocol [
+                "chunkLengths" =? ArrayOf T<float>
+                "chunkLengths" =? T<float>
+            ]
+        
         Class "THREE.Spline"
         |+> [
             Constructor (ArrayOf Vector3)?points
@@ -1710,10 +1717,14 @@ module Definition =
             "points" =@ ArrayOf Vector3
 
             "initFromArray"            => (ArrayOf Vector3)?a ^-> O
-            "getPoint"                 => T<int>?k ^-> O
-            "getControlPointsArray"    => O ^-> O
-            "getLength"                => T<int>?nSubDivisions ^-> O
+            "getPoint"                 => T<int>?k ^-> Vector3
+            "getControlPointsArray"    => O ^-> ArrayOf (Tuple [T<float>; T<float>; T<float>])
+            "getLength"                => !? T<int>?nSubDivisions ^-> Length
             "reparametrizeByArcLength" => T<float>?samplingCoef ^-> O
+            "interpolate"              => T<float>?p0 * T<float>?p1 * T<float>?p2 * T<float>?p3 * T<float>?t * T<float>?t2 * T<float>?t3 ^-> T<float>
+        ]
+        |=> Nested [
+            Length
         ]
 
     let Triangle =
@@ -1722,44 +1733,59 @@ module Definition =
         Class "THREE.Triangle"
         |=> Triangle
         |+> [
-            Constructor (Vector3?a * Vector3?b * Vector3?c)
+            Constructor (!? Vector3?a * !? Vector3?b * !? Vector3?c)
         ]
         |+> Protocol [
             "a" =@ Vector3
             "c" =@ Vector3
             "b" =@ Vector3
 
-            "setFromPointsAndIndices" => (ArrayOf Vector3)?points * T<int>?i0 * T<int>?i1 * T<int>?i2 ^-> Triangle
             "set"                     => Vector3?a * Vector3?b * Vector3?c ^-> Triangle
-            "normal"                  => Vector3?optionalTarget ^-> Vector3
-            "barycoordFromPoint"      => Vector3?point * Vector3?optionalTarget ^-> Vector3
-            "clone"                   => O ^-> Triangle
-            "area"                    => O ^-> T<float>
-            "midpoint"                => Vector3?optionalTarget ^-> Vector3
-            "equals"                  => Triangle?triangle ^-> T<bool>
-            "plane"                   => Plane?optionalTarget ^-> Plane
-            "containsPoint"           => Vector3?point ^-> T<bool>
+            "setFromPointsAndIndices" => (ArrayOf Vector3)?points * T<int>?i0 * T<int>?i1 * T<int>?i2 ^-> Triangle
             "copy"                    => Triangle?triangle ^-> Triangle
+            "area"                    => O ^-> T<float>
+            "midpoint"                => !? Vector3?optionalTarget ^-> Vector3
+            "normal"                  => !? Vector3?optionalTarget ^-> Vector3
+            "plane"                   => !? Plane?optionalTarget ^-> Plane
+            "barycoordFromPoint"      => Vector3?point * !? Vector3?optionalTarget ^-> Vector3
+            "containsPoint"           => Vector3?point ^-> T<bool>
+            "equals"                  => Triangle?triangle ^-> T<bool>
+            "clone"                   => O ^-> Triangle
         ]
 
     let Vector2Class =
         Class "THREE.Vector2"
         |=> Vector2
         |+> [
-            Constructor (T<float>?x * T<float>?y)
+            Constructor (!? T<float>?x * !? T<float>?y)
         ]
         |+> Protocol [
             "x" =@ T<float>
             "y" =@ T<float>
 
             "set"               => T<float>?x * T<float>?y ^-> Vector2
+            "setX"              => T<float>?x ^-> Vector2
+            "setY"              => T<float>?y ^-> Vector2
+            "setComponent"      => T<int>?index * T<float>?value ^-> O
+            "getComponent"      => T<int>?index ^-> T<float>
             "copy"              => Vector2?v ^-> Vector2
             "add"               => Vector2?v ^-> Vector2
             "addVectors"        => Vector2?a * Vector2?b ^-> Vector2
+            "addScalar"         => T<float>?s ^-> Vector2
             "sub"               => Vector2?v ^-> Vector2
             "subVectors"        => Vector2?a * Vector2?b ^-> Vector2
+            "multiply"          => Vector2?v ^-> Vector2
             "multiplyScalar"    => T<float>?s ^-> Vector2
+            "divide"            => Vector2?v ^-> Vector2
             "divideScalar"      => T<float>?s ^-> Vector2
+            "min"               => Vector2?v ^-> Vector2
+            "max"               => Vector2?v ^-> Vector2
+            "clamp"             => Vector2?min * Vector2?max ^-> Vector2
+            "clampScalar"       => T<float>?minVal * T<float>?maxVal ^-> Vector2
+            "floor"             => O ^-> Vector2
+            "ceil"              => O ^-> Vector2
+            "round"             => O ^-> Vector2
+            "roundToZero"       => O ^-> Vector2
             "negate"            => O ^-> Vector2
             "dot"               => Vector2?v ^-> T<float>
             "lengthSq"          => O ^-> T<float>
@@ -1768,31 +1794,18 @@ module Definition =
             "distanceTo"        => Vector2?v ^-> T<float>
             "distanceToSquared" => Vector2?v ^-> T<float>
             "setLength"         => T<float>?l ^-> Vector2
-            "equals"            => Vector2?v ^-> T<bool>
-            "clone"             => O ^-> Vector2
-            "clamp"             => Vector2?min * Vector2?max ^-> Vector2
-            "clampScalar"       => T<float>?min * T<float>?max ^-> Vector2
-            "floor"             => O ^-> Vector2
-            "ceil"              => O ^-> Vector2
-            "round"             => O ^-> Vector2
-            "roundToZero"       => O ^-> Vector2
             "lerp"              => Vector2?v * T<float>?alpha ^-> Vector2
-            "setComponent"      => T<int>?index * T<float>?value ^-> O
-            "addScalar"         => T<float>?s ^-> Vector2
-            "getComponent"      => T<int>?index ^-> T<float>
+            "equals"            => Vector2?v ^-> T<bool>
             "fromArray"         => (Tuple [T<float>; T<float>])?array ^-> Vector2
             "toArray"           => O ^-> Tuple [T<float>; T<float>]
-            "min"               => Vector2?v ^-> Vector2
-            "max"               => Vector2?v ^-> Vector2
-            "setX"              => T<float>?x ^-> Vector2
-            "setY"              => T<float>?y ^-> Vector2
+            "clone"             => O ^-> Vector2
         ]
 
     let Vector3Class =
         Class "THREE.Vector3"
         |=> Vector3
         |+> [
-            Constructor (T<float>?x * T<float>?y * T<float>?z)
+            Constructor (!? T<float>?x * !? T<float>?y * !? T<float>?z)
         ]
         |+> Protocol [
             "x" =@ T<float>
@@ -1803,57 +1816,57 @@ module Definition =
             "setX"                  => T<float>?x ^-> Vector3
             "setY"                  => T<float>?y ^-> Vector3
             "setZ"                  => T<float>?z ^-> Vector3
+            "setComponent"          => T<int>?index * T<float>?value ^-> Vector3
+            "getComponent"          => T<int>?index ^-> T<float>
             "copy"                  => Vector3?v ^-> Vector3
             "add"                   => Vector3?v ^-> Vector3
+            "addScalar"             => T<float>?s ^-> Vector3
             "addVectors"            => Vector3?a * Vector3?b ^-> Vector3
             "sub"                   => Vector3?v ^-> Vector3
             "subVectors"            => Vector3?a * Vector3?b ^-> Vector3
+            "multiply"              => Vector3?v ^-> Vector3
             "multiplyScalar"        => T<float>?s ^-> Vector3
+            "multiplyVectors"       => Vector3?a * Vector3?b ^-> Vector3
+            "applyEuler"            => Euler?euler ^-> Vector3
+            "applyAxisAngle"        => Vector3?axis * T<float>?angle ^-> Vector3
+            "applyMatrix3"          => Matrix3?m ^-> Vector3
+            "applyMatrix4"          => Matrix4?m ^-> Vector3
+            "applyProjection"       => Matrix4?m ^-> Vector3
+            "applyQuaternion"       => Quaternion?quaternion ^-> Vector3
+            "transformDirection"    => Matrix4?m ^-> Vector3
+            "divide"                => Vector3?v ^-> Vector3
             "divideScalar"          => T<float>?s ^-> Vector3
+            "min"                   => Vector3?v ^-> Vector3
+            "max"                   => Vector3?v ^-> Vector3
+            "clamp"                 => Vector3?min * Vector3?max ^-> Vector3
+            "clampScalar"           => T<float>?minVal * T<float>?maxVal ^-> Vector3
+            "floor"                 => O ^-> Vector3
+            "ceil"                  => O ^-> Vector3
+            "round"                 => O ^-> Vector3
+            "roundToZero"           => O ^-> Vector3
             "negate"                => O ^-> Vector3
             "dot"                   => Vector3?v ^-> T<float>
             "lengthSq"              => O ^-> T<float>
             "length"                => O ^-> T<float>
             "lengthManhattan"       => O ^-> T<float>
             "normalize"             => O ^-> Vector3
-            "distanceTo"            => Vector3?v ^-> T<float>
-            "distanceToSquared"     => Vector3?v ^-> T<float>
             "setLength"             => T<float>?l ^-> Vector3
+            "lerp"                  => Vector3?v * T<float>?alpha ^-> Vector3
             "cross"                 => Vector3?v ^-> Vector3
             "crossVectors"          => Vector3?a * Vector3?b ^-> Vector3
+            "projectOnVector"       => Vector3?vector ^-> Vector3
+            "projectOnPlane"        => Vector3?planeNormal ^-> Vector3
+            "reflect"               => Vector3?normal ^-> Vector3
+            "angleTo"               => Vector3?v ^-> T<float>
+            "distanceTo"            => Vector3?v ^-> T<float>
+            "distanceToSquared"     => Vector3?v ^-> T<float>
             "setFromMatrixPosition" => Matrix4?m ^-> Vector3
             "setFromMatrixScale"    => Matrix4?m ^-> Vector3
-            "equals"                => Vector3?v ^-> T<bool>
-            "clone"                 => O ^-> Vector3
-            "clamp"                 => Vector3?min * Vector3?max ^-> Vector3
-            "clampScalar"           => T<float>?min * T<float>?max ^-> Vector3
-            "floor"                 => O ^-> Vector3
-            "ceil"                  => O ^-> Vector3
-            "round"                 => O ^-> Vector3
-            "roundToZero"           => O ^-> Vector3
-            "applyMatrix3"          => Matrix3?m ^-> Vector3
-            "applyMatrix4"          => Matrix3?m ^-> Vector3
-            "projectOnPlane"        => Vector3?planeNormal ^-> Vector3
-            "projectOnVector"       => O ^-> Vector3
-            "addScalar"             => O ^-> Vector3
-            "divide"                => Vector3?v ^-> Vector3
-            "min"                   => Vector3?v ^-> Vector3
-            "max"                   => Vector3?v ^-> Vector3
-            "setComponent"          => T<int>?index * T<float>?value ^-> Vector3
-            "transformDirection"    => Matrix4?m ^-> Vector3
-            "multiplyVectors"       => Vector3?a * Vector3?b ^-> Vector3
-            "getComponent"          => T<int>?index ^-> T<float>
-            "applyAxisAngle"        => Vector3?axis * T<float>?angle ^-> Vector3
-            "lerp"                  => Vector3?v * T<float>?alpha ^-> Vector3
-            "angleTo"               => Vector3?v ^-> T<float>
             "setFromMatrixColumn"   => T<int>?index * Matrix4?matrix ^-> Vector3
-            "reflect"               => Vector3?normal ^-> Vector3
-            "fromArray"             => (Type.Tuple [T<float>; T<float>; T<float>])?array ^-> Vector3
-            "multiply"              => Vector3?v ^-> Vector3
-            "applyProjection"       => Matrix4?m ^-> Vector3
-            "toArray"               => O ^-> Type.Tuple [T<float>; T<float>; T<float>]
-            "applyEuler"            => Euler?euler ^-> Vector3
-            "applyQuaternion"       => Quaternion?quaternion ^-> Vector3
+            "equals"                => Vector3?v ^-> T<bool>
+            "fromArray"             => (Tuple [T<float>; T<float>; T<float>])?array ^-> Vector3
+            "toArray"               => O ^-> Tuple [T<float>; T<float>; T<float>]
+            "clone"                 => O ^-> Vector3
         ]
 
     let Vector4 =
@@ -1862,7 +1875,7 @@ module Definition =
         Class "THREE.Vector4"
         |=> Vector4
         |+> [
-            Constructor (T<float>?x * T<float>?y * T<float>?z * T<float>?w)
+            Constructor (!? T<float>?x * !? T<float>?y * !? T<float>?z * !? T<float>?w)
         ]
         |+> Protocol [
             "x" =@ T<float>
@@ -1871,43 +1884,43 @@ module Definition =
             "w" =@ T<float>
 
             "set"                            => T<float>?x * T<float>?y * T<float>?z * T<float>?w ^-> Vector4
-            "copy"                           => Vector4?v ^-> Vector4
-            "add"                            => Vector4?v ^-> Vector4
-            "addVectors"                     => Vector4?a * Vector4?b ^-> Vector4
-            "sub"                            => Vector4?v ^-> Vector4
-            "subVectors"                     => Vector4?a * Vector4?b ^-> Vector4
-            "multiplyScalar"                 => T<float>?s ^-> Vector4
-            "divideScalar"                   => T<float>?s ^-> Vector4
-            "negate"                         => O ^-> Vector4
-            "dot"                            => Vector4?v ^-> T<float>
-            "lengthSq"                       => O ^-> T<float>
-            "length"                         => O ^-> T<float>
-            "normalize"                      => O ^-> Vector4
-            "setLength"                      => T<float>?l ^-> Vector4
-            "lerp"                           => Vector4?v * T<float>?alpha ^-> Vector4
-            "clone"                          => O ^-> Vector4
-            "clamp"                          => Vector4?min * Vector4?max ^-> Vector4
-            "clampScalar"                    => T<float>?min * T<float>?max ^-> Vector4
-            "floor"                          => O ^-> Vector4
-            "ceil"                           => O ^-> Vector4
-            "round"                          => O ^-> Vector4
-            "roundToZero"                    => O ^-> Vector4
-            "applyMatrix4"                   => Matrix4?m ^-> Vector4
-            "min"                            => Vector4?v ^-> Vector4
-            "max"                            => Vector4?v ^-> Vector4
-            "addScalar"                      => T<float>?s ^-> Vector4
-            "equals"                         => Vector4?v ^-> T<bool>
-            "setAxisAngleFromRotationMatrix" => Matrix4?m ^-> Vector4
-            "setAxisAngleFromQuaternion"     => Quaternion?q ^-> Vector4
-            "getComponent"                   => T<int>?index ^-> T<float>
-            "setComponent"                   => T<int>?index * T<float>?value ^-> O
-            "fromArray"                      => (Tuple [T<float>; T<float>; T<float>; T<float>])?array ^-> Vector4
-            "toArray"                        => O ^-> Tuple [T<float>; T<float>; T<float>; T<float>]
-            "lengthManhattan"                => O ^-> T<float>
             "setX"                           => T<float>?x ^-> Vector4
             "setY"                           => T<float>?y ^-> Vector4
             "setZ"                           => T<float>?z ^-> Vector4
             "setW"                           => T<float>?w ^-> Vector4
+            "setComponent"                   => T<int>?index * T<float>?value ^-> O
+            "getComponent"                   => T<int>?index ^-> T<float>
+            "copy"                           => Vector4?v ^-> Vector4
+            "add"                            => Vector4?v ^-> Vector4
+            "addScalar"                      => T<float>?s ^-> Vector4
+            "addVectors"                     => Vector4?a * Vector4?b ^-> Vector4
+            "sub"                            => Vector4?v ^-> Vector4
+            "subVectors"                     => Vector4?a * Vector4?b ^-> Vector4
+            "multiplyScalar"                 => T<float>?s ^-> Vector4
+            "applyMatrix4"                   => Matrix4?m ^-> Vector4
+            "divideScalar"                   => T<float>?s ^-> Vector4
+            "setAxisAngleFromQuaternion"     => Quaternion?q ^-> Vector4
+            "setAxisAngleFromRotationMatrix" => Matrix4?m ^-> Vector4
+            "min"                            => Vector4?v ^-> Vector4
+            "max"                            => Vector4?v ^-> Vector4
+            "clamp"                          => Vector4?min * Vector4?max ^-> Vector4
+            "clampScalar"                    => T<float>?minVal * T<float>?maxVal ^-> Vector4
+            "floor"                          => O ^-> Vector4
+            "ceil"                           => O ^-> Vector4
+            "round"                          => O ^-> Vector4
+            "roundToZero"                    => O ^-> Vector4
+            "negate"                         => O ^-> Vector4
+            "dot"                            => Vector4?v ^-> T<float>
+            "lengthSq"                       => O ^-> T<float>
+            "length"                         => O ^-> T<float>
+            "lengthManhattan"                => O ^-> T<float>
+            "normalize"                      => O ^-> Vector4
+            "setLength"                      => T<float>?l ^-> Vector4
+            "lerp"                           => Vector4?v * T<float>?alpha ^-> Vector4
+            "equals"                         => Vector4?v ^-> T<bool>
+            "fromArray"                      => (Tuple [T<float>; T<float>; T<float>; T<float>])?array ^-> Vector4
+            "toArray"                        => O ^-> Tuple [T<float>; T<float>; T<float>; T<float>]
+            "clone"                          => O ^-> Vector4
         ]
     
     let SkinnedMesh = Type.New ()
