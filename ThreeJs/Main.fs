@@ -2337,230 +2337,6 @@ module Definition =
             "copy" => RenderableVertex?vertex ^-> O
         ]
 
-    let ShaderChunk =
-        Class "THREE.ShaderChunk"
-        |+> [
-            "fog_pars_fragment"          =? T<string>
-            "fog_fragment"               =? T<string>
-            "envmap_pars_fragment"       =? T<string>
-            "envmap_fragment"            =? T<string>
-            "envmap_pars_vertex"         =? T<string>
-            "worldpos_vertex"            =? T<string>
-            "envmap_vertex"              =? T<string>
-            "map_particle_pars_fragment" =? T<string>
-            "map_particle_fragment"      =? T<string>
-            "map_pars_vertex"            =? T<string>
-            "map_pars_fragment"          =? T<string>
-            "map_vertex"                 =? T<string>
-            "map_fragment"               =? T<string>
-            "lightmap_pars_fragment"     =? T<string>
-            "lightmap_pars_vertex"       =? T<string>
-            "lightmap_fragment"          =? T<string>
-            "lightmap_vertex"            =? T<string>
-            "bumpmap_pars_fragment"      =? T<string>
-            "normalmap_pars_fragment"    =? T<string>
-            "specularmap_pars_fragment"  =? T<string>
-            "specularmap_fragment"       =? T<string>
-            "lights_lambert_pars_vertex" =? T<string>
-            "lights_lambert_vertex"      =? T<string>
-            "lights_phong_pars_vertex"   =? T<string>
-            "lights_phong_vertex"        =? T<string>
-            "lights_phong_pars_fragment" =? T<string>
-            "lights_phong_fragment"      =? T<string>
-            "color_pars_fragment"        =? T<string>
-            "color_fragment"             =? T<string>
-            "color_pars_vertex"          =? T<string>
-            "color_vertex"               =? T<string>
-            "skinning_pars_vertex"       =? T<string>
-            "skinbase_vertex"            =? T<string>
-            "skinning_vertex"            =? T<string>
-            "morphtarget_pars_vertex"    =? T<string>
-            "morphtarget_vertex"         =? T<string>
-            "default_vertex"             =? T<string>
-            "morphnormal_vertex"         =? T<string>
-            "skinnormal_vertex"          =? T<string>
-            "defaultnormal_vertex"       =? T<string>
-            "shadowmap_pars_fragment"    =? T<string>
-            "shadowmap_fragment"         =? T<string>
-            "shadowmap_pars_vertex"      =? T<string>
-            "shadowmap_vertex"           =? T<string>
-            "alphatest_fragment"         =? T<string>
-            "linear_to_gamma_fragment"   =? T<string>
-            "logdepthbuf_pars_vertex"    =? T<string>
-            "logdepthbuf_vertex"         =? T<string>
-            "logdepthbuf_pars_fragment"  =? T<string>
-            "logdepthbuf_fragment"       =? T<string>
-        ]
-
-    let ShaderLib =
-        let Info =
-            Class "Info"
-            |+> Protocol [
-                "uniforms"       =? T<obj>
-                "vertexShader"   =? T<string>
-                "fragmentShader" =? T<string>
-            ]
-        
-        Class "THREE.ShaderLib"
-        |+> [
-            "basic"          =? Info
-            "lambert"        =? Info
-            "phong"          =? Info
-            "particle_basic" =? Info
-            "dashed"         =? Info
-            "depth"          =? Info
-            "normal"         =? Info
-            "normalmap"      =? Info
-            "cube"           =? Info
-            "depthRGBA"      =? Info
-        ]
-        |=> Nested [
-            Info
-        ]
-    
-    let TypeValuePair =
-        Generic / fun a ->
-            Class "TypeValuePair"
-            |+> [
-                "type"  =@ T<string>
-                "value" =@ a
-            ]
-
-    let UniformsLib =
-        let Common =
-            Class "Common"
-            |+> Protocol [
-                "diffuse"               =@ TypeValuePair ColorClass
-                "opacity"               =@ TypeValuePair T<float>
-                "map"                   =@ TypeValuePair Texture
-                "offsetRepeat"          =@ TypeValuePair Vector4
-                "lightMap"              =@ TypeValuePair T<obj>
-                "specularMap"           =@ TypeValuePair T<obj>
-                "envMap"                =@ TypeValuePair T<obj>
-                "flipEnvMap"            =@ TypeValuePair T<int>
-                "useRefract"            =@ TypeValuePair T<int>
-                "reflectivity"          =@ TypeValuePair T<float>
-                "refractionRatio"       =@ TypeValuePair T<float>
-                "combine"               =@ TypeValuePair T<int>
-                "morphTargetInfluences" =@ TypeValuePair T<int>
-            ]
-        
-        let Bump =
-            Class "Bump"
-            |+> Protocol [
-                "bumpMap"   =@ TypeValuePair T<obj>
-                "bumpScale" =@ TypeValuePair T<float>
-            ]
-
-        let Normalmap =
-            Class "Normalmap"
-            |+> Protocol [
-                "normalMap"   =@ TypeValuePair T<obj>
-                "normalScale" =@ TypeValuePair Vector2
-            ]
-    
-        let Fog =
-            Class "Fog"
-            |+> Protocol [
-                "fogDestiny" =@ TypeValuePair T<float>
-                "fogNear"    =@ TypeValuePair T<float>
-                "fogFar"     =@ TypeValuePair T<float>
-                "fogColor"   =@ TypeValuePair ColorClass
-            ]
-
-        let Lights =
-            Class "Lights"
-            |+> Protocol [
-                "ambientLightColor"           =@ TypeValuePair (ArrayOf T<obj>)
-                "directionalLightDirection"   =@ TypeValuePair (ArrayOf T<obj>)
-                "directionalLightColor"       =@ TypeValuePair (ArrayOf T<obj>)
-                "hemisphereLightDirection"    =@ TypeValuePair (ArrayOf T<obj>)
-                "hemisphereLightSkyColor"     =@ TypeValuePair (ArrayOf T<obj>)
-                "hemisphereLightGroundColor"  =@ TypeValuePair (ArrayOf T<obj>)
-                "pointLightColor"             =@ TypeValuePair (ArrayOf T<obj>)
-                "pointLightPosition"          =@ TypeValuePair (ArrayOf T<obj>)
-                "pointLightDistance"          =@ TypeValuePair (ArrayOf T<obj>)
-                "spotLightColor"              =@ TypeValuePair (ArrayOf T<obj>)
-                "spotLightPosition"           =@ TypeValuePair (ArrayOf T<obj>)
-                "spotLightDirection"          =@ TypeValuePair (ArrayOf T<obj>)
-                "spotLightDistance"           =@ TypeValuePair (ArrayOf T<obj>)
-                "spotLightAngleCos"           =@ TypeValuePair (ArrayOf T<obj>)
-                "spotLightExponent"           =@ TypeValuePair (ArrayOf T<obj>)
-            ]
-
-        let Particle =
-            Class "Particle"
-            |+> Protocol [
-                "psColor"    =@ TypeValuePair ColorClass
-                "opacity"    =@ TypeValuePair T<float>
-                "size"       =@ TypeValuePair T<float>
-                "scale"      =@ TypeValuePair T<float>
-                "map"        =@ TypeValuePair Texture
-                "fogDensity" =@ TypeValuePair T<float>
-                "fogNear"    =@ TypeValuePair T<float>
-                "fogFar"     =@ TypeValuePair T<float>
-                "fogColor"   =@ TypeValuePair ColorClass
-            ]
-
-        let Shadowmap =
-            Class "Shadowmap"
-            |+> Protocol [
-                "shadowMap"      =@ TypeValuePair (ArrayOf T<obj>)
-                "shadowMapSize"  =@ TypeValuePair (ArrayOf T<obj>)
-                "shadowBias"     =@ TypeValuePair (ArrayOf T<obj>)
-                "shadowDarkness" =@ TypeValuePair (ArrayOf T<obj>)
-                "shadowMatrix"   =@ TypeValuePair (ArrayOf T<obj>)
-            ]
-
-        Class "THREE.UniformsLib"
-        |+> [
-            "common"    =@ Common
-            "bump"      =@ Bump
-            "normalmap" =@ Normalmap
-            "fog"       =@ Fog
-            "lights"    =@ Lights
-            "particle"  =@ Particle
-            "shadowmap" =@ Shadowmap
-        ]
-        |=> Nested [
-            Common
-            Bump
-            Normalmap
-            Fog
-            Lights
-            Particle
-            Shadowmap
-        ]
-
-    let UniformsUtils =
-        Class "THREE.UniformsUtils"
-        |+> [
-            "merge" => (ArrayOf T<obj>)?uniforms ^-> T<obj>
-            "clone" => T<obj>?uniforms_src ^-> T<obj>
-        ]
-
-    let WebGLProgram =
-        Class "THREE.WebGLProgram"
-        |+> [
-            Constructor (T<obj>?renderer * T<obj>?code * Material?material * T<obj>?parameters)
-        ]
-        |+> Protocol [
-            "uniforms"        =@ T<obj>
-            "attributes"      =@ T<obj>
-            "id"              =? T<int>
-            "code"            =@ T<obj>
-            "usedTimes"       =@ T<int>
-            "program"         =@ T<obj>
-            "vertexShader"    =@ T<obj>
-            "fragementShader" =@ T<obj>
-        ]
-
-    let WebGLShader =
-        Class "THREE.WebGLShader"
-        |+> [
-            Constructor (T<obj>?gl * T<obj>?``type`` * T<string>?``string``)
-        ]
-    
     let FogClass =
         Class "THREE.Fog"
         |=> Fog
@@ -2678,22 +2454,30 @@ module Definition =
     let FontUtils =
         Class "THREE.FontUtils"
         |+> [
-            "faces" =@ T<obj>
-            "face" =@ T<string>
-            "weight" =@ T<string>
-            "style" =@ T<string>
-            "size" =@ T<float>
+            "faces"    =@ T<obj>
+            "face"     =@ T<string>
+            "weight"   =@ T<string>
+            "style"    =@ T<string>
+            "size"     =@ T<float>
             "division" =@ T<float>
 
-            "getFace" => O ^-> T<obj>
-            "loadFace" => T<obj>?data ^-> T<obj>
-            "drawText" => T<string>?text ^-> T<obj>
+            "getFace"            => O ^-> T<obj>
+            "loadFace"           => T<obj>?data ^-> T<obj>
+            "drawText"           => T<string>?text ^-> T<obj>
             "extractGlyphPoints" => T<int>?c * Face3?face * T<float>?scale * T<int>?offset * Path?path ^-> T<obj>
-            "generateShapes" => T<string>?text * !? T<obj>?parameters ^-> ArrayOf Shape
+            "generateShapes"     => T<string>?text * !? T<obj>?parameters ^-> ArrayOf Shape
         ]
 
     let GeometryUtils =
-        Class "THREE.GeometryUtils" 
+        Class "THREE.GeometryUtils"
+        |+> [
+            "merge"                  => Geometry?geometry1 * Geometry?geometry2 * T<int>?materialIndexOffset ^-> Geometry
+            "randomPointInTriangle"  => Vector3?VectorA * Vector3?VectorB * Vector3?VectorC ^-> Vector3
+            "randomPointInFace"      => Face3?Face * Geometry?Geometry * T<bool>?useCachedAreas ^-> Vector3
+            "randomPointsInGeometry" => Geometry?Geometry * (ArrayOf Vector3)?Points ^-> ArrayOf Vector3
+            "triangleArea"           => Vector3?VectorA * Vector3?VectorB * Vector3?VectorC ^-> T<float>
+            "center"                 => Geometry?Geometry ^-> Vector3
+        ]
 
     let ImageUtils =
         Class "THREE.ImageUtils"
@@ -2712,6 +2496,11 @@ module Definition =
 
     let SceneUtils =
         Class "THREE.SceneUtils"
+        |+> [
+            "createMultiMaterialObject" => Geometry?geometry * (ArrayOf Material)?materials ^-> Object3D
+            "attach"                    => Object3D?child * Scene?scene * Object3D?parent ^-> O
+            "attach"                    => Object3D?child * Scene?scene * Object3D?parent ^-> O
+        ]
 
     let Animation =
         Class "THREE.Animation"
@@ -2976,6 +2765,31 @@ module Definition =
             "parameters" =? T<obj>
         ]
 
+    let AxisHelper =
+        Class "THREE.AxisHelper"
+        |=> Inherits Line
+        |+> [
+            Constructor T<float>?size
+        ]
+
+    let MorphAnimation =
+        Class "THREE.MorphAnimation"
+        |+> [
+            Constructor Mesh?mesh
+        ]
+        |+> Protocol [
+            "mesh"        =@ Mesh
+            "frames"      =@ T<int>
+            "currentTime" =@ T<int>
+            "duration"    =@ T<int>
+            "loop"        =@ T<bool>
+            "isPlaying"   =@ T<bool>
+
+            "play"   => O ^-> O
+            "pause"  => O ^-> O
+            "update" => O ^-> O
+        ]
+
     let Assembly =
         Assembly [
             Namespace "IntelliFactory.WebSharper.ThreeJs" [
@@ -3002,7 +2816,6 @@ module Definition =
                 MemoryInfo
                 RenderInfo
                 Info
-                Generic - TypeValuePair
             ]
             Namespace "IntelliFactory.WebSharper.ThreeJs.THREE" [
                 Camera
@@ -3084,12 +2897,6 @@ module Definition =
                 RenderableObject
                 RenderableSprite
                 RenderableVertexClass
-                ShaderChunk
-                ShaderLib
-                UniformsLib
-                UniformsUtils
-                WebGLProgram
-                WebGLShader
                 FogClass
                 FogExp2
                 SceneClass
@@ -3140,6 +2947,8 @@ module Definition =
                 TorusGeometry
                 TorusKnotGeometry
                 TubeGeometry
+                AxisHelper
+                MorphAnimation
             ]
             Namespace "IntelliFactory.WebSharper.ThreeJs.Resources" [
                 (Resource "three.js" "three.min.js").AssemblyWide ()
