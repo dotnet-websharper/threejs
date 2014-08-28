@@ -11,15 +11,8 @@ let main =
         .SourcesFromProject("ThreeJs.fsproj")
         .Embed(["three.min.js"])
 
-let test =
-    (bt.WebSharper.BundleWebsite("IntelliFactory.WebSharper.ThreeJs.Tests")
-    |> FSharpConfig.BaseDir.Custom "Tests")
-        .SourcesFromProject("Tests.fsproj")
-        .References(fun r -> [r.Project main])
-
 bt.Solution [
     main
-    test
 
     bt.NuGet.CreatePackage()
         .Configure(fun c ->
