@@ -163,7 +163,7 @@ module Definition =
     let Box3            = Type.New ()
     let Sphere          = Type.New ()
     
-    open IntelliFactory.WebSharper.Html5
+    open IntelliFactory.WebSharper
 
     let BufferGeometry =
         let BufferGeometry = Type.New ()
@@ -196,7 +196,7 @@ module Definition =
             |> WithComment "Does not implemented yet!"
             
             "normalizeNormals"      => O ^-> O
-            "reorderBuffers"        => T<Uint16Array>?indexBuffer * T<Int32Array>?indexMap * T<int>?vertexCount ^-> O
+            "reorderBuffers"        => T<JavaScript.Uint16Array>?indexBuffer * T<JavaScript.Int32Array>?indexMap * T<int>?vertexCount ^-> O
             "clone"                 => O ^-> BufferGeometry
             "dispose"               => O ^-> O
             
@@ -618,7 +618,7 @@ module Definition =
             "clear"  => O ^-> O
         ]
     
-    open IntelliFactory.WebSharper.Dom
+    open IntelliFactory.WebSharper.JavaScript.Dom
 
     let ImageLoader =
         Class "THREE.ImageLoader"
@@ -1520,7 +1520,7 @@ module Definition =
             Constructor (!? T<float>?n11 * !? T<float>?n12 * !? T<float>?n13 * !? T<float>?n21 * !? T<float>?n22 * !? T<float>?n23 * !? T<float>?n31 * !? T<float>?n32 * !? T<float>?n33)
         ]
         |+> Protocol [
-            "elements" =@ T<Float32Array>
+            "elements" =@ T<JavaScript.Float32Array>
 
             "set"                  => T<float>?n11 * T<float>?n12 * T<float>?n13 * T<float>?n21 * T<float>?n22 * T<float>?n23 * T<float>?n31 * T<float>?n32 * T<float>?n33 ^-> Matrix3
             "identity"             => O ^-> Matrix3
@@ -1545,7 +1545,7 @@ module Definition =
             Constructor (!? T<float>?n11 * !? T<float>?n12 * !? T<float>?n13 * !? T<float>?n14 * !? T<float>?n21 * !? T<float>?n22 * !? T<float>?n23 * !? T<float>?n24 * !? T<float>?n31 * !? T<float>?n32 * !? T<float>?n33 * !? T<float>?n34 * !? T<float>?n41 * !? T<float>?n42 * !? T<float>?n43 * !? T<float>?n44)
         ]
         |+> [
-            "elements" =@ T<Float32Array>
+            "elements" =@ T<JavaScript.Float32Array>
 
             "set"                        => T<float>?n11 * T<float>?n12 * T<float>?n13 * T<float>?n14 * T<float>?n21 * T<float>?n22 * T<float>?n23 * T<float>?n24 * T<float>?n31 * T<float>?n32 * T<float>?n33 * T<float>?n34 * T<float>?n41 * T<float>?n42 * T<float>?n43 * T<float>?n44 ^-> Matrix4
             "identity"                   => O ^-> Matrix4
@@ -1557,7 +1557,7 @@ module Definition =
             "lookAt"                     => Vector3?eye * Vector3?target * Vector3?up ^-> Matrix4
             "multiply"                   => Matrix4?m ^-> Matrix4
             "multiplyMatrices"           => Matrix4?a * Matrix4?b ^-> Matrix4
-            "multiplyToArray"            => Matrix4?a * Matrix4?b * ((ArrayOf T<float>) + T<Float32Array>)?r ^-> Matrix4
+            "multiplyToArray"            => Matrix4?a * Matrix4?b * ((ArrayOf T<float>) + T<JavaScript.Float32Array>)?r ^-> Matrix4
             "multiplyScalar"             => T<float>?s ^-> Matrix4
             "applyToVector3Array"        => (ArrayOf T<float>)?array * !? T<int>?offset * !? T<int>?length ^-> ArrayOf T<float>
             "determinant"                => O ^-> T<float>
@@ -2162,7 +2162,7 @@ module Definition =
         ]
         |+> Protocol [
             "domElement"          =@ T<Element>
-            "context"             =@ T<WebGL.WebGLRenderingContext>
+            "context"             =@ T<JavaScript.WebGL.RenderingContext>
             "devicePixelRatio"    =@ T<float>
             "autoClear"           =@ T<bool>
             "autoClearColor"      =@ T<bool>
@@ -2187,7 +2187,7 @@ module Definition =
             "shadowMapPlugin"     =@ ShadowMapPlugin
             
 
-            "getContext"                      => O ^-> T<WebGL.WebGLRenderingContext>
+            "getContext"                      => O ^-> T<JavaScript.WebGL.RenderingContext>
             "supportsVertexTextures"          => O ^-> T<bool>
             "supportsFloatTextures"           => O ^-> T<bool>
             "supportsStandardDerivatives"     => O ^-> T<bool>
@@ -2440,7 +2440,7 @@ module Definition =
         Class "THREE.DataTexture"
         |=> Inherits TextureClass
         |+> [
-            Constructor (T<ArrayBufferView>?data * T<int>?width * T<int>?height * T<int>?format * T<int>?``type`` * T<int>?mapping * T<int>?wrapS * T<int>?wrapT * T<int>?magFilter * T<int>?minFilter * T<int>?anisotropy)
+            Constructor (T<JavaScript.ArrayBufferView>?data * T<int>?width * T<int>?height * T<int>?format * T<int>?``type`` * T<int>?mapping * T<int>?wrapS * T<int>?wrapT * T<int>?magFilter * T<int>?minFilter * T<int>?anisotropy)
         ]
         |+> Protocol [
             "image" =@ T<obj>
