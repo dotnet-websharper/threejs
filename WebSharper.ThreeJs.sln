@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ThreeJs", "ThreeJs\ThreeJs.fsproj", "{FE9F90FB-5928-49DE-904E-467650CCE14F}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WebSharper.ThreeJs", "WebSharper.ThreeJs\WebSharper.ThreeJs.fsproj", "{FE9F90FB-5928-49DE-904E-467650CCE14F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

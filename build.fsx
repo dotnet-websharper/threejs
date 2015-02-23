@@ -6,9 +6,8 @@ let bt =
     |> fun bt -> bt.WithFramework(bt.Framework.Net40)
 
 let main =
-    (bt.WebSharper.Extension("IntelliFactory.WebSharper.ThreeJs")
-    |> FSharpConfig.BaseDir.Custom "ThreeJs")
-        .SourcesFromProject("ThreeJs.fsproj")
+    bt.WebSharper.Extension("WebSharper.ThreeJs")
+        .SourcesFromProject()
         .Embed(["three.min.js"])
 
 bt.Solution [

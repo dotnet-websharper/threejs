@@ -8,7 +8,7 @@
     <WebSharperProject>InterfaceGenerator</WebSharperProject>
     <Name>ThreeJs</Name>
     <RootNamespace>ThreeJs</RootNamespace>
-    <AssemblyName>IntelliFactory.WebSharper.ThreeJs</AssemblyName>
+    <AssemblyName>WebSharper.ThreeJs</AssemblyName>
     <NuGetPackageImportStamp>e0d4ec72</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -45,23 +45,11 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
-  <Import Project="..\packages\WebSharper.2.5.114.49\build\WebSharper.targets" Condition="Exists('..\packages\WebSharper.2.5.114.49\build\WebSharper.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\WebSharper.2.5.114.49\build\WebSharper.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WebSharper.2.5.114.49\build\WebSharper.targets'))" />
-  </Target>
+  <Import Project="../build/net40/$(Name).proj" />
   <ItemGroup>
     <None Include="packages.config" />
     <Compile Include="Main.fs" />
     <EmbeddedResource Include="three.min.js" />
     <Content Include="three.js" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
   </ItemGroup>
 </Project>

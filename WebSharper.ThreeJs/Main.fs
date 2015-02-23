@@ -1,11 +1,11 @@
 ﻿namespace ThreeJs
 
-open IntelliFactory.WebSharper.InterfaceGenerator
+open WebSharper.InterfaceGenerator
 
 module Definition =
     let O = T<unit>
 
-    open IntelliFactory.WebSharper.InterfaceGenerator.Type
+    open WebSharper.InterfaceGenerator.Type
 
     let Vector3    = Type.New ()
     let Euler      = Type.New ()
@@ -14,10 +14,10 @@ module Definition =
 
     let EventDispatcher =
         Class "THREE.EventDispatcher"
-        |+> [
+        |+> Static [
             Constructor O
         ]
-        |+> Protocol [
+        |+> Instance [
             "apply"               => T<obj>?``object`` ^-> O
             "addEventListener"    => T<string>?``type`` * (T<obj> ^-> O)?listener ^-> O
             "hasEventListener"    => T<string>?``type`` * (T<obj> ^-> O)?listener ^-> T<bool>
@@ -31,10 +31,10 @@ module Definition =
         Class "THREE.Object3D"
         |=> Object3D
         |=> Inherits EventDispatcher
-        |+> [
+        |+> Static [
             Constructor O
         ]
-        |+> Protocol [
+        |+> Instance [
             "id"                     =? T<int>
             "uuid"                   =? T<string>
             "name"                   =@ T<string>
@@ -90,10 +90,10 @@ module Definition =
         Class "THREE.Camera"
         |=> Camera
         |=> Inherits Object3D
-        |+> [
+        |+> Static [
             Constructor O
         ]
-        |+> Protocol [
+        |+> Instance [
             "matrixWorldInverse" =@ Matrix4
             "projectionMatrix"   =@ Matrix4
             
@@ -107,10 +107,10 @@ module Definition =
         Class "THREE.OrthographicCamera"
         |=> OrthographicCamera
         |=> Inherits Camera
-        |+> [
+        |+> Static [
             Constructor (T<float>?left * T<float>?right * T<float>?top * T<float>?bottom * !? T<float>?near * !? T<float>?far)
         ]
-        |+> Protocol [
+        |+> Instance [
             "left"   =@ T<float>
             "right"  =@ T<float>
             "top"    =@ T<float>
@@ -128,10 +128,10 @@ module Definition =
         Class "THREE.PerspectiveCamera"
         |=> PerspectiveCamera
         |=> Inherits Camera
-        |+> [
+        |+> Static [
             Constructor (!? T<float>?fov * !? T<float>?aspect * !? T<float>?near * !? T<float>?far)
         ]
-        |+> Protocol [
+        |+> Instance [
             "fov"    =@ T<float>
             "aspect" =@ T<float>
             "near"   =@ T<float>
@@ -145,10 +145,10 @@ module Definition =
 
     let BufferAttribute =
         Class "THREE.BufferAttribute"
-        |+> [
+        |+> Static [
             Constructor O
         ]
-        |+> Protocol [
+        |+> Instance [
             "length" =? T<int>
 
             "set"     => T<obj>?value ^-> O
@@ -163,7 +163,7 @@ module Definition =
     let Box3            = Type.New ()
     let Sphere          = Type.New ()
     
-    open IntelliFactory.WebSharper
+    open WebSharper
 
     let BufferGeometry =
         let BufferGeometry = Type.New ()
@@ -171,10 +171,10 @@ module Definition =
         Class "THREE.BufferGeometry"
         |=> BufferGeometry
         |=> Inherits EventDispatcher
-        |+> [
+        |+> Static [
             Constructor O
         ]
-        |+> Protocol [
+        |+> Instance [
             "id"             =? T<int>
             "uuid"           =? T<string>
             "name"           =@ T<string>
@@ -204,10 +204,10 @@ module Definition =
     
     let Clock =
         Class "THREE.Clock"
-        |+> [
+        |+> Static [
             Constructor !? T<bool>?autoStart
         ]
-        |+> Protocol [
+        |+> Instance [
             "autoStart"   =@ T<bool>
             "startTime"   =@ T<int>
             "oldTime"     =@ T<int>
@@ -236,11 +236,11 @@ module Definition =
 
         Class "THREE.Color"
         |=> Color
-        |+> [
+        |+> Static [
             Constructor (T<int>?r * T<int>?g * T<int>?b)
             Constructor (Color + T<int> + T<string>)?value
         ]
-        |+> Protocol [
+        |+> Instance [
             "r" =@ T<int>
             "g" =@ T<int>
             "b" =@ T<int>
@@ -277,10 +277,10 @@ module Definition =
         
         Class "THREE.Face3"
         |=> Face3
-        |+> [
+        |+> Static [
             Constructor (T<int>?a * T<int>?b * T<int>?c * !? Vector3?normal * !? ColorClass?color * !? T<int>?materialIndex)
         ]
-        |+> Protocol [
+        |+> Instance [
             "a"              =@ T<int>
             "b"              =@ T<int>
             "c"              =@ T<int>
@@ -332,10 +332,10 @@ module Definition =
         Class "THREE.Geometry"
         |=> Geometry
         |=> Inherits EventDispatcher
-        |+> [
+        |+> Static [
             Constructor O
         ]
-        |+> Protocol [
+        |+> Instance [
             "id"                      =? T<int>
             "uuid"                    =? T<string>
             "name"                    =@ T<string>
@@ -384,7 +384,7 @@ module Definition =
 
     let ProjectionData =
         Class "ProjectionData"
-        |+> Protocol [
+        |+> Instance [
             "elements" =@ ArrayOf T<obj>
             "lights"   =@ ArrayOf Light
             "objects"  =@ ArrayOf Object3D
@@ -393,10 +393,10 @@ module Definition =
 
     let Projector =
         Class "THREE.Projector"
-        |+> [
+        |+> Static [
             Constructor O
         ]
-        |+> Protocol [
+        |+> Instance [
             "projectVector"   => Vector3?vector * Camera?camera ^-> Vector3
             "unprojectVector" => Vector3?vector * Camera?camera ^-> Vector3
             "pickingRay"      => Vector3?vector * Camera?camera ^-> Raycaster
@@ -421,10 +421,10 @@ module Definition =
     let RaycasterClass =
         Class "THREE.Raycaster"
         |=> Raycaster
-        |+> [
+        |+> Static [
             Constructor (Vector3?origin * Vector3?direction * !? T<float>?near * !? T<float>?far)
         ]
-        |+> Protocol [
+        |+> Instance [
             "ray"       =@ Ray
             "near"      =@ T<float>
             "far"       =@ T<float>
@@ -442,10 +442,10 @@ module Definition =
         Class "THREE.Light"
         |=> Light
         |=> Inherits Object3D
-        |+> [
+        |+> Static [
             Constructor Color?color
         ]
-        |+> Protocol [
+        |+> Instance [
             "color" =@ ColorClass
 
             "clone" => !? Light?light ^-> Light
@@ -457,20 +457,20 @@ module Definition =
         Class "THREE.AmbientLight"
         |=> AmbientLight
         |=> Inherits LightClass
-        |+> [
+        |+> Static [
             Constructor Color?color
         ]
-        |+> Protocol [
+        |+> Instance [
             "clone" => O ^-> AmbientLight
         ]
 
     let AreaLight =
         Class "THREE.AreaLight"
         |=> Inherits LightClass
-        |+> [
+        |+> Static [
             Constructor (Color?color * !? T<float>?intensity)
         ]
-        |+> Protocol [
+        |+> Instance [
             "normal"               =@ Vector3
             "right"                =@ Vector3
             "intensity"            =@ T<float>
@@ -487,10 +487,10 @@ module Definition =
         Class "THREE.DirectionalLight"
         |=> DirectionalLight
         |=> Inherits LightClass
-        |+> [
+        |+> Static [
             Constructor (Color?color * !? T<float>?intensity)
         ]
-        |+> Protocol [
+        |+> Instance [
             "target"              =@ Object3D
             "intensity"           =@ T<float>
             "castShadow"          =@ T<bool>
@@ -529,10 +529,10 @@ module Definition =
         Class "THREE.HemisphereLight"
         |=> HemisphereLight
         |=> Inherits LightClass
-        |+> [
+        |+> Static [
             Constructor (Color?skyColor * Color?groundColor * !? T<float>?intensity)
         ]
-        |+> Protocol [
+        |+> Instance [
             "groundColor" =@ ColorClass
             "intensity"   =@ T<float>
 
@@ -545,10 +545,10 @@ module Definition =
         Class "THREE.PointLight"
         |=> PointLight
         |=> Inherits LightClass
-        |+> [
+        |+> Static [
             Constructor (Color?color * !? T<float>?intensity * !? T<float>?distance)
         ]
-        |+> Protocol [
+        |+> Instance [
             "intensity"   =@ T<float>
             "distance"    =@ T<float>
 
@@ -561,10 +561,10 @@ module Definition =
         Class "THREE.SpotLight"
         |=> SpotLight
         |=> Inherits LightClass
-        |+> [
+        |+> Static [
             Constructor (Color?color * !? T<float>?intensity * !? T<float>?distance * !? T<float>?angle * !? T<float>?exponent)
         ]
-        |+> Protocol [
+        |+> Instance [
             "target"              =@ Object3D
             "intensity"           =@ T<float>
             "distance"            =@ T<float>
@@ -592,10 +592,10 @@ module Definition =
 
     let BufferGeometryLoader =
         Class "THREE.BufferGeometryLoader"
-        |+> [
+        |+> Static [
             Constructor !? LoadingManager?manager
         ]
-        |+> Protocol [
+        |+> Instance [
             "manager"     =@ LoadingManager
             "crossOrigin" =@ T<string>
 
@@ -606,10 +606,10 @@ module Definition =
     
     let Cache =
         Class "THREE.Cache"
-        |+> [
+        |+> Static [
             Constructor O
         ]
-        |+> Protocol [
+        |+> Instance [
             "files" =@ T<obj>
 
             "add"    => (T<string> + T<int>)?key * T<obj>?file ^-> O
@@ -618,14 +618,14 @@ module Definition =
             "clear"  => O ^-> O
         ]
     
-    open IntelliFactory.WebSharper.JavaScript.Dom
+    open WebSharper.JavaScript.Dom
 
     let ImageLoader =
         Class "THREE.ImageLoader"
-        |+> [
+        |+> Static [
             Constructor !? LoadingManager?manager
         ]
-        |+> Protocol [
+        |+> Instance [
             "cache"       =@ Cache
             "manager"     =@ LoadingManager
             "crossOrigin" =@ T<string>
@@ -638,10 +638,10 @@ module Definition =
 
     let Loader =
         Class "THREE.Loader"
-        |+> [
+        |+> Static [
             Constructor T<bool>?showStatus
         ]
-        |+> Protocol [
+        |+> Instance [
             "showStatus"       =@ T<bool>
             "statusDomElement" =@ T<Element>
             "imageLoader"      =@ ImageLoader
@@ -664,10 +664,10 @@ module Definition =
         Class "THREE.JSONLoader"
         |=> JSONLoader
         |=> Inherits Loader
-        |+> [
+        |+> Static [
             Constructor T<bool>?showStatus
         ]
-        |+> Protocol [
+        |+> Instance [
             "withCredentials" =@ T<bool>
 
             "load"         => T<string>?url * (!? Geometry * !? (ArrayOf Material) ^-> O)?callback * !? T<string>?texturePath ^-> O
@@ -678,10 +678,10 @@ module Definition =
     let LoadingManagerClass =
         Class "THREE.LoadingManager"
         |=> LoadingManager
-        |+> [
+        |+> Static [
             Constructor (!? (O ^-> O)?onLoad * !? (!? T<string>?url * !? T<int>?loaded * !? T<int>?total ^-> O)?onProgress * !? (O ^-> O)?onError)
         ]
-        |+> Protocol [
+        |+> Instance [
             "onLoad"     =@ (O ^-> O)
             "onProgress" =@ (!? T<string>?url * !? T<int>?loaded * !? T<int>?total ^-> O)
             "onError"    =@ (O ^-> O)
@@ -692,10 +692,10 @@ module Definition =
     
     let MaterialLoader =
         Class "THREE.MaterialLoader"
-        |+> [
+        |+> Static [
             Constructor !? LoadingManager?manager
         ]
-        |+> [
+        |+> Static [
             "manager"     =@ LoadingManager
             "crossOrigin" =@ T<string>
 
@@ -706,10 +706,10 @@ module Definition =
 
     let ObjectLoader =
         Class "THREE.ObjectLoader"
-        |+> [
+        |+> Static [
             Constructor !? LoadingManager?manager
         ]
-        |+> Protocol [
+        |+> Instance [
             "manager"     =@ LoadingManager
             "crossOrigin" =@ T<string>
 
@@ -723,10 +723,10 @@ module Definition =
     
     let SceneLoader =
         Class "THREE.SceneLoader"
-        |+> [
+        |+> Static [
             Constructor O
         ]
-        |+> Protocol [
+        |+> Instance [
             "onLoadStart"         =@ (O ^-> O)
             "onLoadProgress"      =@ (O ^-> O)
             "onLoadComplete"      =@ (O ^-> O)
@@ -748,10 +748,10 @@ module Definition =
     let TextureLoader =
         Class "THREE.TextureLoader"
         |=> Inherits EventDispatcher
-        |+> [
+        |+> Static [
             Constructor !? LoadingManager?manager
         ]
-        |+> Protocol [
+        |+> Instance [
             "manager"     =@ LoadingManager
             "crossOrigin" =@ T<string>
 
@@ -761,10 +761,10 @@ module Definition =
 
     let XHRLoader =
         Class "THREE.XHRLoader"
-        |+> [
+        |+> Static [
             Constructor !? LoadingManager?manager
         ]
-        |+> Protocol [
+        |+> Instance [
             "cache"       =@ Cache
             "manager"     =@ LoadingManager
             "crossOrigin" =@ T<string>
@@ -777,10 +777,10 @@ module Definition =
         Class "THREE.Material"
         |=> Material
         |=> Inherits EventDispatcher
-        |+> [
+        |+> Static [
             Constructor O
         ]
-        |+> Protocol [
+        |+> Instance [
             "id"                  =? T<int>
             "uuid"                =? T<string>
             "name"                =@ T<string>
@@ -830,10 +830,10 @@ module Definition =
         Class "THREE.LineBasicMaterial"
         |=> LineBasicMaterial
         |=> Inherits MaterialClass
-        |+> [
+        |+> Static [
             Constructor !? LineBasicMaterialConfiguration?parameters
         ]
-        |+> Protocol [
+        |+> Instance [
             "color"        =@ ColorClass
             "linewidth"    =@ T<float>
             "linecap"      =@ T<string>
@@ -869,10 +869,10 @@ module Definition =
         Class "THREE.LineDashedMaterial"
         |=> LineDashedMaterial
         |=> Inherits MaterialClass
-        |+> [
+        |+> Static [
             Constructor !? LineDashedMaterialConfiguration?parameters
         ]
-        |+> Protocol [
+        |+> Instance [
             "color"        =@ ColorClass
             "linewidth"    =@ T<float>
             "scale"        =@ T<float>
@@ -917,10 +917,10 @@ module Definition =
         Class "THREE.MeshBasicMaterial"
         |=> MeshBasicMaterial
         |=> Inherits MaterialClass
-        |+> [
+        |+> Static [
             Constructor !? MeshBasicMaterialConfiguration?parameters
         ]
-        |+> Protocol [
+        |+> Instance [
             "color"              =@ ColorClass
             "map"                =@ Texture
             "lightMap"           =@ Texture
@@ -961,10 +961,10 @@ module Definition =
         
         Class "THREE.MeshDepthMaterial"
         |=> MeshDepthMaterial
-        |+> [
+        |+> Static [
             Constructor !? MeshDepthMaterialConfiguration?parameters
         ]
-        |+> Protocol [
+        |+> Instance [
             "morphTargets"       =@ T<bool>
             "wireframe"          =@ T<bool>
             "wireframeLinewidth" =@ T<float>
@@ -978,10 +978,10 @@ module Definition =
         Class "THREE.MeshFaceMaterial"
         |=> MeshFaceMaterial
         |=> Inherits Material
-        |+> [
+        |+> Static [
             Constructor !? (ArrayOf Material)?materials
         ]
-        |+> [
+        |+> Static [
             "materials" =@ ArrayOf Material
 
             "clone" => O ^-> MeshFaceMaterial
@@ -1024,10 +1024,10 @@ module Definition =
         Class "THREE.MeshLambertMaterial"
         |=> MeshLambertMaterial
         |=> Inherits MaterialClass
-        |+> [
+        |+> Static [
             Constructor !? MeshLambertMaterialConfiguration?parameters
         ]
-        |+> Protocol [
+        |+> Instance [
             "color"              =@ ColorClass
             "ambient"            =@ ColorClass
             "emissive"           =@ ColorClass
@@ -1075,10 +1075,10 @@ module Definition =
         Class "THREE.MeshNormalMaterial"
         |=> MeshNormalMaterial
         |=> Inherits MaterialClass
-        |+> [
+        |+> Static [
             Constructor !? MeshNormalMaterialConfiguration?parameters
         ]
-        |+> Protocol [
+        |+> Instance [
             "shading"            =@ T<float>
             "wireframe"          =@ T<bool>
             "wireframeLinewidth" =@ T<float>
@@ -1131,10 +1131,10 @@ module Definition =
         Class "THREE.MeshPhongMaterial"
         |=> MeshPhongMaterial
         |=> Inherits MaterialClass
-        |+> [
+        |+> Static [
             Constructor !? MeshPhongMaterialConfiguration?parameters
         ]
-        |+> Protocol [
+        |+> Instance [
             "color"              =@ ColorClass
             "ambient"            =@ ColorClass
             "emissive"           =@ ColorClass
@@ -1191,10 +1191,10 @@ module Definition =
         Class "THREE.ParticleSystemMaterial"
         |=> ParticleSystemMaterial
         |=> Inherits MaterialClass
-        |+> [
+        |+> Static [
             Constructor !? ParticleSystemMaterialConfiguration?parameters
         ]
-        |+> Protocol [
+        |+> Instance [
             "color"           =@ ColorClass
             "map"             =@ Texture
             "size"            =@ T<float>
@@ -1231,7 +1231,7 @@ module Definition =
 
     let DefaultAttributeValues =
         Class "DefaultAttributeValues"
-        |+> Protocol [
+        |+> Instance [
             "color" =@ Tuple [T<float>; T<float>; T<float>]
             "uv"    =@ Tuple [T<float>; T<float>]
             "uv2"   =@ Tuple [T<float>; T<float>]
@@ -1243,10 +1243,10 @@ module Definition =
         Class "THREE.ShaderMaterial"
         |=> ShaderMaterial
         |=> Inherits MaterialClass
-        |+> [
+        |+> Static [
             Constructor !? ShaderMaterialConfiguration?parameters
         ]
-        |+> Protocol [
+        |+> Instance [
             "fragmentShader"         =@ T<string>
             "vertexShader"           =@ T<string>
             "uniforms"               =@ T<obj>
@@ -1275,10 +1275,10 @@ module Definition =
         Class "THREE.RawShaderMaterial"
         |=> RawShaderMaterial
         |=> Inherits ShaderMaterial
-        |+> [
+        |+> Static [
             Constructor !? T<obj>?parameters
         ]
-        |+> Protocol [
+        |+> Instance [
             "clone" => O ^-> RawShaderMaterial
         ]
 
@@ -1300,10 +1300,10 @@ module Definition =
         Class "THREE.SpriteCanvasMaterial"
         |=> SpriteCanvasMaterial
         |=> Inherits MaterialClass
-        |+> [
+        |+> Static [
             Constructor !? SpriteCanvasMaterialConfiguration?parameters
         ]
-        |+> Protocol [
+        |+> Instance [
             "color"   =@ ColorClass
             "program" =@ (T<obj>?context * T<obj>?color ^-> O)
 
@@ -1333,10 +1333,10 @@ module Definition =
         Class "THREE.SpriteMaterial"
         |=> SpriteMaterial
         |=> Inherits MaterialClass
-        |+> [
+        |+> Static [
             Constructor !? SpriteMaterialConfiguration?parameters
         ]
-        |+> Protocol [
+        |+> Instance [
             "color"    =@ ColorClass
             "map"      =@ Texture
             "rotation" =@ T<float>
@@ -1350,10 +1350,10 @@ module Definition =
         
         Class "THREE.Box2"
         |=> Box2
-        |+> [
+        |+> Static [
             Constructor (!? Vector2?min * !? Vector2?max)
         ]
-        |+> Protocol [
+        |+> Instance [
             "min" =@ Vector2
             "max" =@ Vector2
             
@@ -1384,10 +1384,10 @@ module Definition =
     let Box3Class =
         Class "THREE.Box3"
         |=> Box3
-        |+> [
+        |+> Static [
             Constructor (!? Vector3?min * !? Vector3?max)
         ]
-        |+> Protocol [
+        |+> Instance [
             "min" =@ Vector3
             "max" =@ Vector3
             
@@ -1422,10 +1422,10 @@ module Definition =
     let EulerClass =
         Class "THREE.Euler"
         |=> Euler
-        |+> [
+        |+> Static [
             Constructor (!? T<float>?x * !? T<float>?y * !? T<float>?z * !? T<string>?order)
         ]
-        |+> Protocol [
+        |+> Instance [
             "x"                =@ T<float>
             "y"                =@ T<float>
             "z"                =@ T<float>
@@ -1452,10 +1452,10 @@ module Definition =
         
         Class "THREE.Frustum"
         |=> Frustum
-        |+> [
+        |+> Static [
             Constructor (!? Plane?p0 * !? Plane?p1 * !? Plane?p2 * !? Plane?p3 * !? Plane?p4 * !? Plane?p5)
         ]
-        |+> Protocol [
+        |+> Instance [
             "planes" =@ ArrayOf Plane
 
             "set"              => Plane?p0 * Plane?p1 * Plane?p2 * Plane?p3 * Plane?p4 * Plane?p5 ^-> Frustum
@@ -1473,10 +1473,10 @@ module Definition =
         
         Class "THREE.Line3"
         |=> Line3
-        |+> [
+        |+> Static [
             Constructor (!? Vector3?start * !? Vector3?``end``)
         ]
-        |+> Protocol [
+        |+> Instance [
             "start" =@ Vector3
             "end"   =@ Vector3
 
@@ -1496,7 +1496,7 @@ module Definition =
 
     let Math =
         Class "THREE.Math"
-        |+> [
+        |+> Static [
             "generateUUID"    => O ^-> T<string>
             "clamp"           => T<float>?x * T<float>?a * T<float>?b ^-> T<float>
             "clampBottom"     => T<float>?x * T<float>?a ^-> T<float>
@@ -1516,10 +1516,10 @@ module Definition =
     let Matrix3Class =
         Class "THREE.Matrix3"
         |=> Matrix3
-        |+> [
+        |+> Static [
             Constructor (!? T<float>?n11 * !? T<float>?n12 * !? T<float>?n13 * !? T<float>?n21 * !? T<float>?n22 * !? T<float>?n23 * !? T<float>?n31 * !? T<float>?n32 * !? T<float>?n33)
         ]
-        |+> Protocol [
+        |+> Instance [
             "elements" =@ T<JavaScript.Float32Array>
 
             "set"                  => T<float>?n11 * T<float>?n12 * T<float>?n13 * T<float>?n21 * T<float>?n22 * T<float>?n23 * T<float>?n31 * T<float>?n32 * T<float>?n33 ^-> Matrix3
@@ -1541,10 +1541,10 @@ module Definition =
     let Matrix4Class =
         Class "THREE.Matrix4"
         |=> Matrix4
-        |+> [
+        |+> Static [
             Constructor (!? T<float>?n11 * !? T<float>?n12 * !? T<float>?n13 * !? T<float>?n14 * !? T<float>?n21 * !? T<float>?n22 * !? T<float>?n23 * !? T<float>?n24 * !? T<float>?n31 * !? T<float>?n32 * !? T<float>?n33 * !? T<float>?n34 * !? T<float>?n41 * !? T<float>?n42 * !? T<float>?n43 * !? T<float>?n44)
         ]
-        |+> [
+        |+> Static [
             "elements" =@ T<JavaScript.Float32Array>
 
             "set"                        => T<float>?n11 * T<float>?n12 * T<float>?n13 * T<float>?n14 * T<float>?n21 * T<float>?n22 * T<float>?n23 * T<float>?n24 * T<float>?n31 * T<float>?n32 * T<float>?n33 * T<float>?n34 * T<float>?n41 * T<float>?n42 * T<float>?n43 * T<float>?n44 ^-> Matrix4
@@ -1586,10 +1586,10 @@ module Definition =
     let PlaneClass =
         Class "THREE.Plane"
         |=> Plane
-        |+> [
+        |+> Static [
             Constructor (!? Vector3?normal * !? T<float>?constant)
         ]
-        |+> Protocol [
+        |+> Instance [
             "normal"   =@ Vector3
             "constant" =@ T<float>
 
@@ -1616,10 +1616,10 @@ module Definition =
     let QuaternionClass =
         Class "THREE.Quaternion"
         |=> Quaternion
-        |+> [
+        |+> Static [
             Constructor (!? T<float>?x * !? T<float>?y * !? T<float>?z * !? T<float>?w)
         ]
-        |+> Protocol [
+        |+> Instance [
             "x"                =@ T<float>
             "y"                =@ T<float>
             "z"                =@ T<float>
@@ -1650,10 +1650,10 @@ module Definition =
     let RayClass =
         Class "THREE.Ray"
         |=> Ray
-        |+> [
+        |+> Static [
             Constructor (!? Vector3?origin * !? Vector3?direction)
         ]
-        |+> Protocol [
+        |+> Instance [
             "origin"    =@ Vector3
             "direction" =@ Vector3
 
@@ -1679,10 +1679,10 @@ module Definition =
     let SphereClass =
         Class "THREE.Sphere"
         |=> Sphere
-        |+> [
+        |+> Static [
             Constructor (!? Vector3?center * !? T<float>?radius)
         ]
-        |+> Protocol [
+        |+> Instance [
             "center" =@ Vector3
             "radius" =@ T<float>
 
@@ -1704,16 +1704,16 @@ module Definition =
     let Spline =
         let Length =
             Class "Length"
-            |+> Protocol [
+            |+> Instance [
                 "chunkLengths" =? ArrayOf T<float>
                 "chunkLengths" =? T<float>
             ]
         
         Class "THREE.Spline"
-        |+> [
+        |+> Static [
             Constructor (ArrayOf Vector3)?points
         ]
-        |+> Protocol [
+        |+> Instance [
             "points" =@ ArrayOf Vector3
 
             "initFromArray"            => (ArrayOf Vector3)?a ^-> O
@@ -1732,10 +1732,10 @@ module Definition =
         
         Class "THREE.Triangle"
         |=> Triangle
-        |+> [
+        |+> Static [
             Constructor (!? Vector3?a * !? Vector3?b * !? Vector3?c)
         ]
-        |+> Protocol [
+        |+> Instance [
             "a" =@ Vector3
             "c" =@ Vector3
             "b" =@ Vector3
@@ -1756,10 +1756,10 @@ module Definition =
     let Vector2Class =
         Class "THREE.Vector2"
         |=> Vector2
-        |+> [
+        |+> Static [
             Constructor (!? T<float>?x * !? T<float>?y)
         ]
-        |+> Protocol [
+        |+> Instance [
             "x" =@ T<float>
             "y" =@ T<float>
 
@@ -1804,10 +1804,10 @@ module Definition =
     let Vector3Class =
         Class "THREE.Vector3"
         |=> Vector3
-        |+> [
+        |+> Static [
             Constructor (!? T<float>?x * !? T<float>?y * !? T<float>?z)
         ]
-        |+> Protocol [
+        |+> Instance [
             "x" =@ T<float>
             "y" =@ T<float>
             "z" =@ T<float>
@@ -1874,10 +1874,10 @@ module Definition =
 
         Class "THREE.Vector4"
         |=> Vector4
-        |+> [
+        |+> Static [
             Constructor (!? T<float>?x * !? T<float>?y * !? T<float>?z * !? T<float>?w)
         ]
-        |+> Protocol [
+        |+> Instance [
             "x" =@ T<float>
             "y" =@ T<float>
             "z" =@ T<float>
@@ -1928,10 +1928,10 @@ module Definition =
     let Bone =
         Class "THREE.Bone"
         |=> Inherits Object3D
-        |+> [
+        |+> Static [
             Constructor (SkinnedMesh?belongsToSkin)
         ]
-        |+> Protocol [
+        |+> Instance [
             "skin"                 =@ SkinnedMesh
             "skinMatrix"           =@ Matrix4
             "accumulatedRotWeight" =@ T<float>
@@ -1947,10 +1947,10 @@ module Definition =
         Class "THREE.Line"
         |=> Line
         |=> Inherits Object3D
-        |+> [
+        |+> Static [
             Constructor (!? Geometry?geometry * !? Material?material * !? T<int>?``type``)
         ]
-        |+> Protocol [
+        |+> Instance [
             "geometry" =@ Geometry
             "material" =@ Material
             "type"     =@ T<int>
@@ -1964,10 +1964,10 @@ module Definition =
         Class "THREE.LOD"
         |=> LOD
         |=> Inherits Object3D
-        |+> [
+        |+> Static [
             Constructor O
         ]
-        |+> Protocol [
+        |+> Instance [
             "objects" =@ ArrayOf Object3D
 
             "addLevel"             => Object3D?``object`` * !? T<float>?distance ^-> O
@@ -1982,10 +1982,10 @@ module Definition =
         Class "THREE.Mesh"
         |=> Mesh
         |=> Inherits Object3D
-        |+> [
+        |+> Static [
             Constructor (!? Geometry?geometry * !? Material?material)
         ]
-        |+> Protocol [
+        |+> Instance [
             "geometry" =@ Geometry
             "material" =@ Material
 
@@ -2001,10 +2001,10 @@ module Definition =
         Class "THREE.MorphAnimMesh"
         |=> MorphAnimMesh
         |=> Inherits Mesh
-        |+> [
+        |+> Static [
             Constructor (Geometry?geometry * Material?material)
         ]
-        |+> Protocol [
+        |+> Instance [
             "duration"     =@ T<int>
             "mirroredLoop" =@ T<bool>
             "time"         =@ T<int>
@@ -2025,10 +2025,10 @@ module Definition =
         Class "THREE.ParticleSystem"
         |=> ParticleSystem
         |=> Inherits Object3D
-        |+> [
+        |+> Static [
             Constructor (!? Geometry?geometry * !? Material?material)
         ]
-        |+> Protocol [
+        |+> Instance [
             "geometry"       =@ Geometry
             "material"       =@ Material
             "sortParticles"  =@ T<bool>
@@ -2043,10 +2043,10 @@ module Definition =
         Class "THREE.SkinnedMesh"
         |=> SkinnedMesh
         |=> Inherits Mesh
-        |+> [
+        |+> Static [
             Constructor (Geometry?geometry * Material?material * T<bool>?useVertexTexture)
         ]
-        |+> Protocol [
+        |+> Instance [
             "skeleton"       =@ Skeleton
             "identityMatrix" =@ Matrix4
 
@@ -2062,10 +2062,10 @@ module Definition =
         Class "THREE.Sprite"
         |=> Sprite
         |=> Inherits Object3D
-        |+> [
+        |+> Static [
             Constructor (!? Material?material)
         ]
-        |+> Protocol [
+        |+> Instance [
             "geometry" =@ Geometry
             "material" =@ SpriteMaterial
 
@@ -2085,10 +2085,10 @@ module Definition =
 
     let CanvasRenderer =
         Class "THREE.CanvasRenderer"
-        |+> [
+        |+> Static [
             Constructor !? CanvasRendererConfiguration?parameters
         ]
-        |+> Protocol [
+        |+> Instance [
             "domElement"       =@ T<Element>
             "devicePixelRatio" =@ T<float>
             "autoClear"        =@ T<bool>
@@ -2133,7 +2133,7 @@ module Definition =
 
     let MemoryInfo =
         Class "MemoryInfo"
-        |+> Protocol [
+        |+> Instance [
             "programs"   =@ T<int>
             "geometries" =@ T<int>
             "textures"   =@ T<int>
@@ -2141,7 +2141,7 @@ module Definition =
 
     let RenderInfo =
         Class "RenderInfo"
-        |+> Protocol [
+        |+> Instance [
             "calls"    =@ T<int>
             "vertices" =@ T<int>
             "faces"    =@ T<int>
@@ -2150,17 +2150,17 @@ module Definition =
 
     let Info =
         Class "Info"
-        |+> Protocol [
+        |+> Instance [
             "memory" =@ MemoryInfo
             "render" =@ RenderInfo
         ]
 
     let WebGLRenderer =
         Class "THREE.WebGLRenderer"
-        |+> [
+        |+> Static [
             Constructor !? WebGLRendererConfiguration?parameters
         ]
-        |+> Protocol [
+        |+> Instance [
             "domElement"          =@ T<Element>
             "context"             =@ T<JavaScript.WebGL.RenderingContext>
             "devicePixelRatio"    =@ T<float>
@@ -2229,10 +2229,10 @@ module Definition =
         Class "THREE.WebGLRenderTarget"
         |=> WebGLRenderTarget
         |=> Inherits EventDispatcher
-        |+> [
+        |+> Static [
             Constructor (T<float>?width * T<float>?height * !? T<obj>?options)
         ]
-        |+> Protocol [
+        |+> Instance [
             "wrapS"           =@ T<int>
             "wrapT"           =@ T<int>
             "magFilter"       =@ T<int>
@@ -2255,7 +2255,7 @@ module Definition =
     let WebGLRenderTargetCube =
         Class "THREE.WebGLRenderTargetCube"
         |=> Inherits WebGLRenderTargetClass
-        |+> Protocol [
+        |+> Instance [
             "activeCubeFace" =@ T<int>
         ]
 
@@ -2263,10 +2263,10 @@ module Definition =
 
     let RenderableFace =
         Class "THREE.RenderableFace"
-        |+> [
+        |+> Static [
             Constructor O
         ]
-        |+> Protocol [
+        |+> Instance [
             "id"                  =? T<int>
             "v1"                  =@ RenderableVertex
             "v2"                  =@ RenderableVertex
@@ -2282,10 +2282,10 @@ module Definition =
     
     let RenderableLine =
         Class "THREE.RenderableLine"
-        |+> [
+        |+> Static [
             Constructor O
         ]
-        |+> Protocol [
+        |+> Instance [
             "id"           =? T<int>
             "v1"           =@ RenderableVertex
             "v2"           =@ RenderableVertex
@@ -2297,10 +2297,10 @@ module Definition =
 
     let RenderableObject =
         Class "THREE.RenderableObject"
-        |+> [
+        |+> Static [
             Constructor O
         ]
-        |+> Protocol [
+        |+> Instance [
             "id"     =@ T<int>
             "object" =@ Object3D
             "z"      =@ T<float>
@@ -2308,10 +2308,10 @@ module Definition =
 
     let RenderableSprite =
         Class "THREE.RenderableSprite"
-        |+> [
+        |+> Static [
             Constructor O
         ]
-        |+> Protocol [
+        |+> Instance [
             "id"           =? T<int>
             "object"       =@ Object3D
             "x"            =@ T<float>
@@ -2325,10 +2325,10 @@ module Definition =
     let RenderableVertexClass =
         Class "THREE.RenderableVertex"
         |=> RenderableVertex
-        |+> [
+        |+> Static [
             Constructor O
         ]
-        |+> Protocol [
+        |+> Instance [
             "position"       =@ Vector3
             "positionWorld"  =@ Vector3
             "positionScreen" =@ Vector4
@@ -2340,10 +2340,10 @@ module Definition =
     let FogClass =
         Class "THREE.Fog"
         |=> Fog
-        |+> [
+        |+> Static [
             Constructor (Color?color * !? T<float>?near * !? T<float>?far)
         ]
-        |+> Protocol [
+        |+> Instance [
             "name"  =@ T<string>
             "color" =@ ColorClass
             "near"  =@ T<float>
@@ -2357,10 +2357,10 @@ module Definition =
         
         Class "THREE.FogExp2"
         |=> FogExp2
-        |+> [
+        |+> Static [
             Constructor (Color?color * !? T<float>?density)
         ]
-        |+> Protocol [
+        |+> Instance [
             "name"    =@ T<string>
             "color"   =@ ColorClass
             "density" =@ T<float>
@@ -2372,10 +2372,10 @@ module Definition =
         Class "THREE.Scene"
         |=> Scene
         |=> Inherits Object3D
-        |+> [
+        |+> Static [
             Constructor O
         ]
-        |+> Protocol [
+        |+> Instance [
             "fog"              =@ Fog
             "overrideMaterial" =@ Material
             "autoUpdate"       =@ T<bool>
@@ -2388,10 +2388,10 @@ module Definition =
         Class "THREE.Texture"
         |=> Texture
         |=> Inherits EventDispatcher
-        |+> [
+        |+> Static [
             Constructor (T<Element>?image * !? T<int>?mapping * !? T<int>?wrapS * !? T<int>?wrapT * !? T<int>?magFilter * !? T<int>?minFilter * !? T<int>?format * !? T<int>?``type`` * !? T<int>?anisotropy)
         ]
-        |+> Protocol [
+        |+> Instance [
             "id"                 =? T<int>
             "uuid"               =? T<string>
             "name"               =? T<string>
@@ -2423,10 +2423,10 @@ module Definition =
         
         Class "THREE.CompressedTexture"
         |=> Inherits TextureClass
-        |+> [
+        |+> Static [
             Constructor ((ArrayOf T<obj>)?mipmaps * T<int>?width * T<int>?height * T<int>?format * T<int>?``type`` * T<int>?mapping * T<int>?wrapS * T<int>?wrapT * T<int>?magFilter * T<int>?minFilter * T<int>?anisotropy)
         ]
-        |+> Protocol [
+        |+> Instance [
             "image"           =@ T<obj>
             "mipmaps"         =@ ArrayOf T<obj>
             "generateMipmaps" =@ T<bool>
@@ -2439,10 +2439,10 @@ module Definition =
 
         Class "THREE.DataTexture"
         |=> Inherits TextureClass
-        |+> [
+        |+> Static [
             Constructor (T<JavaScript.ArrayBufferView>?data * T<int>?width * T<int>?height * T<int>?format * T<int>?``type`` * T<int>?mapping * T<int>?wrapS * T<int>?wrapT * T<int>?magFilter * T<int>?minFilter * T<int>?anisotropy)
         ]
-        |+> Protocol [
+        |+> Instance [
             "image" =@ T<obj>
 
             "clone" => O ^-> DataTexture
@@ -2453,7 +2453,7 @@ module Definition =
 
     let FontUtils =
         Class "THREE.FontUtils"
-        |+> [
+        |+> Static [
             "faces"    =@ T<obj>
             "face"     =@ T<string>
             "weight"   =@ T<string>
@@ -2470,7 +2470,7 @@ module Definition =
 
     let GeometryUtils =
         Class "THREE.GeometryUtils"
-        |+> [
+        |+> Static [
             "merge"                  => Geometry?geometry1 * Geometry?geometry2 * T<int>?materialIndexOffset ^-> Geometry
             "randomPointInTriangle"  => Vector3?VectorA * Vector3?VectorB * Vector3?VectorC ^-> Vector3
             "randomPointInFace"      => Face3?Face * Geometry?Geometry * T<bool>?useCachedAreas ^-> Vector3
@@ -2481,7 +2481,7 @@ module Definition =
 
     let ImageUtils =
         Class "THREE.ImageUtils"
-        |+> [
+        |+> Static [
             "crossOrigin" =@ T<string>
 
             "loadTexture"               => T<string>?url * !? T<obj>?mapping * !? (!? Texture ^-> O)?onLoad * !? (!? T<obj> ^-> O)?onError ^-> Texture
@@ -2496,7 +2496,7 @@ module Definition =
 
     let SceneUtils =
         Class "THREE.SceneUtils"
-        |+> [
+        |+> Static [
             "createMultiMaterialObject" => Geometry?geometry * (ArrayOf Material)?materials ^-> Object3D
             "attach"                    => Object3D?child * Scene?scene * Object3D?parent ^-> O
             "attach"                    => Object3D?child * Scene?scene * Object3D?parent ^-> O
@@ -2590,10 +2590,10 @@ module Definition =
     let BoxGeometry =
         Class "THREE.BoxGeometry"
         |=> Inherits Geometry
-        |+> [
+        |+> Static [
             Constructor (T<float>?width * T<float>?height * T<float>?depth * !? T<int>?widthSegments * !? T<int>?heightSegments * !? T<int>?depthSegments)
         ]
-        |+> Protocol [
+        |+> Instance [
             "parameters"     =? T<obj>
             "widthSegments"  =@ T<int>
             "heightSegments" =@ T<int>
@@ -2603,30 +2603,30 @@ module Definition =
     let CircleGeometry =
         Class "THREE.CircleGeometry"
         |=> Inherits Geometry
-        |+> [
+        |+> Static [
             Constructor (!? T<float>?radius * !? T<int>?segments * !? T<float>?thetaStart * !? T<float>?thetaLength)
         ]
-        |+> Protocol [
+        |+> Instance [
             "parameters" =? T<obj>
         ]
 
     let CylinderGeometry =
         Class "THREE.CylinderGeometry"
         |=> Inherits Geometry
-        |+> [
+        |+> Static [
             Constructor (!? T<float>?radiusTop * !? T<float>?radiusBottom * !? T<float>?height * !? T<int>?radialSegments * !? T<int>?heightSegments * !? T<bool>?openEnded)
         ]
-        |+> Protocol [
+        |+> Instance [
             "parameters" =? T<obj>
         ]
 
     let ExtrudeGeometry =
         Class "THREE.ExtrudeGeometry"
         |=> Inherits Geometry
-        |+> [
+        |+> Static [
             Constructor (!? (ArrayOf Shape)?shapes * !? T<obj>?options)
         ]
-        |+> Protocol [
+        |+> Instance [
             "shapebb" =? Box3
 
             "addShapeList" => (ArrayOf Shape)?shapes * !? T<obj>?options ^-> O
@@ -2636,74 +2636,74 @@ module Definition =
     let IcosahedronGeometry =
         Class "THREE.IcosahedronGeometry"
         |=> Inherits Geometry
-        |+> [
+        |+> Static [
             Constructor (!? T<float>?radius * !? T<float>?detail)
         ]
-        |+> Protocol [
+        |+> Instance [
             "parameters" =? T<obj>
         ]
 
     let LatheGeometry =
         Class "THREE.LatheGeometry"
         |=> Inherits Geometry
-        |+> [
+        |+> Static [
             Constructor ((ArrayOf T<obj>)?points * !? T<int>?segments * !? T<float>?phiStart * !? T<float>?phiLength)
         ]
 
     let OctahedronGeometry =
         Class "THREE.OctahedronGeometry"
         |=> Inherits Geometry
-        |+> [
+        |+> Static [
             Constructor (!? T<float>?radius * !? T<float>?detail)
         ]
-        |+> Protocol [
+        |+> Instance [
             "parameters" =? T<obj>
         ]
 
     let ParametricGeometry =
         Class "THREE.ParametricGeometry"
         |=> Inherits Geometry
-        |+> [
+        |+> Static [
             Constructor ((T<obj> * T<obj> ^-> T<obj>)?func * T<int>?slices * T<int>?stacks)
         ]
 
     let PlaneGeometry =
         Class "THREE.PlaneGeometry"
         |=> Inherits Geometry
-        |+> [
+        |+> Static [
             Constructor (T<float>?width * T<float>?height * !? T<int>?widthSegments * !? T<int>?heightSegments)
         ]
-        |+> Protocol [
+        |+> Instance [
             "parameters" =? T<obj>
         ]
 
     let PolyhedronGeometry =
         Class "THREE.PolyhedronGeometry"
         |=> Inherits Geometry
-        |+> [
+        |+> Static [
             Constructor ((ArrayOf T<float>)?vertices * (ArrayOf T<float>)?indices * !? T<float>?radius * !? T<float>?detail)
         ]
-        |+> Protocol [
+        |+> Instance [
             "boundingSphere" =? Sphere
         ]
 
     let RingGeometry =
         Class "THREE.RingGeometry"
         |=> Inherits Geometry
-        |+> [
+        |+> Static [
             Constructor (!? T<float>?innerRadius * !? T<float>?outerRadius * !? T<int>?thetaSegments * !? T<int>?phiSegments * !? T<float>?thetaLength * !? T<float>?phiLength)
         ]
-        |+> Protocol [
+        |+> Instance [
             "boundingSphere" =? Sphere
         ]
 
     let ShapeGeometry =
         Class "THREE.ShapeGeometry"
         |=> Inherits Geometry
-        |+> [
+        |+> Static [
             Constructor (!? (ArrayOf Shape)?shapes * !? T<obj>?options)
         ]
-        |+> Protocol [
+        |+> Instance [
             "shapebb" =? Box3
 
             "addShapeList" => (ArrayOf Shape)?shapes * !? T<obj>?options ^-> O
@@ -2713,10 +2713,10 @@ module Definition =
     let SphereGeometry =
         Class "THREE.SphereGeometry"
         |=> Inherits Geometry
-        |+> [
+        |+> Static [
             Constructor (!? T<float>?radius * !? T<int>?widthSegments * !? T<int>?heightSegments * !? T<float>?phiStart * !? T<float>?phiLength * !? T<float>?thetaStart * !? T<float>?thetaLength)
         ]
-        |+> Protocol [
+        |+> Instance [
             "parameters"     =? T<obj>
             "boundingSphere" =? Sphere
         ]
@@ -2724,60 +2724,60 @@ module Definition =
     let TetrahedronGeometry =
         Class "THREE.TetrahedronGeometry"
         |=> Inherits Geometry
-        |+> [
+        |+> Static [
             Constructor (!? T<float>?radius * !? T<float>?detail)
         ]
 
     let TextGeometry =
         Class "THREE.TextGeometry"
         |=> Inherits ExtrudeGeometry
-        |+> [
+        |+> Static [
             Constructor (T<string>?text * !? T<obj>?parameters)
         ]
 
     let TorusGeometry =
         Class "THREE.TorusGeometry"
         |=> Inherits Geometry
-        |+> [
+        |+> Static [
             Constructor (!? T<float>?radius * !? T<float>?tube * !? T<int>?radialSegments * !? T<int>?tubularSegments * !? T<float>?arc)
         ]
-        |+> Protocol [
+        |+> Instance [
             "parameters" =? T<obj>
         ]
 
     let TorusKnotGeometry =
         Class "THREE.TorusKnotGeometry"
         |=> Inherits Geometry
-        |+> [
+        |+> Static [
             Constructor (!? T<float>?radius * !? T<float>?tube * !? T<int>?radialSegments * !? T<int>?tubularSegments * !? T<float>?p * !? T<float>?q * !? T<float>?heightScale)
         ]
-        |+> Protocol [
+        |+> Instance [
             "parameters" =? T<obj>
         ]
 
     let TubeGeometry =
         Class "THREE.TubeGeometry"
         |=> Inherits Geometry
-        |+> [
+        |+> Static [
             Constructor (T<obj>?path * !? T<int>?segments * !? T<float>?radius * !? T<int>?radiusSegments * !? T<bool>?closed * !? T<bool>?debug)
         ]
-        |+> Protocol [
+        |+> Instance [
             "parameters" =? T<obj>
         ]
 
     let AxisHelper =
         Class "THREE.AxisHelper"
         |=> Inherits Line
-        |+> [
+        |+> Static [
             Constructor T<float>?size
         ]
 
     let MorphAnimation =
         Class "THREE.MorphAnimation"
-        |+> [
+        |+> Static [
             Constructor Mesh?mesh
         ]
-        |+> Protocol [
+        |+> Instance [
             "mesh"        =@ Mesh
             "frames"      =@ T<int>
             "currentTime" =@ T<int>
@@ -2792,7 +2792,7 @@ module Definition =
 
     let Assembly =
         Assembly [
-            Namespace "IntelliFactory.WebSharper.ThreeJs" [
+            Namespace "WebSharper.ThreeJs" [
                 HSL
                 MorphTarget
                 MorphColor
@@ -2817,7 +2817,7 @@ module Definition =
                 RenderInfo
                 Info
             ]
-            Namespace "IntelliFactory.WebSharper.ThreeJs.THREE" [
+            Namespace "WebSharper.ThreeJs.THREE" [
                 Camera
                 OrthographicCamera
                 PerspectiveCamera
@@ -2950,7 +2950,7 @@ module Definition =
                 AxisHelper
                 MorphAnimation
             ]
-            Namespace "IntelliFactory.WebSharper.ThreeJs.Resources" [
+            Namespace "WebSharper.ThreeJs.Resources" [
                 (Resource "three.js" "three.min.js").AssemblyWide ()
             ]
         ]
