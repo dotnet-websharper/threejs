@@ -7,10 +7,10 @@ module Definition =
 
     open WebSharper.InterfaceGenerator.Type
 
-    let Vector3    = Type.New ()
-    let Euler      = Type.New ()
-    let Quaternion = Type.New ()
-    let Matrix4    = Type.New ()
+    let Vector3    = Class "THREE.Vector3"
+    let Euler      = Class "THREE.Euler"
+    let Quaternion = Class "THREE.Quaternion"
+    let Matrix4    = Class "THREE.Matrix4"
 
     let EventDispatcher =
         Class "THREE.EventDispatcher"
@@ -26,10 +26,7 @@ module Definition =
         ]
 
     let Object3D =
-        let Object3D = Type.New ()
-        
         Class "THREE.Object3D"
-        |=> Object3D
         |=> Inherits EventDispatcher
         |+> Static [
             Constructor O
@@ -38,8 +35,8 @@ module Definition =
             "id"                     =? T<int>
             "uuid"                   =? T<string>
             "name"                   =@ T<string>
-            "parent"                 =@ Object3D
-            "children"               =@ ArrayOf Object3D
+            "parent"                 =@ TSelf
+            "children"               =@ ArrayOf TSelf
             "up"                     =@ Vector3
             "position"               =@ Vector3
             "rotation"               =@ Euler
@@ -62,33 +59,30 @@ module Definition =
             "setRotationFromEuler"      => Euler?euler ^-> O
             "setRotationFromMatrix"     => Matrix4?m ^-> O
             "setRotationFromQuaternion" => Quaternion?q ^-> O
-            "rotateOnAxis"              => Vector3?axis * T<float>?angle ^-> Object3D
-            "rotateX"                   => T<float>?angle ^-> Object3D
-            "rotateY"                   => T<float>?angle ^-> Object3D
-            "rotateZ"                   => T<float>?angle ^-> Object3D
-            "translateOnAxis"           => Vector3?axis * T<float>?distance ^-> Object3D
-            "translateX"                => T<float>?distance ^-> Object3D
-            "translateY"                => T<float>?distance ^-> Object3D
-            "translateZ"                => T<float>?distance ^-> Object3D
+            "rotateOnAxis"              => Vector3?axis * T<float>?angle ^-> TSelf
+            "rotateX"                   => T<float>?angle ^-> TSelf
+            "rotateY"                   => T<float>?angle ^-> TSelf
+            "rotateZ"                   => T<float>?angle ^-> TSelf
+            "translateOnAxis"           => Vector3?axis * T<float>?distance ^-> TSelf
+            "translateX"                => T<float>?distance ^-> TSelf
+            "translateY"                => T<float>?distance ^-> TSelf
+            "translateZ"                => T<float>?distance ^-> TSelf
             "localToWorld"              => Vector3?vector ^-> Vector3
             "worldToLocal"              => Vector3?vector ^-> Vector3
             "lookAt"                    => Vector3?vector ^-> O
-            "add"                       => Object3D?``object`` ^-> O
-            "remove"                    => Object3D?``object`` ^-> O
-            "traverse"                  => (Object3D ^-> O)?callback ^-> O
-            "getObjectById"             => T<int>?id * T<bool>?``recursive`` ^-> Object3D
-            "getObjectByName"           => T<string>?name * T<bool>?``recursive`` ^-> Object3D
-            "getDescendants"            => !? (ArrayOf Object3D)?array ^-> ArrayOf Object3D
+            "add"                       => TSelf?``object`` ^-> O
+            "remove"                    => TSelf?``object`` ^-> O
+            "traverse"                  => (TSelf ^-> O)?callback ^-> O
+            "getObjectById"             => T<int>?id * T<bool>?``recursive`` ^-> TSelf
+            "getObjectByName"           => T<string>?name * T<bool>?``recursive`` ^-> TSelf
+            "getDescendants"            => !? (ArrayOf TSelf)?array ^-> ArrayOf TSelf
             "updateMatrix"              => O ^-> O
             "updateMatrixWorld"         => T<bool>?force ^-> O
-            "clone"                     => !? Object3D?``object`` * !? T<bool>?``recursive`` ^-> Object3D
+            "clone"                     => !? TSelf?``object`` * !? T<bool>?``recursive`` ^-> TSelf
         ]
 
     let Camera =
-        let Camera = Type.New ()
-        
         Class "THREE.Camera"
-        |=> Camera
         |=> Inherits Object3D
         |+> Static [
             Constructor O
@@ -98,14 +92,11 @@ module Definition =
             "projectionMatrix"   =@ Matrix4
             
             "lookAt" => Vector3?vector ^-> O
-            "clone"  => !? Camera?camera ^-> Camera
+            "clone"  => !? TSelf?camera ^-> TSelf
         ]
     
     let OrthographicCamera =
-        let OrthographicCamera = Type.New ()
-        
         Class "THREE.OrthographicCamera"
-        |=> OrthographicCamera
         |=> Inherits Camera
         |+> Static [
             Constructor (T<float>?left * T<float>?right * T<float>?top * T<float>?bottom * !? T<float>?near * !? T<float>?far)
@@ -119,14 +110,11 @@ module Definition =
             "far"    =@ T<float>
 
             "updateProjectionMatrix" => O ^-> O
-            "clone"                  => O ^-> OrthographicCamera
+            "clone"                  => O ^-> TSelf
         ]
     
     let PerspectiveCamera =
-        let PerspectiveCamera = Type.New ()
-        
         Class "THREE.PerspectiveCamera"
-        |=> PerspectiveCamera
         |=> Inherits Camera
         |+> Static [
             Constructor (!? T<float>?fov * !? T<float>?aspect * !? T<float>?near * !? T<float>?far)
@@ -140,7 +128,7 @@ module Definition =
             "setLens"                => T<float>?focalLength * !? T<float>?frameHeight ^-> O
             "setViewOffset"          => T<float>?fullWidth * T<float>?fullHeight * T<float>?x * T<float>?y * T<float>?width * T<float>?height ^-> O
             "updateProjectionMatrix" => O ^-> O
-            "clone"                  => O ^-> PerspectiveCamera
+            "clone"                  => O ^-> TSelf
         ]
 
     let BufferAttribute =
@@ -160,16 +148,13 @@ module Definition =
             "setXYZW" => T<int>?index * T<obj>?x * T<obj>?y * T<obj>?z * T<obj>?w ^-> O
         ]
 
-    let Box3            = Type.New ()
-    let Sphere          = Type.New ()
+    let Box3            = Class "THREE.Box3"
+    let Sphere          = Class "THREE.Sphere"
     
     open WebSharper
 
     let BufferGeometry =
-        let BufferGeometry = Type.New ()
-        
         Class "THREE.BufferGeometry"
-        |=> BufferGeometry
         |=> Inherits EventDispatcher
         |+> Static [
             Constructor O
@@ -197,7 +182,7 @@ module Definition =
             
             "normalizeNormals"      => O ^-> O
             "reorderBuffers"        => T<JavaScript.Uint16Array>?indexBuffer * T<JavaScript.Int32Array>?indexMap * T<int>?vertexCount ^-> O
-            "clone"                 => O ^-> BufferGeometry
+            "clone"                 => O ^-> TSelf
             "dispose"               => O ^-> O
             
         ]
@@ -232,51 +217,45 @@ module Definition =
         }
     
     let ColorClass =
-        let Color = Type.New ()
-
         Class "THREE.Color"
-        |=> Color
         |+> Static [
             Constructor (T<int>?r * T<int>?g * T<int>?b)
-            Constructor (Color + T<int> + T<string>)?value
+            Constructor (TSelf + T<int> + T<string>)?value
         ]
         |+> Instance [
             "r" =@ T<int>
             "g" =@ T<int>
             "b" =@ T<int>
 
-            "set"                  => (Color + T<int> + T<string>)?value ^-> Color
-            "setHex"               => T<int>?hex ^-> Color
-            "setRGB"               => T<int>?r * T<int>?g * T<int>?b ^-> Color
-            "setHSL"               => T<float>?h * T<float>?s * T<float>?l ^-> Color
-            "setStyle"             => T<string>?style ^-> Color
-            "copy"                 => Color?color ^-> Color
-            "copyGammaToLinear"    => Color?color ^-> Color
-            "copyLinearToGamma"    => Color?color ^-> Color
-            "convertGammaToLinear" => O ^-> Color
-            "convertLinearToGamma" => O ^-> Color
+            "set"                  => (TSelf + T<int> + T<string>)?value ^-> TSelf
+            "setHex"               => T<int>?hex ^-> TSelf
+            "setRGB"               => T<int>?r * T<int>?g * T<int>?b ^-> TSelf
+            "setHSL"               => T<float>?h * T<float>?s * T<float>?l ^-> TSelf
+            "setStyle"             => T<string>?style ^-> TSelf
+            "copy"                 => TSelf?color ^-> TSelf
+            "copyGammaToLinear"    => TSelf?color ^-> TSelf
+            "copyLinearToGamma"    => TSelf?color ^-> TSelf
+            "convertGammaToLinear" => O ^-> TSelf
+            "convertLinearToGamma" => O ^-> TSelf
             "getHex"               => O ^-> T<int>
             "getHexString"         => O ^-> T<string>
             "getHSL"               => !? HSL?optionalTarget ^-> HSL
             "getStyle"             => O ^-> T<string>
-            "offsetHSL"            => T<float>?h * T<float>?s * T<float>?l ^-> Color
-            "add "                 => Color?color ^-> Color
-            "addColors"            => Color?color1 * Color?color2 ^-> Color
-            "addScalar"            => T<int>?s ^-> Color
-            "multiply"             => Color?color ^-> Color
-            "multiplyScalar"       => T<int>?s ^-> Color
-            "lerp"                 => Color?color * T<float>?alpha ^-> Color
-            "equals"               => Color?c ^-> T<bool>
-            "fromArray"            => Tuple [T<int>; T<int>; T<int>] ^-> Color
+            "offsetHSL"            => T<float>?h * T<float>?s * T<float>?l ^-> TSelf
+            "add "                 => TSelf?color ^-> TSelf
+            "addColors"            => TSelf?color1 * TSelf?color2 ^-> TSelf
+            "addScalar"            => T<int>?s ^-> TSelf
+            "multiply"             => TSelf?color ^-> TSelf
+            "multiplyScalar"       => T<int>?s ^-> TSelf
+            "lerp"                 => TSelf?color * T<float>?alpha ^-> TSelf
+            "equals"               => TSelf?c ^-> T<bool>
+            "fromArray"            => Tuple [T<int>; T<int>; T<int>] ^-> TSelf
             "toArray"              => O ^-> Tuple [T<int>; T<int>; T<int>]
-            "clone"                => O ^-> Color
+            "clone"                => O ^-> TSelf
         ]
     
     let Face3 =
-        let Face3 = Type.New ()
-        
         Class "THREE.Face3"
-        |=> Face3
         |+> Static [
             Constructor (T<int>?a * T<int>?b * T<int>?c * !? Vector3?normal * !? ColorClass?color * !? T<int>?materialIndex)
         ]
@@ -291,7 +270,7 @@ module Definition =
             "vertexTangents" =@ Tuple [T<float>; T<float>; T<float>]
             "materialIndex"  =@ T<int>
 
-            "clone" => O ^-> Face3
+            "clone" => O ^-> TSelf
         ]
     
     let MorphTarget =
@@ -324,13 +303,10 @@ module Definition =
             ]
         }
     
-    let Matrix3 = Type.New ()
+    let Matrix3 = Class "THREE.Matrix3"
 
     let Geometry =
-        let Geometry = Type.New ()
-        
         Class "THREE.Geometry"
-        |=> Geometry
         |=> Inherits EventDispatcher
         |+> Static [
             Constructor O
@@ -370,17 +346,17 @@ module Definition =
             "computeLineDistances"  => O ^-> O
             "computeBoundingBox"    => O ^-> O
             "computeBoundingSphere" => O ^-> O
-            "merge"                 => Geometry?geometry * !? Matrix3?matrix * !? T<int>?materialIndexOffset ^-> O
+            "merge"                 => TSelf?geometry * !? Matrix3?matrix * !? T<int>?materialIndexOffset ^-> O
             "mergeVertices"         => O ^-> T<int>
             "makeGroups"            => T<bool>?usesFaceMaterial * T<int>?maxVerticesInGroup ^-> O
-            "clone"                 => O ^-> Geometry
+            "clone"                 => O ^-> TSelf
             "dispose"               => O ^-> O
         ]
 
-    let Raycaster = Type.New ()
-    let Scene = Type.New ()
+    let Raycaster = Class "THREE.Raycaster"
+    let Scene = Class "THREE.Scene"
 
-    let Light = Type.New ()
+    let Light = Class "THREE.Light"
 
     let ProjectionData =
         Class "ProjectionData"
@@ -403,7 +379,7 @@ module Definition =
             "projectScene"    => Scene?scene * Camera?camera * T<bool>?sortObjects * T<bool>?sortElements ^-> ProjectionData
         ]
 
-    let Ray = Type.New ()
+    let Ray = Class "THREE.Ray"
 
     let Intersection =
         Pattern.Config "Intersection" {
@@ -411,16 +387,15 @@ module Definition =
             Optional =
             [
                 "distance" , T<float>
-                "point"    , Vector3
+                "point"    , Vector3.Type
                 "face"     , Face3.Type
                 "faceIndex", T<int>
                 "object"   , Object3D.Type
             ]
         }
 
-    let RaycasterClass =
-        Class "THREE.Raycaster"
-        |=> Raycaster
+    let Raycaster' =
+        Raycaster
         |+> Static [
             Constructor (Vector3?origin * Vector3?direction * !? T<float>?near * !? T<float>?far)
         ]
@@ -438,35 +413,31 @@ module Definition =
     
     let Color = ColorClass + T<int> + T<string>
 
-    let LightClass =
-        Class "THREE.Light"
-        |=> Light
+    let Light' =
+        Light
         |=> Inherits Object3D
         |+> Static [
             Constructor Color?color
         ]
         |+> Instance [
-            "color" =@ ColorClass
+            "color" =@ Color
 
             "clone" => !? Light?light ^-> Light
         ]
     
     let AmbientLight =
-        let AmbientLight = Type.New ()
-
         Class "THREE.AmbientLight"
-        |=> AmbientLight
-        |=> Inherits LightClass
+        |=> Inherits Light
         |+> Static [
             Constructor Color?color
         ]
         |+> Instance [
-            "clone" => O ^-> AmbientLight
+            "clone" => O ^-> TSelf
         ]
 
     let AreaLight =
         Class "THREE.AreaLight"
-        |=> Inherits LightClass
+        |=> Inherits Light
         |+> Static [
             Constructor (Color?color * !? T<float>?intensity)
         ]
@@ -482,11 +453,8 @@ module Definition =
         ]
     
     let DirectionalLight =
-        let DirectionalLight = Type.New ()
-
         Class "THREE.DirectionalLight"
-        |=> DirectionalLight
-        |=> Inherits LightClass
+        |=> Inherits Light
         |+> Static [
             Constructor (Color?color * !? T<float>?intensity)
         ]
@@ -520,31 +488,25 @@ module Definition =
             "shadowCamera"        =@ Camera
             "shadowMatrix"        =@ T<obj>
 
-            "clone" => O ^-> DirectionalLight
+            "clone" => O ^-> TSelf
         ]
 
     let HemisphereLight =
-        let HemisphereLight = Type.New ()
-        
         Class "THREE.HemisphereLight"
-        |=> HemisphereLight
-        |=> Inherits LightClass
+        |=> Inherits Light
         |+> Static [
             Constructor (Color?skyColor * Color?groundColor * !? T<float>?intensity)
         ]
         |+> Instance [
-            "groundColor" =@ ColorClass
+            "groundColor" =@ Color
             "intensity"   =@ T<float>
 
-            "clone" => O ^-> HemisphereLight
+            "clone" => O ^-> TSelf
         ]
     
     let PointLight =
-        let PointLight = Type.New ()
-
         Class "THREE.PointLight"
-        |=> PointLight
-        |=> Inherits LightClass
+        |=> Inherits Light
         |+> Static [
             Constructor (Color?color * !? T<float>?intensity * !? T<float>?distance)
         ]
@@ -552,15 +514,12 @@ module Definition =
             "intensity"   =@ T<float>
             "distance"    =@ T<float>
 
-            "clone" => O ^-> PointLight
+            "clone" => O ^-> TSelf
         ]
     
     let SpotLight =
-        let SpotLight = Type.New ()
-
         Class "THREE.SpotLight"
-        |=> SpotLight
-        |=> Inherits LightClass
+        |=> Inherits Light
         |+> Static [
             Constructor (Color?color * !? T<float>?intensity * !? T<float>?distance * !? T<float>?angle * !? T<float>?exponent)
         ]
@@ -585,10 +544,10 @@ module Definition =
             "shadowCamera"        =@ Camera
             "shadowMatrix"        =@ T<obj>
 
-            "clone" => O ^-> SpotLight
+            "clone" => O ^-> TSelf
         ]
 
-    let LoadingManager = Type.New ()
+    let LoadingManager = Class "THREE.LoadingManager"
 
     let BufferGeometryLoader =
         Class "THREE.BufferGeometryLoader"
@@ -634,7 +593,7 @@ module Definition =
             "setCrossOrigin" => T<string>?value ^-> O
         ]
         
-    let Material = Type.New ()
+    let Material = Class "THREE.Material"
 
     let Loader =
         Class "THREE.Loader"
@@ -659,10 +618,7 @@ module Definition =
         ]
 
     let JSONLoader =
-        let JSONLoader = Type.New ()
-        
         Class "THREE.JSONLoader"
-        |=> JSONLoader
         |=> Inherits Loader
         |+> Static [
             Constructor T<bool>?showStatus
@@ -671,13 +627,12 @@ module Definition =
             "withCredentials" =@ T<bool>
 
             "load"         => T<string>?url * (!? Geometry * !? (ArrayOf Material) ^-> O)?callback * !? T<string>?texturePath ^-> O
-            "loadAjaxJSON" => JSONLoader?context * T<string>?url * (!? Geometry * !? (ArrayOf Material) ^-> O)?callback * T<string>?texturePath * !? (!? T<obj> ^-> O)?callbackProgress ^-> O
+            "loadAjaxJSON" => TSelf?context * T<string>?url * (!? Geometry * !? (ArrayOf Material) ^-> O)?callback * T<string>?texturePath * !? (!? T<obj> ^-> O)?callbackProgress ^-> O
             "parse"        => T<obj>?json * T<string>?texturePath ^-> T<obj>
         ]
     
-    let LoadingManagerClass =
-        Class "THREE.LoadingManager"
-        |=> LoadingManager
+    let LoadingManager' =
+        LoadingManager
         |+> Static [
             Constructor (!? (O ^-> O)?onLoad * !? (!? T<string>?url * !? T<int>?loaded * !? T<int>?total ^-> O)?onProgress * !? (O ^-> O)?onError)
         ]
@@ -743,7 +698,7 @@ module Definition =
             "parse"                    => T<obj>?json * (!? T<obj> ^-> O)?callbackFinished * T<string>?url ^-> O
         ]
     
-    let Texture = Type.New ()
+    let Texture = Class "THREE.Texture"
 
     let TextureLoader =
         Class "THREE.TextureLoader"
@@ -773,9 +728,8 @@ module Definition =
             "setCrossOrigin" => T<string>?value ^-> O
         ]
 
-    let MaterialClass =
-        Class "THREE.Material"
-        |=> Material
+    let Material' =
+        Material
         |=> Inherits EventDispatcher
         |+> Static [
             Constructor O
@@ -825,23 +779,20 @@ module Definition =
         }
 
     let LineBasicMaterial =
-        let LineBasicMaterial = Type.New ()
-
         Class "THREE.LineBasicMaterial"
-        |=> LineBasicMaterial
-        |=> Inherits MaterialClass
+        |=> Inherits Material
         |+> Static [
             Constructor !? LineBasicMaterialConfiguration?parameters
         ]
         |+> Instance [
-            "color"        =@ ColorClass
+            "color"        =@ Color
             "linewidth"    =@ T<float>
             "linecap"      =@ T<string>
             "linejoin"     =@ T<string>
             "vertexColors" =@ T<bool>
             "fog"          =@ T<bool>
 
-            "clone" => O ^-> LineBasicMaterial
+            "clone" => O ^-> TSelf
         ]
     
     let LineDashedMaterialConfiguration =
@@ -864,16 +815,13 @@ module Definition =
         }
 
     let LineDashedMaterial =
-        let LineDashedMaterial = Type.New ()
-
         Class "THREE.LineDashedMaterial"
-        |=> LineDashedMaterial
-        |=> Inherits MaterialClass
+        |=> Inherits Material
         |+> Static [
             Constructor !? LineDashedMaterialConfiguration?parameters
         ]
         |+> Instance [
-            "color"        =@ ColorClass
+            "color"        =@ Color
             "linewidth"    =@ T<float>
             "scale"        =@ T<float>
             "dashSize"     =@ T<float>
@@ -881,7 +829,7 @@ module Definition =
             "vertexColors" =@ T<bool>
             "fog"          =@ T<bool>
 
-            "clone" => O ^-> LineDashedMaterial
+            "clone" => O ^-> TSelf
         ]
 
     let MeshBasicMaterialConfiguration =
@@ -891,9 +839,9 @@ module Definition =
             [
                 "color"             , T<int>
                 "opacity"           , T<float>
-                "map"               , Texture
-                "lightMap"          , Texture
-                "specularMap"       , Texture
+                "map"               , Texture.Type
+                "lightMap"          , Texture.Type
+                "specularMap"       , Texture.Type
                 "envMap"            , T<obj>
                 "combine"           , T<int>
                 "reflectivity"      , T<float>
@@ -912,16 +860,13 @@ module Definition =
         }
 
     let MeshBasicMaterial =
-        let MeshBasicMaterial = Type.New ()
-
         Class "THREE.MeshBasicMaterial"
-        |=> MeshBasicMaterial
-        |=> Inherits MaterialClass
+        |=> Inherits Material
         |+> Static [
             Constructor !? MeshBasicMaterialConfiguration?parameters
         ]
         |+> Instance [
-            "color"              =@ ColorClass
+            "color"              =@ Color
             "map"                =@ Texture
             "lightMap"           =@ Texture
             "specularMap"        =@ Texture
@@ -939,7 +884,7 @@ module Definition =
             "skinning"           =@ T<bool>
             "morphTargets"       =@ T<bool>
             
-            "clone" => O ^-> MeshBasicMaterial
+            "clone" => O ^-> TSelf
         ]
 
     let MeshDepthMaterialConfiguration =
@@ -957,10 +902,7 @@ module Definition =
         }
 
     let MeshDepthMaterial =
-        let MeshDepthMaterial = Type.New ()
-        
         Class "THREE.MeshDepthMaterial"
-        |=> MeshDepthMaterial
         |+> Static [
             Constructor !? MeshDepthMaterialConfiguration?parameters
         ]
@@ -969,14 +911,11 @@ module Definition =
             "wireframe"          =@ T<bool>
             "wireframeLinewidth" =@ T<float>
 
-            "clone" => O ^-> MeshDepthMaterial
+            "clone" => O ^-> TSelf
         ]
 
     let MeshFaceMaterial =
-        let MeshFaceMaterial = Type.New ()
-
         Class "THREE.MeshFaceMaterial"
-        |=> MeshFaceMaterial
         |=> Inherits Material
         |+> Static [
             Constructor !? (ArrayOf Material)?materials
@@ -984,7 +923,7 @@ module Definition =
         |+> Static [
             "materials" =@ ArrayOf Material
 
-            "clone" => O ^-> MeshFaceMaterial
+            "clone" => O ^-> TSelf
         ]
 
     let MeshLambertMaterialConfiguration =
@@ -996,9 +935,9 @@ module Definition =
                 "ambient"           , T<int>
                 "emissive"          , T<int>
                 "opacity"           , T<float>
-                "map"               , Texture
-                "lightMap"          , Texture
-                "specularMap"       , Texture
+                "map"               , Texture.Type
+                "lightMap"          , Texture.Type
+                "specularMap"       , Texture.Type
                 "envMap"            , T<obj>
                 "combine"           , T<int>
                 "reflectivity"      , T<float>
@@ -1019,18 +958,15 @@ module Definition =
         }
 
     let MeshLambertMaterial =
-        let MeshLambertMaterial = Type.New ()
-        
         Class "THREE.MeshLambertMaterial"
-        |=> MeshLambertMaterial
-        |=> Inherits MaterialClass
+        |=> Inherits Material
         |+> Static [
             Constructor !? MeshLambertMaterialConfiguration?parameters
         ]
         |+> Instance [
-            "color"              =@ ColorClass
-            "ambient"            =@ ColorClass
-            "emissive"           =@ ColorClass
+            "color"              =@ Color
+            "ambient"            =@ Color
+            "emissive"           =@ Color
             "wrapAround"         =@ T<bool>
             "wrapRGB"            =@ Vector3
             "map"                =@ Texture
@@ -1051,7 +987,7 @@ module Definition =
             "morphTargets"       =@ T<bool>
             "morphNormals"       =@ T<bool>
 
-            "clone" => O ^-> MeshLambertMaterial
+            "clone" => O ^-> TSelf
         ]
 
     let MeshNormalMaterialConfiguration =
@@ -1070,11 +1006,8 @@ module Definition =
         }
     
     let MeshNormalMaterial =
-        let MeshNormalMaterial = Type.New ()
-        
         Class "THREE.MeshNormalMaterial"
-        |=> MeshNormalMaterial
-        |=> Inherits MaterialClass
+        |=> Inherits Material
         |+> Static [
             Constructor !? MeshNormalMaterialConfiguration?parameters
         ]
@@ -1084,10 +1017,10 @@ module Definition =
             "wireframeLinewidth" =@ T<float>
             "morphTargets"       =@ T<bool>
             
-            "clone" => O ^-> MeshNormalMaterial
+            "clone" => O ^-> TSelf
         ]
 
-    let Vector2 = Type.New ()
+    let Vector2 = Class "THREE.Vector2"
 
     let MeshPhongMaterialConfiguration =
         Pattern.Config "MeshPhongMaterialConfiguration" {
@@ -1100,13 +1033,13 @@ module Definition =
                 "specular"          , T<int>
                 "shininess"         , T<float>
                 "opacity"           , T<float>
-                "map"               , Texture
-                "lightMap"          , Texture
-                "bumpMap"           , Texture
+                "map"               , Texture.Type
+                "lightMap"          , Texture.Type
+                "bumpMap"           , Texture.Type
                 "bumpScale"         , T<float>
-                "normalMap"         , Texture
-                "normalScale"       , Vector2
-                "specularMap"       , Texture
+                "normalMap"         , Texture.Type
+                "normalScale"       , Vector2.Type
+                "specularMap"       , Texture.Type
                 "envMap"            , T<obj>
                 "combine"           , T<int>
                 "reflectivity"      , T<float>
@@ -1126,19 +1059,16 @@ module Definition =
         }
 
     let MeshPhongMaterial =
-        let MeshPhongMaterial = Type.New ()
-        
         Class "THREE.MeshPhongMaterial"
-        |=> MeshPhongMaterial
-        |=> Inherits MaterialClass
+        |=> Inherits Material
         |+> Static [
             Constructor !? MeshPhongMaterialConfiguration?parameters
         ]
         |+> Instance [
-            "color"              =@ ColorClass
-            "ambient"            =@ ColorClass
-            "emissive"           =@ ColorClass
-            "specular"           =@ ColorClass
+            "color"              =@ Color
+            "ambient"            =@ Color
+            "emissive"           =@ Color
+            "specular"           =@ Color
             "shininess"          =@ T<float>
             "metal"              =@ T<bool>
             "wrapAround"         =@ T<bool>
@@ -1165,7 +1095,7 @@ module Definition =
             "morphTargets"       =@ T<bool>
             "morphNormals"       =@ T<bool>
 
-            "clone" => O ^-> MeshPhongMaterial
+            "clone" => O ^-> TSelf
         ]
     
     let ParticleSystemMaterialConfiguration =
@@ -1175,7 +1105,7 @@ module Definition =
             [
                 "color"       , T<int>
                 "opacity"     , T<float>
-                "map"         , Texture
+                "map"         , Texture.Type
                 "size"        , T<float>
                 "blending"    , T<int>
                 "depthTest"   , T<bool>
@@ -1186,23 +1116,20 @@ module Definition =
         }
 
     let ParticleSystemMaterial =
-        let ParticleSystemMaterial = Type.New ()
-
         Class "THREE.ParticleSystemMaterial"
-        |=> ParticleSystemMaterial
-        |=> Inherits MaterialClass
+        |=> Inherits Material
         |+> Static [
             Constructor !? ParticleSystemMaterialConfiguration?parameters
         ]
         |+> Instance [
-            "color"           =@ ColorClass
+            "color"           =@ Color
             "map"             =@ Texture
             "size"            =@ T<float>
             "sizeAttenuation" =@ T<bool>
             "vertexColors"    =@ T<bool>
             "fog"             =@ T<bool>
 
-            "clone" => O ^-> ParticleSystemMaterial
+            "clone" => O ^-> TSelf
         ]
 
     let ShaderMaterialConfiguration =
@@ -1238,11 +1165,8 @@ module Definition =
         ]
 
     let ShaderMaterial =
-        let ShaderMaterial = Type.New ()
-
         Class "THREE.ShaderMaterial"
-        |=> ShaderMaterial
-        |=> Inherits MaterialClass
+        |=> Inherits Material
         |+> Static [
             Constructor !? ShaderMaterialConfiguration?parameters
         ]
@@ -1266,20 +1190,17 @@ module Definition =
                                             
             "index0AttributeName"    =@ T<string>
 
-            "clone" => O ^-> ShaderMaterial
+            "clone" => O ^-> TSelf
         ]
 
     let RawShaderMaterial =
-        let RawShaderMaterial = Type.New ()
-        
         Class "THREE.RawShaderMaterial"
-        |=> RawShaderMaterial
         |=> Inherits ShaderMaterial
         |+> Static [
             Constructor !? T<obj>?parameters
         ]
         |+> Instance [
-            "clone" => O ^-> RawShaderMaterial
+            "clone" => O ^-> TSelf
         ]
 
     let SpriteCanvasMaterialConfiguration =
@@ -1295,19 +1216,16 @@ module Definition =
         }
 
     let SpriteCanvasMaterial =
-        let SpriteCanvasMaterial = Type.New ()
-        
         Class "THREE.SpriteCanvasMaterial"
-        |=> SpriteCanvasMaterial
-        |=> Inherits MaterialClass
+        |=> Inherits Material
         |+> Static [
             Constructor !? SpriteCanvasMaterialConfiguration?parameters
         ]
         |+> Instance [
-            "color"   =@ ColorClass
+            "color"   =@ Color
             "program" =@ (T<obj>?context * T<obj>?color ^-> O)
 
-            "clone" => O ^-> SpriteCanvasMaterial
+            "clone" => O ^-> TSelf
         ]
     
     let SpriteMaterialConfiguration =
@@ -1317,39 +1235,33 @@ module Definition =
             [
                 "color"     , T<int>
                 "opacity"   , T<float>
-                "map"       , Texture
+                "map"       , Texture.Type
                 "blending"  , T<int>
                 "depthTest" , T<bool>
                 "depthWrite", T<bool>
-                "uvOffset"  , Vector2
-                "uvScale"   , Vector2
+                "uvOffset"  , Vector2.Type
+                "uvScale"   , Vector2.Type
                 "fog"       , T<bool>
             ]
         }
 
     let SpriteMaterial =
-        let SpriteMaterial = Type.New ()
-
         Class "THREE.SpriteMaterial"
-        |=> SpriteMaterial
-        |=> Inherits MaterialClass
+        |=> Inherits Material
         |+> Static [
             Constructor !? SpriteMaterialConfiguration?parameters
         ]
         |+> Instance [
-            "color"    =@ ColorClass
+            "color"    =@ Color
             "map"      =@ Texture
             "rotation" =@ T<float>
             "fog"      =@ T<bool>
 
-            "clone" => O ^-> SpriteMaterial
+            "clone" => O ^-> TSelf
         ]
 
     let Box2 =
-        let Box2 = Type.New ()
-        
         Class "THREE.Box2"
-        |=> Box2
         |+> Static [
             Constructor (!? Vector2?min * !? Vector2?max)
         ]
@@ -1357,33 +1269,32 @@ module Definition =
             "min" =@ Vector2
             "max" =@ Vector2
             
-            "set"                  => Vector2?min * Vector2?max ^-> Box2
-            "setFromPoints"        => (ArrayOf Vector2)?points ^-> Box2
-            "setFromCenterAndSize" => Vector2?center * Vector2?size ^-> Box2
-            "copy"                 => Box2?box ^-> Box2
-            "makeEmpty"            => O ^-> Box2
+            "set"                  => Vector2?min * Vector2?max ^-> TSelf
+            "setFromPoints"        => (ArrayOf Vector2)?points ^-> TSelf
+            "setFromCenterAndSize" => Vector2?center * Vector2?size ^-> TSelf
+            "copy"                 => TSelf?box ^-> TSelf
+            "makeEmpty"            => O ^-> TSelf
             "empty"                => O ^-> T<bool>
             "center"               => !? Vector2?optionalTarget ^-> Vector2
             "size"                 => !? Vector2?optionalTarget ^-> Vector2
-            "expandByPoint"        => Vector2?point ^-> Box2
-            "expandByVector"       => Vector2?vector ^-> Box2
-            "expandByScalar"       => T<float>?scalar ^-> Box2
+            "expandByPoint"        => Vector2?point ^-> TSelf
+            "expandByVector"       => Vector2?vector ^-> TSelf
+            "expandByScalar"       => T<float>?scalar ^-> TSelf
             "containsPoint"        => Vector2?point ^-> T<bool>
-            "containsBox"          => Box2?box ^-> T<bool>
+            "containsBox"          => TSelf?box ^-> T<bool>
             "getParameter"         => Vector2?point * !? Vector2?optionalTarget ^-> Vector2
-            "isIntersectionBox"    => Box2?box ^-> T<bool>
+            "isIntersectionBox"    => TSelf?box ^-> T<bool>
             "clampPoint"           => Vector2?point * !? Vector2?optionalTarget ^-> Vector2
             "distanceToPoint"      => Vector2?point ^-> T<float>
-            "intersect"            => Box2?box ^-> Box2
-            "union"                => Box2?box ^-> Box2
-            "translate"            => Vector2?offset ^-> Box2
-            "equals"               => Box2?box ^-> T<bool>
-            "clone"                => O ^-> Box2
+            "intersect"            => TSelf?box ^-> TSelf
+            "union"                => TSelf?box ^-> TSelf
+            "translate"            => Vector2?offset ^-> TSelf
+            "equals"               => TSelf?box ^-> T<bool>
+            "clone"                => O ^-> TSelf
         ]
     
-    let Box3Class =
-        Class "THREE.Box3"
-        |=> Box3
+    let Box3' =
+        Box3
         |+> Static [
             Constructor (!? Vector3?min * !? Vector3?max)
         ]
@@ -1419,9 +1330,8 @@ module Definition =
             "clone"                => O ^-> Box3
         ]
 
-    let EulerClass =
-        Class "THREE.Euler"
-        |=> Euler
+    let Euler' =
+        Euler
         |+> Static [
             Constructor (!? T<float>?x * !? T<float>?y * !? T<float>?z * !? T<string>?order)
         ]
@@ -1445,34 +1355,28 @@ module Definition =
             "clone"                 => O ^-> Euler
         ]
 
-    let Plane = Type.New ()
+    let Plane = Class "THREE.Plane"
 
     let Frustum =
-        let Frustum = Type.New ()
-        
         Class "THREE.Frustum"
-        |=> Frustum
         |+> Static [
             Constructor (!? Plane?p0 * !? Plane?p1 * !? Plane?p2 * !? Plane?p3 * !? Plane?p4 * !? Plane?p5)
         ]
         |+> Instance [
             "planes" =@ ArrayOf Plane
 
-            "set"              => Plane?p0 * Plane?p1 * Plane?p2 * Plane?p3 * Plane?p4 * Plane?p5 ^-> Frustum
-            "copy"             => Frustum?frustum ^-> Frustum
-            "setFromMatrix"    => Matrix4?m ^-> Frustum
+            "set"              => Plane?p0 * Plane?p1 * Plane?p2 * Plane?p3 * Plane?p4 * Plane?p5 ^-> TSelf
+            "copy"             => TSelf?frustum ^-> TSelf
+            "setFromMatrix"    => Matrix4?m ^-> TSelf
             "intersectsObject" => Object3D?``object`` ^-> T<bool>
             "intersectsSphere" => Sphere?sphere ^-> T<bool>
             "intersectsBox"    => T<obj>?box ^-> T<bool>
             "containsPoint"    => Vector3?point ^-> T<bool>
-            "clone"            => O ^-> Frustum
+            "clone"            => O ^-> TSelf
         ]
 
     let Line3 =
-        let Line3 = Type.New ()
-        
         Class "THREE.Line3"
-        |=> Line3
         |+> Static [
             Constructor (!? Vector3?start * !? Vector3?``end``)
         ]
@@ -1480,8 +1384,8 @@ module Definition =
             "start" =@ Vector3
             "end"   =@ Vector3
 
-            "set"                          => Vector3?start * Vector3?``end`` ^-> Line3
-            "copy"                         => Line3?line ^-> Line3
+            "set"                          => Vector3?start * Vector3?``end`` ^-> TSelf
+            "copy"                         => TSelf?line ^-> TSelf
             "center"                       => !? Vector3?optionalTarget ^-> Vector3
             "delta"                        => !? Vector3?optionalTarget ^-> Vector3
             "distanceSq"                   => O ^-> T<float>
@@ -1489,9 +1393,9 @@ module Definition =
             "at"                           => T<float>?t * !? Vector3?optionalTarget ^-> Vector3
             "closestPointToPointParameter" => Vector3?point * T<bool>?clampToLine ^-> T<float>
             "closestPointToPoint"          => Vector3?point * T<bool>?clampToLine * !? Vector3?optionalTarget ^-> Vector3
-            "applyMatrix4"                 => Matrix4?matrix ^-> Line3
-            "equals"                       => Line3?line ^-> T<bool>
-            "clone"                        => O ^-> Line3
+            "applyMatrix4"                 => Matrix4?matrix ^-> TSelf
+            "equals"                       => TSelf?line ^-> T<bool>
+            "clone"                        => O ^-> TSelf
         ]
 
     let Math =
@@ -1513,9 +1417,8 @@ module Definition =
             "isPowerOfTwo"    => T<float>?value ^-> T<bool>
         ]
     
-    let Matrix3Class =
-        Class "THREE.Matrix3"
-        |=> Matrix3
+    let Matrix3' =
+        Matrix3
         |+> Static [
             Constructor (!? T<float>?n11 * !? T<float>?n12 * !? T<float>?n13 * !? T<float>?n21 * !? T<float>?n22 * !? T<float>?n23 * !? T<float>?n31 * !? T<float>?n32 * !? T<float>?n33)
         ]
@@ -1538,9 +1441,8 @@ module Definition =
             "clone"                => O ^-> Matrix3
         ]
 
-    let Matrix4Class =
-        Class "THREE.Matrix4"
-        |=> Matrix4
+    let Matrix4' =
+        Matrix4
         |+> Static [
             Constructor (!? T<float>?n11 * !? T<float>?n12 * !? T<float>?n13 * !? T<float>?n14 * !? T<float>?n21 * !? T<float>?n22 * !? T<float>?n23 * !? T<float>?n24 * !? T<float>?n31 * !? T<float>?n32 * !? T<float>?n33 * !? T<float>?n34 * !? T<float>?n41 * !? T<float>?n42 * !? T<float>?n43 * !? T<float>?n44)
         ]
@@ -1583,9 +1485,8 @@ module Definition =
             "clone"                      => O ^-> Matrix4
         ]
 
-    let PlaneClass =
-        Class "THREE.Plane"
-        |=> Plane
+    let Plane' =
+        Plane
         |+> Static [
             Constructor (!? Vector3?normal * !? T<float>?constant)
         ]
@@ -1613,9 +1514,8 @@ module Definition =
             "clone"                         => O ^-> Plane
         ]
 
-    let QuaternionClass =
-        Class "THREE.Quaternion"
-        |=> Quaternion
+    let Quaternion' =
+        Quaternion
         |+> Static [
             Constructor (!? T<float>?x * !? T<float>?y * !? T<float>?z * !? T<float>?w)
         ]
@@ -1647,9 +1547,8 @@ module Definition =
             "clone"                 => O ^-> Quaternion
         ]
 
-    let RayClass =
-        Class "THREE.Ray"
-        |=> Ray
+    let Ray' =
+        Ray
         |+> Static [
             Constructor (!? Vector3?origin * !? Vector3?direction)
         ]
@@ -1676,9 +1575,8 @@ module Definition =
             "clone"                => O ^-> Ray
         ]
 
-    let SphereClass =
-        Class "THREE.Sphere"
-        |=> Sphere
+    let Sphere' =
+        Sphere
         |+> Static [
             Constructor (!? Vector3?center * !? T<float>?radius)
         ]
@@ -1728,10 +1626,7 @@ module Definition =
         ]
 
     let Triangle =
-        let Triangle = Type.New ()
-        
         Class "THREE.Triangle"
-        |=> Triangle
         |+> Static [
             Constructor (!? Vector3?a * !? Vector3?b * !? Vector3?c)
         ]
@@ -1740,22 +1635,21 @@ module Definition =
             "c" =@ Vector3
             "b" =@ Vector3
 
-            "set"                     => Vector3?a * Vector3?b * Vector3?c ^-> Triangle
-            "setFromPointsAndIndices" => (ArrayOf Vector3)?points * T<int>?i0 * T<int>?i1 * T<int>?i2 ^-> Triangle
-            "copy"                    => Triangle?triangle ^-> Triangle
+            "set"                     => Vector3?a * Vector3?b * Vector3?c ^-> TSelf
+            "setFromPointsAndIndices" => (ArrayOf Vector3)?points * T<int>?i0 * T<int>?i1 * T<int>?i2 ^-> TSelf
+            "copy"                    => TSelf?triangle ^-> TSelf
             "area"                    => O ^-> T<float>
             "midpoint"                => !? Vector3?optionalTarget ^-> Vector3
             "normal"                  => !? Vector3?optionalTarget ^-> Vector3
             "plane"                   => !? Plane?optionalTarget ^-> Plane
             "barycoordFromPoint"      => Vector3?point * !? Vector3?optionalTarget ^-> Vector3
             "containsPoint"           => Vector3?point ^-> T<bool>
-            "equals"                  => Triangle?triangle ^-> T<bool>
-            "clone"                   => O ^-> Triangle
+            "equals"                  => TSelf?triangle ^-> T<bool>
+            "clone"                   => O ^-> TSelf
         ]
 
-    let Vector2Class =
-        Class "THREE.Vector2"
-        |=> Vector2
+    let Vector2' =
+        Vector2
         |+> Static [
             Constructor (!? T<float>?x * !? T<float>?y)
         ]
@@ -1801,9 +1695,8 @@ module Definition =
             "clone"             => O ^-> Vector2
         ]
 
-    let Vector3Class =
-        Class "THREE.Vector3"
-        |=> Vector3
+    let Vector3' =
+        Vector3
         |+> Static [
             Constructor (!? T<float>?x * !? T<float>?y * !? T<float>?z)
         ]
@@ -1870,10 +1763,7 @@ module Definition =
         ]
 
     let Vector4 =
-        let Vector4 = Type.New ()
-
         Class "THREE.Vector4"
-        |=> Vector4
         |+> Static [
             Constructor (!? T<float>?x * !? T<float>?y * !? T<float>?z * !? T<float>?w)
         ]
@@ -1883,47 +1773,47 @@ module Definition =
             "z" =@ T<float>
             "w" =@ T<float>
 
-            "set"                            => T<float>?x * T<float>?y * T<float>?z * T<float>?w ^-> Vector4
-            "setX"                           => T<float>?x ^-> Vector4
-            "setY"                           => T<float>?y ^-> Vector4
-            "setZ"                           => T<float>?z ^-> Vector4
-            "setW"                           => T<float>?w ^-> Vector4
+            "set"                            => T<float>?x * T<float>?y * T<float>?z * T<float>?w ^-> TSelf
+            "setX"                           => T<float>?x ^-> TSelf
+            "setY"                           => T<float>?y ^-> TSelf
+            "setZ"                           => T<float>?z ^-> TSelf
+            "setW"                           => T<float>?w ^-> TSelf
             "setComponent"                   => T<int>?index * T<float>?value ^-> O
             "getComponent"                   => T<int>?index ^-> T<float>
-            "copy"                           => Vector4?v ^-> Vector4
-            "add"                            => Vector4?v ^-> Vector4
-            "addScalar"                      => T<float>?s ^-> Vector4
-            "addVectors"                     => Vector4?a * Vector4?b ^-> Vector4
-            "sub"                            => Vector4?v ^-> Vector4
-            "subVectors"                     => Vector4?a * Vector4?b ^-> Vector4
-            "multiplyScalar"                 => T<float>?s ^-> Vector4
-            "applyMatrix4"                   => Matrix4?m ^-> Vector4
-            "divideScalar"                   => T<float>?s ^-> Vector4
-            "setAxisAngleFromQuaternion"     => Quaternion?q ^-> Vector4
-            "setAxisAngleFromRotationMatrix" => Matrix4?m ^-> Vector4
-            "min"                            => Vector4?v ^-> Vector4
-            "max"                            => Vector4?v ^-> Vector4
-            "clamp"                          => Vector4?min * Vector4?max ^-> Vector4
-            "clampScalar"                    => T<float>?minVal * T<float>?maxVal ^-> Vector4
-            "floor"                          => O ^-> Vector4
-            "ceil"                           => O ^-> Vector4
-            "round"                          => O ^-> Vector4
-            "roundToZero"                    => O ^-> Vector4
-            "negate"                         => O ^-> Vector4
-            "dot"                            => Vector4?v ^-> T<float>
+            "copy"                           => TSelf?v ^-> TSelf
+            "add"                            => TSelf?v ^-> TSelf
+            "addScalar"                      => T<float>?s ^-> TSelf
+            "addVectors"                     => TSelf?a * TSelf?b ^-> TSelf
+            "sub"                            => TSelf?v ^-> TSelf
+            "subVectors"                     => TSelf?a * TSelf?b ^-> TSelf
+            "multiplyScalar"                 => T<float>?s ^-> TSelf
+            "applyMatrix4"                   => Matrix4?m ^-> TSelf
+            "divideScalar"                   => T<float>?s ^-> TSelf
+            "setAxisAngleFromQuaternion"     => Quaternion?q ^-> TSelf
+            "setAxisAngleFromRotationMatrix" => Matrix4?m ^-> TSelf
+            "min"                            => TSelf?v ^-> TSelf
+            "max"                            => TSelf?v ^-> TSelf
+            "clamp"                          => TSelf?min * TSelf?max ^-> TSelf
+            "clampScalar"                    => T<float>?minVal * T<float>?maxVal ^-> TSelf
+            "floor"                          => O ^-> TSelf
+            "ceil"                           => O ^-> TSelf
+            "round"                          => O ^-> TSelf
+            "roundToZero"                    => O ^-> TSelf
+            "negate"                         => O ^-> TSelf
+            "dot"                            => TSelf?v ^-> T<float>
             "lengthSq"                       => O ^-> T<float>
             "length"                         => O ^-> T<float>
             "lengthManhattan"                => O ^-> T<float>
-            "normalize"                      => O ^-> Vector4
-            "setLength"                      => T<float>?l ^-> Vector4
-            "lerp"                           => Vector4?v * T<float>?alpha ^-> Vector4
-            "equals"                         => Vector4?v ^-> T<bool>
-            "fromArray"                      => (Tuple [T<float>; T<float>; T<float>; T<float>])?array ^-> Vector4
+            "normalize"                      => O ^-> TSelf
+            "setLength"                      => T<float>?l ^-> TSelf
+            "lerp"                           => TSelf?v * T<float>?alpha ^-> TSelf
+            "equals"                         => TSelf?v ^-> T<bool>
+            "fromArray"                      => (Tuple [T<float>; T<float>; T<float>; T<float>])?array ^-> TSelf
             "toArray"                        => O ^-> Tuple [T<float>; T<float>; T<float>; T<float>]
-            "clone"                          => O ^-> Vector4
+            "clone"                          => O ^-> TSelf
         ]
     
-    let SkinnedMesh = Type.New ()
+    let SkinnedMesh = Class "THREE.SkinnedMesh"
 
     let Bone =
         Class "THREE.Bone"
@@ -1942,10 +1832,7 @@ module Definition =
         ]
 
     let Line =
-        let Line = Type.New ()
-        
         Class "THREE.Line"
-        |=> Line
         |=> Inherits Object3D
         |+> Static [
             Constructor (!? Geometry?geometry * !? Material?material * !? T<int>?``type``)
@@ -1955,14 +1842,11 @@ module Definition =
             "material" =@ Material
             "type"     =@ T<int>
 
-            "clone" => !? Line?``object`` ^-> Line
+            "clone" => !? TSelf?``object`` ^-> TSelf
         ]
     
     let LOD =
-        let LOD = Type.New ()
-        
         Class "THREE.LOD"
-        |=> LOD
         |=> Inherits Object3D
         |+> Static [
             Constructor O
@@ -1973,14 +1857,11 @@ module Definition =
             "addLevel"             => Object3D?``object`` * !? T<float>?distance ^-> O
             "getObjectForDistance" => T<float>?distance ^-> Object3D
             "update"               => Camera?camera ^-> O
-            "clone"                => !? LOD?``object`` ^-> LOD
+            "clone"                => !? TSelf?``object`` ^-> TSelf
         ]
     
     let Mesh =
-        let Mesh = Type.New ()
-
         Class "THREE.Mesh"
-        |=> Mesh
         |=> Inherits Object3D
         |+> Static [
             Constructor (!? Geometry?geometry * !? Material?material)
@@ -1991,15 +1872,12 @@ module Definition =
 
             "updateMorphTargets"        => O ^-> O
             "getMorphTargetIndexByName" => T<string>?name ^-> T<int>
-            "clone"                     => !? Mesh?``object`` * !? T<bool>?``recursive`` ^-> Mesh
+            "clone"                     => !? TSelf?``object`` * !? T<bool>?``recursive`` ^-> TSelf
             
         ]
 
     let MorphAnimMesh =
-        let MorphAnimMesh = Type.New ()
-
         Class "THREE.MorphAnimMesh"
-        |=> MorphAnimMesh
         |=> Inherits Mesh
         |+> Static [
             Constructor (Geometry?geometry * Material?material)
@@ -2016,14 +1894,11 @@ module Definition =
             "setAnimationLabel"    => T<string>?label * T<int>?start * T<int>?``end`` ^-> O
             "playAnimation"        => T<string>?label * T<int>?fps ^-> O
             "updateAnimation"      => T<int>?delta ^-> O
-            "clone"                => !? MorphAnimMesh?``object`` ^-> MorphAnimMesh
+            "clone"                => !? TSelf?``object`` ^-> TSelf
         ]
 
     let ParticleSystem =
-        let ParticleSystem = Type.New ()
-        
         Class "THREE.ParticleSystem"
-        |=> ParticleSystem
         |=> Inherits Object3D
         |+> Static [
             Constructor (!? Geometry?geometry * !? Material?material)
@@ -2034,14 +1909,13 @@ module Definition =
             "sortParticles"  =@ T<bool>
             "frustrumCulled" =@ T<bool>
 
-            "clone" => !? ParticleSystem ^-> ParticleSystem
+            "clone" => !? TSelf ^-> TSelf
         ]
 
-    let Skeleton = Type.New ()
+    let Skeleton = Class "THREE.Skeleton"
 
-    let SkinnedMeshClass =
-        Class "THREE.SkinnedMesh"
-        |=> SkinnedMesh
+    let SkinnedMesh' =
+        SkinnedMesh
         |=> Inherits Mesh
         |+> Static [
             Constructor (Geometry?geometry * Material?material * T<bool>?useVertexTexture)
@@ -2057,10 +1931,7 @@ module Definition =
         ]
 
     let Sprite =
-        let Sprite = Type.New ()
-        
         Class "THREE.Sprite"
-        |=> Sprite
         |=> Inherits Object3D
         |+> Static [
             Constructor (!? Material?material)
@@ -2070,7 +1941,7 @@ module Definition =
             "material" =@ SpriteMaterial
 
             "updateMatrix" => O ^-> O
-            "clone"        => !? Sprite?``object`` ^-> O
+            "clone"        => !? TSelf?``object`` ^-> TSelf
         ]
 
     let CanvasRendererConfiguration =
@@ -2199,7 +2070,7 @@ module Definition =
             "setScissor"                      => T<float>?x * T<float>?y * T<float>?width * T<float>?height ^-> O
             "enableScissorTest"               => T<bool>?enable ^-> O
             "setClearColor"                   => Color?color * !? T<float>?alpha ^-> O
-            "getClearColor"                   => O ^-> ColorClass
+            "getClearColor"                   => O ^-> Color
             "getClearAlpha"                   => O ^-> T<float>
             "clear"                           => !? T<bool>?color * !? T<bool>?depth * !? T<bool>?stencil ^-> O
             "clearColor"                      => O ^-> O
@@ -2274,7 +2145,7 @@ module Definition =
             "normalModel"         =@ Vector3
             "vertexNormalsModel"  =@ Tuple [Vector3; Vector3; Vector3]
             "vertexNormalsLength" =@ T<int>
-            "color"               =@ ColorClass
+            "color"               =@ Color
             "material"            =@ Material
             "uvs"                 =@ Tuple [Vector2; Vector2; Vector2]
             "z"                   =@ T<float>
@@ -2289,7 +2160,7 @@ module Definition =
             "id"           =? T<int>
             "v1"           =@ RenderableVertex
             "v2"           =@ RenderableVertex
-            "vertexColors" =@ Tuple [ColorClass; ColorClass]
+            "vertexColors" =@ Tuple [Color; Color]
             "material"     =@ Material
             "z"            =@ T<obj>
             
@@ -2345,7 +2216,7 @@ module Definition =
         ]
         |+> Instance [
             "name"  =@ T<string>
-            "color" =@ ColorClass
+            "color" =@ Color
             "near"  =@ T<float>
             "far"   =@ T<float>
 
@@ -2362,15 +2233,14 @@ module Definition =
         ]
         |+> Instance [
             "name"    =@ T<string>
-            "color"   =@ ColorClass
+            "color"   =@ Color
             "density" =@ T<float>
 
             "clone" => O ^-> FogExp2
         ]
 
-    let SceneClass =
-        Class "THREE.Scene"
-        |=> Scene
+    let Scene' =
+        Scene
         |=> Inherits Object3D
         |+> Static [
             Constructor O
@@ -2384,9 +2254,8 @@ module Definition =
             "clone" => !? Scene?``object`` ^-> Scene
         ]
 
-    let TextureClass =
-        Class "THREE.Texture"
-        |=> Texture
+    let Texture' =
+        Texture
         |=> Inherits EventDispatcher
         |+> Static [
             Constructor (T<Element>?image * !? T<int>?mapping * !? T<int>?wrapS * !? T<int>?wrapT * !? T<int>?magFilter * !? T<int>?minFilter * !? T<int>?format * !? T<int>?``type`` * !? T<int>?anisotropy)
@@ -2422,7 +2291,7 @@ module Definition =
         let CompressedTexture = Type.New ()
         
         Class "THREE.CompressedTexture"
-        |=> Inherits TextureClass
+        |=> Inherits Texture
         |+> Static [
             Constructor ((ArrayOf T<obj>)?mipmaps * T<int>?width * T<int>?height * T<int>?format * T<int>?``type`` * T<int>?mapping * T<int>?wrapS * T<int>?wrapT * T<int>?magFilter * T<int>?minFilter * T<int>?anisotropy)
         ]
@@ -2438,7 +2307,7 @@ module Definition =
         let DataTexture = Type.New ()
 
         Class "THREE.DataTexture"
-        |=> Inherits TextureClass
+        |=> Inherits Texture
         |+> Static [
             Constructor (T<JavaScript.ArrayBufferView>?data * T<int>?width * T<int>?height * T<int>?format * T<int>?``type`` * T<int>?mapping * T<int>?wrapS * T<int>?wrapT * T<int>?magFilter * T<int>?minFilter * T<int>?anisotropy)
         ]
@@ -2491,7 +2360,7 @@ module Definition =
             "loadDDSTexture"            => T<string>?url * T<obj>?mapping * !? (!? CompressedTexture ^-> O)?onLoad * !? (!? T<obj> ^-> O)?onError ^-> CompressedTexture
             "parseDDS"                  => T<obj>?buffer * T<bool>?loadMipmaps ^-> T<obj>
             "getNormalMap"              => T<Element>?image * !? T<int>?depth ^-> T<Element>
-            "generateDataTexture"       => T<float>?width * T<float>?height * ColorClass?color ^-> DataTexture
+            "generateDataTexture"       => T<float>?width * T<float>?height * Color?color ^-> DataTexture
         ]
 
     let SceneUtils =
@@ -2829,12 +2698,12 @@ module Definition =
                 Geometry
                 Object3D
                 Projector
-                RaycasterClass
+                Raycaster
                 AmbientLight
                 AreaLight
                 DirectionalLight
                 HemisphereLight
-                LightClass
+                Light
                 PointLight
                 SpotLight
                 BufferGeometryLoader
@@ -2842,7 +2711,7 @@ module Definition =
                 ImageLoader
                 JSONLoader
                 Loader
-                LoadingManagerClass
+                LoadingManager
                 MaterialLoader
                 ObjectLoader
                 SceneLoader
@@ -2850,7 +2719,7 @@ module Definition =
                 XHRLoader
                 LineBasicMaterial
                 LineDashedMaterial
-                MaterialClass
+                Material
                 MeshBasicMaterial
                 MeshDepthMaterial
                 MeshFaceMaterial
@@ -2863,22 +2732,22 @@ module Definition =
                 SpriteCanvasMaterial
                 SpriteMaterial
                 Box2
-                Box3Class
+                Box3
                 ColorClass
-                EulerClass
+                Euler
                 Frustum
                 Line3
                 Math
-                Matrix3Class
-                Matrix4Class
-                PlaneClass
-                QuaternionClass
-                RayClass
-                SphereClass
+                Matrix3
+                Matrix4
+                Plane
+                Quaternion
+                Ray
+                Sphere
                 Spline
                 Triangle
-                Vector2Class
-                Vector3Class
+                Vector2
+                Vector3
                 Vector4
                 Bone
                 Line
@@ -2886,10 +2755,12 @@ module Definition =
                 Mesh
                 MorphAnimMesh
                 ParticleSystem
-                SkinnedMeshClass
+                SkinnedMesh
                 Sprite
                 CanvasRenderer
                 WebGLRenderer
+                WebGLRendererConfiguration
+                WebGLRendererPrecision
                 WebGLRenderTargetClass
                 WebGLRenderTargetCube
                 RenderableFace
@@ -2899,10 +2770,10 @@ module Definition =
                 RenderableVertexClass
                 FogClass
                 FogExp2
-                SceneClass
+                Scene
                 CompressedTexture
                 DataTexture
-                TextureClass
+                Texture
                 FontUtils
                 GeometryUtils
                 ImageUtils
