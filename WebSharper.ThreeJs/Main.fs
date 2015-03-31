@@ -1603,8 +1603,7 @@ module Definition =
         let Length =
             Class "Length"
             |+> Instance [
-                "chunkLengths" =? ArrayOf T<float>
-                "chunkLengths" =? T<float>
+                "chunkLengths" =? ArrayOf T<float> + T<float>
             ]
         
         Class "THREE.Spline"
