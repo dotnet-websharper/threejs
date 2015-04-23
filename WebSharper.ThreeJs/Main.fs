@@ -1911,7 +1911,7 @@ module Definition =
             "clone" => !? TSelf ^-> TSelf
         ]
 
-    let Skeleton = Class "THREE.Skeleton"
+//    let Skeleton = Class "THREE.Skeleton"
 
     let SkinnedMesh' =
         SkinnedMesh
@@ -1920,7 +1920,7 @@ module Definition =
             Constructor (Geometry?geometry * Material?material * T<bool>?useVertexTexture)
         ]
         |+> Instance [
-            "skeleton"       =@ Skeleton
+            "skeleton"       =@ T<obj>
             "identityMatrix" =@ Matrix4
 
             "updateMatrixWorld"    => T<bool>?force ^-> O
@@ -2684,6 +2684,7 @@ module Definition =
                 MemoryInfo
                 RenderInfo
                 Info
+                WebGLRendererPrecision
             ]
             Namespace "WebSharper.ThreeJs.THREE" [
                 Camera
@@ -2702,7 +2703,7 @@ module Definition =
                 AreaLight
                 DirectionalLight
                 HemisphereLight
-                Light
+                Light'
                 PointLight
                 SpotLight
                 BufferGeometryLoader
@@ -2718,7 +2719,7 @@ module Definition =
                 XHRLoader
                 LineBasicMaterial
                 LineDashedMaterial
-                Material
+                Material'
                 MeshBasicMaterial
                 MeshDepthMaterial
                 MeshFaceMaterial
@@ -2754,12 +2755,12 @@ module Definition =
                 Mesh
                 MorphAnimMesh
                 ParticleSystem
-                SkinnedMesh
+                SkinnedMesh'
                 Sprite
                 CanvasRenderer
                 WebGLRenderer
-                WebGLRendererConfiguration
-                WebGLRendererPrecision
+//                WebGLRendererConfiguration
+//                WebGLRendererPrecision
                 WebGLRenderTargetClass
                 WebGLRenderTargetCube
                 RenderableFace
@@ -2769,10 +2770,10 @@ module Definition =
                 RenderableVertexClass
                 FogClass
                 FogExp2
-                Scene
+                Scene'
                 CompressedTexture
                 DataTexture
-                Texture
+                Texture'
                 FontUtils
                 GeometryUtils
                 ImageUtils
