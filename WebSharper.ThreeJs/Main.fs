@@ -1911,8 +1911,6 @@ module Definition =
             "clone" => !? TSelf ^-> TSelf
         ]
 
-//    let Skeleton = Class "THREE.Skeleton"
-
     let SkinnedMesh' =
         SkinnedMesh
         |=> Inherits Mesh
@@ -2759,8 +2757,6 @@ module Definition =
                 Sprite
                 CanvasRenderer
                 WebGLRenderer
-//                WebGLRendererConfiguration
-//                WebGLRendererPrecision
                 WebGLRenderTargetClass
                 WebGLRenderTargetCube
                 RenderableFace
