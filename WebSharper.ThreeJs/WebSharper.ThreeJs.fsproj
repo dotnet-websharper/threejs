@@ -6,7 +6,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{fe9f90fb-5928-49de-904e-467650cce14f}</ProjectGuid>
     <WebSharperProject>InterfaceGenerator</WebSharperProject>
-    <Name>ThreeJs</Name>
+    <Name>WebSharper.ThreeJs</Name>
     <RootNamespace>ThreeJs</RootNamespace>
     <AssemblyName>WebSharper.ThreeJs</AssemblyName>
     <NuGetPackageImportStamp>e0d4ec72</NuGetPackageImportStamp>
