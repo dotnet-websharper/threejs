@@ -1,9 +1,6 @@
 syntax: glob
 build/*
 packages/*
-Tests/bin/*
-Tests/Content/*
-Tests/obj/*
-ThreeJs/bin/*
-ThreeJs/obj/*
+WebSharper.ThreeJs/bin/*
+WebSharper.ThreeJs/obj/*
 *.suo
