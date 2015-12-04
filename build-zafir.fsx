@@ -8,7 +8,7 @@ let bt =
         .WithFramework(fun fw -> fw.Net40)
 
 let main =
-    bt.WebSharper.Extension("WebSharper.ThreeJs")
+    bt.Zafir.Extension("WebSharper.ThreeJs")
         .SourcesFromProject()
         .Embed(["three.min.js"])
 
