@@ -2365,7 +2365,6 @@ module Definition =
         |+> Static [
             "createMultiMaterialObject" => Geometry?geometry * (ArrayOf Material)?materials ^-> Object3D
             "attach"                    => Object3D?child * Scene?scene * Object3D?parent ^-> O
-            "attach"                    => Object3D?child * Scene?scene * Object3D?parent ^-> O
         ]
 
     let Animation =
