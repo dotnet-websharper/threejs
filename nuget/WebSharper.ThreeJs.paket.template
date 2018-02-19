@@ -11,7 +11,9 @@ description
 tags
     Web JavaScript F# C#
 files
+    ../WebSharper.ThreeJs/bin/Release/net461/WebSharper.ThreeJs.dll ==> lib/net461
+    ../WebSharper.ThreeJs/bin/Release/net461/WebSharper.ThreeJs.xml ==> lib/net461
     ../WebSharper.ThreeJs/bin/Release/netstandard2.0/WebSharper.ThreeJs.dll ==> lib/netstandard2.0
     ../WebSharper.ThreeJs/bin/Release/netstandard2.0/WebSharper.ThreeJs.xml ==> lib/netstandard2.0
 dependencies
-        WebSharper ~> 4.2.0-alpha
+        WebSharper ~> 4.2.2-beta
