@@ -1,6 +1,8 @@
-
-bin/
-obj/
-/.fake/
-/paket-files/
-/.vscode/
+build/*
+packages/*
+WebSharper.ThreeJs/bin/*
+WebSharper.ThreeJs/obj/*
+*.suo
+.fake/
+paket-files/
+.vscode/
