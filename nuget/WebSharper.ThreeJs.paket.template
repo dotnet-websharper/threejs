@@ -16,4 +16,4 @@ files
     ../WebSharper.ThreeJs/bin/Release/netstandard2.0/WebSharper.ThreeJs.dll ==> lib/netstandard2.0
     ../WebSharper.ThreeJs/bin/Release/netstandard2.0/WebSharper.ThreeJs.xml ==> lib/netstandard2.0
 dependencies
-        WebSharper ~> 4.6.4
+        WebSharper ~> 4.6.5
