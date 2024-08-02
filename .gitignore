@@ -6,3 +6,5 @@ WebSharper.ThreeJs/obj/*
 .fake/
 paket-files/
 .vscode/
+.vs
+websharper.log
