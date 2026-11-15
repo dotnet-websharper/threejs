@@ -1,0 +1,11 @@
+{
+  "name": "websharper.threejs.sample",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "esbuild": "^0.28.1"
+  },
+  "dependencies": {
+    "three": "^0.187.0"
+  }
+}

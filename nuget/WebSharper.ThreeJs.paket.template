@@ -4,16 +4,18 @@ authors
     IntelliFactory
 owners
     IntelliFactory
-licenseUrl http://websharper.com/licensing
-projectUrl https://bitbucket.org/intellifactory/websharper.threejs
+repositoryType git
+repositoryUrl https://github.com/dotnet-websharper/threejs/
+licenseUrl https://github.com/dotnet-websharper/threejs/blob/main/LICENSE.md
+iconUrl https://github.com/dotnet-websharper/core/raw/websharper50/tools/WebSharper.png
+projectUrl https://github.com/dotnet-websharper/threejs
 description
-    WebSharper Extensions for three.js (r67)
+    WebSharper bindings for three.js 0.187 (WebGL 3D rendering)
 tags
-    Web JavaScript F# C#
+    Web JavaScript F# C# WebGL 3D three.js
 files
-    ../WebSharper.ThreeJs/bin/Release/net461/WebSharper.ThreeJs.dll ==> lib/net461
-    ../WebSharper.ThreeJs/bin/Release/net461/WebSharper.ThreeJs.xml ==> lib/net461
     ../WebSharper.ThreeJs/bin/Release/netstandard2.0/WebSharper.ThreeJs.dll ==> lib/netstandard2.0
+    ../WebSharper.ThreeJs/bin/Release/netstandard2.0/WebSharper.ThreeJs.websharper ==> lib/netstandard2.0
     ../WebSharper.ThreeJs/bin/Release/netstandard2.0/WebSharper.ThreeJs.xml ==> lib/netstandard2.0
 dependencies
         WebSharper ~> LOCKEDVERSION:[3]
