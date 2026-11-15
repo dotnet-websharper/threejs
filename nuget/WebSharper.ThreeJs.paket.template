@@ -15,7 +15,6 @@ tags
     Web JavaScript F# C# WebGL 3D three.js
 files
     ../WebSharper.ThreeJs/bin/Release/netstandard2.0/WebSharper.ThreeJs.dll ==> lib/netstandard2.0
-    ../WebSharper.ThreeJs/bin/Release/netstandard2.0/WebSharper.ThreeJs.websharper ==> lib/netstandard2.0
     ../WebSharper.ThreeJs/bin/Release/netstandard2.0/WebSharper.ThreeJs.xml ==> lib/netstandard2.0
 dependencies
         WebSharper ~> LOCKEDVERSION:[3]
