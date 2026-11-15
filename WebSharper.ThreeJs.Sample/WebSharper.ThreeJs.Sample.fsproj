@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <OutputType>Library</OutputType>
+    <WebSharperSourceMap>false</WebSharperSourceMap>
+    <NoWarn>$(NoWarn);FS3886</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Client.fs" />
+    <None Include="package.json" />
+    <None Include="esbuild.config.mjs" />
+    <None Include="wsconfig.json" />
+    <Content Include="index.html" />
+    <Content Include="site.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../WebSharper.ThreeJs/WebSharper.ThreeJs.fsproj" />
+  </ItemGroup>
+
+  <Target Name="ESBuildBundle" AfterTargets="WebSharperCompile">
+    <Exec Command="npm install" />
+    <Exec Command="node ./esbuild.config.mjs" />
+  </Target>
+
+  <Import Project="..\.paket\Paket.Restore.targets" />
+</Project>

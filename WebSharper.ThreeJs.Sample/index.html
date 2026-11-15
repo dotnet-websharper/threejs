@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebSharper.ThreeJs — sample</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23111827'/%3E%3Cpath d='M8 2.5 13.5 5.5v5L8 13.5 2.5 10.5v-5z' fill='none' stroke='%2360a5fa' stroke-width='1.2'/%3E%3Cpath d='M8 2.5v11M2.5 5.5 13.5 10.5M13.5 5.5 2.5 10.5' stroke='%2360a5fa' stroke-width='.8' opacity='.7'/%3E%3C/svg%3E" />
+    <script>
+        // Apply a previously chosen theme before first paint. Light is the
+        // default; the key is shared with Client.fs (themeStorageKey).
+        try {
+            var t = localStorage.getItem('websharper-threejs-theme');
+            if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+        } catch (e) { }
+    </script>
+    <link rel="stylesheet" href="site.css" />
+    <!-- three.js is bundled from the npm package; the WebSharper head is folded in here. -->
+    <!-- ws-head -->
+</head>
+<body>
+    <header class="app-header">
+        <div class="app-titles">
+            <h1>WebSharper.ThreeJs</h1>
+            <p>three.js 0.187 bindings for F# — with <a href="https://websharper.com">WebSharper</a></p>
+        </div>
+        <div class="app-actions">
+            <button class="btn theme-toggle" ws-onclick="ToggleTheme" title="Switch between the light and dark theme">
+                <span>${themeLabel}</span>
+            </button>
+            <a class="app-source" href="https://github.com/dotnet-websharper/threejs">Source</a>
+        </div>
+    </header>
+
+    <main class="page">
+        <section class="stage">
+            <div id="viewport" class="viewport"></div>
+            <p class="hint">Drag to orbit · scroll to zoom · right-drag to pan · move the pointer over an object to pick it</p>
+        </section>
+
+        <aside class="panel">
+            <section class="card">
+                <header class="card-header">
+                    <h2>Scene</h2>
+                    <p>Pick a geometry and a material, then add objects to the rig.</p>
+                </header>
+                <div class="grid-2">
+                    <label class="field">
+                        Geometry
+                        <select ws-var="Geometry">
+                            <option value="Box">Box</option>
+                            <option value="Sphere">Sphere</option>
+                            <option value="TorusKnot">Torus knot</option>
+                            <option value="Capsule">Capsule</option>
+                            <option value="Cone">Cone</option>
+                            <option value="Cylinder">Cylinder</option>
+                            <option value="Ring">Ring</option>
+                            <option value="Torus">Torus</option>
+                            <option value="Icosahedron">Icosahedron</option>
+                            <option value="Dodecahedron">Dodecahedron</option>
+                            <option value="Octahedron">Octahedron</option>
+                            <option value="Tetrahedron">Tetrahedron</option>
+                        </select>
+                    </label>
+                    <label class="field">
+                        Material
+                        <select ws-var="Material">
+                            <option value="Standard">Standard (PBR)</option>
+                            <option value="Physical">Physical</option>
+                            <option value="Phong">Phong</option>
+                            <option value="Lambert">Lambert</option>
+                            <option value="Toon">Toon</option>
+                            <option value="Normal">Normal</option>
+                            <option value="Depth">Depth</option>
+                            <option value="Basic">Basic</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="toolbar">
+                    <button class="btn primary" ws-onclick="AddObject">Add object</button>
+                    <button class="btn" ws-onclick="ClearObjects">Clear</button>
+                    <button class="btn" ws-onclick="ResetCamera">Reset camera</button>
+                </div>
+                <div class="toolbar">
+                    <button class="btn" ws-onclick="ToggleAnimation"><span>${animationState}</span></button>
+                    <button class="btn" ws-onclick="ToggleHelpers">Toggle helpers</button>
+                    <button class="btn" ws-onclick="ToggleDebug">Toggle debug</button>
+                </div>
+                <p class="pill">${objectCount}</p>
+            </section>
+
+            <section class="card">
+                <header class="card-header">
+                    <h2>Picking &amp; stats</h2>
+                </header>
+                <p class="readout">${picked}</p>
+                <p class="readout">${stats}</p>
+                <p class="readout">${clockInfo}</p>
+            </section>
+
+            <section class="card">
+                <header class="card-header">
+                    <h2>Math &amp; helpers</h2>
+                    <p>Values recomputed with the typed math API.</p>
+                </header>
+                <p class="readout">${mathInfo}</p>
+            </section>
+
+            <section class="card">
+                <header class="card-header">
+                    <h2>Status</h2>
+                </header>
+                <p class="notice">${status}</p>
+            </section>
+        </aside>
+    </main>
+
+    <script type="text/javascript" src="Scripts/WebSharper.ThreeJs.Sample.min.js"></script>
+</body>
+</html>

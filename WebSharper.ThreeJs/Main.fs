@@ -2,7 +2,7 @@
 //
 // This file is part of WebSharper
 //
-// Copyright (c) 2008-2018 IntelliFactory
+// Copyright (c) 2008-2026 IntelliFactory
 //
 // Licensed under the Apache License, Version 2.0 (the "License"); you
 // may not use this file except in compliance with the License.  You may
@@ -17,1704 +17,1149 @@
 // permissions and limitations under the License.
 //
 // $end{copyright}
-namespace ThreeJs
+namespace WebSharper.ThreeJs
 
+open WebSharper
 open WebSharper.InterfaceGenerator
 
+/// <summary>Typed bindings for <a href="https://threejs.org/">three.js</a> 0.187.</summary>
+/// <remarks>
+/// The binding is npm based: every class is a named import from the
+/// <c>three</c> package (<c>import { Vector3 } from "three"</c>) and the
+/// addons come from <c>three/addons/…</c>. The sample bundles the npm package
+/// with esbuild; there is no global <c>THREE</c> object and no CDN
+/// <c>&lt;script&gt;</c>.
+/// </remarks>
 module Definition =
-    let O = T<unit>
 
-    open WebSharper.InterfaceGenerator.Type
+    let Unit = T<unit>
 
-    let Vector3    = Class "THREE.Vector3"
-    let Euler      = Class "THREE.Euler"
-    let Quaternion = Class "THREE.Quaternion"
-    let Matrix4    = Class "THREE.Matrix4"
+    /// Imports a named export of the `three` package.
+    let c3 (name: string) : CodeModel.Class =
+        Class name |> Import name "three"
 
-    let EventDispatcher =
-        Class "THREE.EventDispatcher"
-        |+> Static [
-            Constructor O
-        ]
-        |+> Instance [
-            "apply"               => T<obj>?``object`` ^-> O
-            "addEventListener"    => T<string>?``type`` * (T<obj> ^-> O)?listener ^-> O
-            "hasEventListener"    => T<string>?``type`` * (T<obj> ^-> O)?listener ^-> T<bool>
-            "removeEventListener" => T<string>?``type`` * (T<obj> ^-> O)?listener ^-> O
-            "dispatchEvent"       => T<string>?``type`` ^-> O
-        ]
+    /// Imports a named export of a three.js addon module.
+    let a3 (moduleName: string) (name: string) : CodeModel.Class =
+        Class name |> Import name moduleName
 
-    let Object3D =
-        Class "THREE.Object3D"
-        |=> Inherits EventDispatcher
-        |+> Static [
-            Constructor O
-        ]
-        |+> Instance [
-            "id"                     =? T<int>
-            "uuid"                   =? T<string>
-            "name"                   =@ T<string>
-            "parent"                 =@ TSelf
-            "children"               =@ ArrayOf TSelf
-            "up"                     =@ Vector3
-            "position"               =@ Vector3
-            "rotation"               =@ Euler
-            "quaternion"             =@ Quaternion
-            "scale"                  =@ Vector3
-            "renderDepth"            =@ T<float>
-            "rotationAutoUpdate"     =@ T<bool>
-            "matrix"                 =@ Matrix4
-            "matrixWorld"            =@ Matrix4
-            "matrixAutoUpdate"       =@ T<bool>
-            "matrixWorldNeedsUpdate" =@ T<bool>
-            "visible"                =@ T<bool>
-            "castShadow"             =@ T<bool>
-            "receiveShadow"          =@ T<bool>
-            "frustumCulled"          =@ T<bool>
-            "userData"               =@ T<obj>
+    /// A common typed array, as accepted by buffers and textures.
+    let TypedArray =
+        T<JavaScript.Float32Array> +
+        T<JavaScript.Float64Array> +
+        T<JavaScript.Int8Array> +
+        T<JavaScript.Int16Array> +
+        T<JavaScript.Int32Array> +
+        T<JavaScript.Uint8Array> +
+        T<JavaScript.Uint8ClampedArray> +
+        T<JavaScript.Uint16Array> +
+        T<JavaScript.Uint32Array>
 
-            "applyMatrix"               => Matrix4?matrix ^-> O
-            "setRotationFromAxisAngle"  => Vector3?axis * T<float>?angle ^-> O
-            "setRotationFromEuler"      => Euler?euler ^-> O
-            "setRotationFromMatrix"     => Matrix4?m ^-> O
-            "setRotationFromQuaternion" => Quaternion?q ^-> O
-            "rotateOnAxis"              => Vector3?axis * T<float>?angle ^-> TSelf
-            "rotateX"                   => T<float>?angle ^-> TSelf
-            "rotateY"                   => T<float>?angle ^-> TSelf
-            "rotateZ"                   => T<float>?angle ^-> TSelf
-            "translateOnAxis"           => Vector3?axis * T<float>?distance ^-> TSelf
-            "translateX"                => T<float>?distance ^-> TSelf
-            "translateY"                => T<float>?distance ^-> TSelf
-            "translateZ"                => T<float>?distance ^-> TSelf
-            "localToWorld"              => Vector3?vector ^-> Vector3
-            "worldToLocal"              => Vector3?vector ^-> Vector3
-            "lookAt"                    => Vector3?vector ^-> O
-            "add"                       => TSelf?``object`` ^-> O
-            "remove"                    => TSelf?``object`` ^-> O
-            "traverse"                  => (TSelf ^-> O)?callback ^-> O
-            "getObjectById"             => T<int>?id * T<bool>?``recursive`` ^-> TSelf
-            "getObjectByName"           => T<string>?name * T<bool>?``recursive`` ^-> TSelf
-            "getDescendants"            => !? (ArrayOf TSelf)?array ^-> ArrayOf TSelf
-            "updateMatrix"              => O ^-> O
-            "updateMatrixWorld"         => T<bool>?force ^-> O
-            "clone"                     => !? TSelf?``object`` * !? T<bool>?``recursive`` ^-> TSelf
+    // ------------------------------------------------------------------
+    // Constants and enumerations
+    // ------------------------------------------------------------------
+
+    /// Which faces of a mesh are rendered.
+    let Side =
+        Pattern.EnumInlines "Side" [
+            "FrontSide", "0"
+            "BackSide", "1"
+            "DoubleSide", "2"
         ]
 
-    let Camera =
-        Class "THREE.Camera"
-        |=> Inherits Object3D
-        |+> Static [
-            Constructor O
-        ]
-        |+> Instance [
-            "matrixWorldInverse" =@ Matrix4
-            "projectionMatrix"   =@ Matrix4
-            
-            "lookAt" => Vector3?vector ^-> O
-            "clone"  => !? TSelf?camera ^-> TSelf
-        ]
-    
-    let OrthographicCamera =
-        Class "THREE.OrthographicCamera"
-        |=> Inherits Camera
-        |+> Static [
-            Constructor (T<float>?left * T<float>?right * T<float>?top * T<float>?bottom * !? T<float>?near * !? T<float>?far)
-        ]
-        |+> Instance [
-            "left"   =@ T<float>
-            "right"  =@ T<float>
-            "top"    =@ T<float>
-            "bottom" =@ T<float>
-            "near"   =@ T<float>
-            "far"    =@ T<float>
-
-            "updateProjectionMatrix" => O ^-> O
-            "clone"                  => O ^-> TSelf
-        ]
-    
-    let PerspectiveCamera =
-        Class "THREE.PerspectiveCamera"
-        |=> Inherits Camera
-        |+> Static [
-            Constructor (!? T<float>?fov * !? T<float>?aspect * !? T<float>?near * !? T<float>?far)
-        ]
-        |+> Instance [
-            "fov"    =@ T<float>
-            "aspect" =@ T<float>
-            "near"   =@ T<float>
-            "far"    =@ T<float>
-
-            "setLens"                => T<float>?focalLength * !? T<float>?frameHeight ^-> O
-            "setViewOffset"          => T<float>?fullWidth * T<float>?fullHeight * T<float>?x * T<float>?y * T<float>?width * T<float>?height ^-> O
-            "updateProjectionMatrix" => O ^-> O
-            "clone"                  => O ^-> TSelf
+    /// How a material is blended with what is already in the buffer.
+    let Blending =
+        Pattern.EnumInlines "Blending" [
+            "NoBlending", "0"
+            "NormalBlending", "1"
+            "AdditiveBlending", "2"
+            "SubtractiveBlending", "3"
+            "MultiplyBlending", "4"
+            "CustomBlending", "5"
         ]
 
-    let BufferAttribute =
-        Class "THREE.BufferAttribute"
-        |+> Static [
-            Constructor O
-        ]
-        |+> Instance [
-            "length" =? T<int>
-
-            "set"     => T<obj>?value ^-> O
-            "setX"    => T<int>?index * T<obj>?x ^-> O
-            "setY"    => T<int>?index * T<obj>?y ^-> O
-            "setZ"    => T<int>?index * T<obj>?z ^-> O
-            "setXY"   => T<int>?index * T<obj>?x * T<obj>?y ^-> O
-            "setXYZ"  => T<int>?index * T<obj>?x * T<obj>?y * T<obj>?z ^-> O
-            "setXYZW" => T<int>?index * T<obj>?x * T<obj>?y * T<obj>?z * T<obj>?w ^-> O
+    /// The shadow map algorithm used by the renderer.
+    /// `PCFSoftShadowMap` was removed in three.js 0.187 (it falls back to
+    /// `PCFShadowMap`), so it is deliberately not exposed here.
+    let ShadowMapType =
+        Pattern.EnumInlines "ShadowMapType" [
+            "BasicShadowMap", "0"
+            "PCFShadowMap", "1"
+            "VSMShadowMap", "3"
         ]
 
-    let Box3            = Class "THREE.Box3"
-    let Sphere          = Class "THREE.Sphere"
-    
-    open WebSharper
+    /// The tone mapping operator applied by the renderer.
+    let ToneMapping =
+        Pattern.EnumInlines "ToneMapping" [
+            "NoToneMapping", "0"
+            "LinearToneMapping", "1"
+            "ReinhardToneMapping", "2"
+            "CineonToneMapping", "3"
+            "ACESFilmicToneMapping", "4"
+            "AgXToneMapping", "6"
+            "NeutralToneMapping", "7"
+        ]
 
-    let BufferGeometry =
-        Class "THREE.BufferGeometry"
-        |=> Inherits EventDispatcher
-        |+> Static [
-            Constructor O
+    /// How a texture is sampled outside of the [0, 1] range.
+    let Wrapping =
+        Pattern.EnumInlines "Wrapping" [
+            "RepeatWrapping", "1000"
+            "ClampToEdgeWrapping", "1001"
+            "MirroredRepeatWrapping", "1002"
         ]
-        |+> Instance [
-            "id"             =? T<int>
-            "uuid"           =? T<string>
-            "name"           =@ T<string>
-            "attributes"     =@ T<obj>
-            "offsets"        =@ ArrayOf T<obj>
-            "boundingBox"    =@ Box3
-            "boundingSphere" =@ Sphere
-            
-            "addAttribute"          => (T<string> + T<int>)?name * T<obj>?attribute ^-> O
-            "getAttribute"          => (T<string> + T<int>)?name ^-> T<obj>
-            "applyMatrix"           => Matrix4?matrix ^-> O
-            "computeBoundingBox"    => O ^-> O
-            "computeBoundingSphere" => O ^-> O
-            "computeVertexNormals"  => O ^-> O
-            "computeTangents"       => O ^-> O
-            "computeOffsets"        => !? T<int>?indexBufferSize ^-> ArrayOf T<obj>
-            
-            "merge"                 => O ^-> O
-            |> WithComment "Does not implemented yet!"
-            
-            "normalizeNormals"      => O ^-> O
-            "reorderBuffers"        => T<JavaScript.Uint16Array>?indexBuffer * T<JavaScript.Int32Array>?indexMap * T<int>?vertexCount ^-> O
-            "clone"                 => O ^-> TSelf
-            "dispose"               => O ^-> O
-            
+
+    /// Texture magnification/minification filters.
+    let TextureFilter =
+        Pattern.EnumInlines "TextureFilter" [
+            "NearestFilter", "1003"
+            "NearestMipmapNearestFilter", "1004"
+            "NearestMipmapLinearFilter", "1005"
+            "LinearFilter", "1006"
+            "LinearMipmapNearestFilter", "1007"
+            "LinearMipmapLinearFilter", "1008"
         ]
-    
+
+    /// How a texture is mapped onto a surface.
+    let TextureMapping =
+        Pattern.EnumInlines "TextureMapping" [
+            "UVMapping", "300"
+            "CubeReflectionMapping", "301"
+            "CubeRefractionMapping", "302"
+            "EquirectangularReflectionMapping", "303"
+            "EquirectangularRefractionMapping", "304"
+        ]
+
+    /// CPU-side pixel layouts.
+    let TextureFormat =
+        Pattern.EnumInlines "TextureFormat" [
+            "AlphaFormat", "1021"
+            "RGBFormat", "1022"
+            "RGBAFormat", "1023"
+            "DepthFormat", "1026"
+            "DepthStencilFormat", "1027"
+            "RedFormat", "1028"
+            "RGFormat", "1030"
+        ]
+
+    /// Storage type of the pixel components.
+    let TextureType =
+        Pattern.EnumInlines "TextureType" [
+            "UnsignedByteType", "1009"
+            "FloatType", "1015"
+            "HalfFloatType", "1016"
+        ]
+
+    /// GPU buffer usage hints.
+    let Usage =
+        Pattern.EnumInlines "Usage" [
+            "StaticDrawUsage", "35044"
+            "DynamicDrawUsage", "35048"
+            "StreamDrawUsage", "35040"
+        ]
+
+    /// Animation loop modes.
+    let LoopMode =
+        Pattern.EnumInlines "LoopMode" [
+            "LoopOnce", "2200"
+            "LoopRepeat", "2201"
+            "LoopPingPong", "2202"
+        ]
+
+    /// Keyframe interpolation modes.
+    let InterpolationMode =
+        Pattern.EnumInlines "InterpolationMode" [
+            "InterpolateDiscrete", "2300"
+            "InterpolateLinear", "2301"
+            "InterpolateSmooth", "2302"
+        ]
+
+    /// Color spaces understood by the renderer and the textures.
+    let ColorSpace =
+        Pattern.EnumInlines "ColorSpace" [
+            "NoColorSpace", "''"
+            "SRGBColorSpace", "'srgb'"
+            "LinearSRGBColorSpace", "'srgb-linear'"
+        ]
+
+    // ------------------------------------------------------------------
+    // Class handles — every three.js value we bind, with its npm import.
+    // ------------------------------------------------------------------
+
+    // Math
+    let Vector2 = c3 "Vector2"
+    let Vector3 = c3 "Vector3"
+    let Vector4 = c3 "Vector4"
+    let Matrix3 = c3 "Matrix3"
+    let Matrix4 = c3 "Matrix4"
+    let Quaternion = c3 "Quaternion"
+    let Euler = c3 "Euler"
+    let Color = c3 "Color"
+    let Box2 = c3 "Box2"
+    let Box3 = c3 "Box3"
+    let Sphere = c3 "Sphere"
+    let Plane = c3 "Plane"
+    let Ray = c3 "Ray"
+    let Line3 = c3 "Line3"
+    let Triangle = c3 "Triangle"
+    let Frustum = c3 "Frustum"
+    let Spherical = c3 "Spherical"
+    let MathUtils = c3 "MathUtils"
     let Clock =
-        Class "THREE.Clock"
-        |+> Static [
-            Constructor !? T<bool>?autoStart
-        ]
-        |+> Instance [
-            "autoStart"   =@ T<bool>
-            "startTime"   =@ T<int>
-            "oldTime"     =@ T<int>
-            "elapsedTime" =@ T<float>
-            "running"     =@ T<bool>
+        c3 "Clock"
+        |> ObsoleteWithMessage "Clock is deprecated in three.js 0.187; use Timer instead."
 
-            "start"          => O ^-> O
-            "stop"           => O ^-> O
-            "getElapsedTime" => O ^-> T<float>
-            "getDelta"       => O ^-> T<float>
-        ]
-    
+    let Timer = c3 "Timer"
+    let Layers = c3 "Layers"
+
+    // Core
+    let EventDispatcher = c3 "EventDispatcher"
+    let Object3D = c3 "Object3D"
+    let Group = c3 "Group"
+    let Scene = c3 "Scene"
+    let Camera = c3 "Camera"
+    let PerspectiveCamera = c3 "PerspectiveCamera"
+    let OrthographicCamera = c3 "OrthographicCamera"
+    let BufferAttribute = c3 "BufferAttribute"
+    let BufferGeometry = c3 "BufferGeometry"
+    let Raycaster = c3 "Raycaster"
+
+    // Textures and loaders
+    let Texture = c3 "Texture"
+    let CanvasTexture = c3 "CanvasTexture"
+    let DataTexture = c3 "DataTexture"
+    let VideoTexture = c3 "VideoTexture"
+    let CubeTexture = c3 "CubeTexture"
+    let Loader = c3 "Loader"
+    let LoadingManager = c3 "LoadingManager"
+    let TextureLoader = c3 "TextureLoader"
+
+    // Materials
+    let Material = c3 "Material"
+    let MeshBasicMaterial = c3 "MeshBasicMaterial"
+    let MeshStandardMaterial = c3 "MeshStandardMaterial"
+    let MeshPhysicalMaterial = c3 "MeshPhysicalMaterial"
+    let MeshPhongMaterial = c3 "MeshPhongMaterial"
+    let MeshLambertMaterial = c3 "MeshLambertMaterial"
+    let MeshNormalMaterial = c3 "MeshNormalMaterial"
+    let MeshDepthMaterial = c3 "MeshDepthMaterial"
+    let MeshToonMaterial = c3 "MeshToonMaterial"
+    let MeshMatcapMaterial = c3 "MeshMatcapMaterial"
+    let PointsMaterial = c3 "PointsMaterial"
+    let LineBasicMaterial = c3 "LineBasicMaterial"
+    let LineDashedMaterial = c3 "LineDashedMaterial"
+    let SpriteMaterial = c3 "SpriteMaterial"
+    let ShadowMaterial = c3 "ShadowMaterial"
+    let ShaderMaterial = c3 "ShaderMaterial"
+
+    // Objects
+    let Mesh = c3 "Mesh"
+    let Line = c3 "Line"
+    let LineSegments = c3 "LineSegments"
+    let LineLoop = c3 "LineLoop"
+    let Points = c3 "Points"
+    let Sprite = c3 "Sprite"
+    let LOD = c3 "LOD"
+    let InstancedMesh = c3 "InstancedMesh"
+
+    // Lights and shadows
+    let Light = c3 "Light"
+    let AmbientLight = c3 "AmbientLight"
+    let DirectionalLight = c3 "DirectionalLight"
+    let HemisphereLight = c3 "HemisphereLight"
+    let PointLight = c3 "PointLight"
+    let SpotLight = c3 "SpotLight"
+    let RectAreaLight = c3 "RectAreaLight"
+    let LightShadow = c3 "LightShadow"
+    let DirectionalLightShadow = c3 "DirectionalLightShadow"
+    let PointLightShadow = c3 "PointLightShadow"
+    let SpotLightShadow = c3 "SpotLightShadow"
+
+    // Scenes, fog
+    let Fog = c3 "Fog"
+    let FogExp2 = c3 "FogExp2"
+
+    // Renderers
+    let WebGLRenderer = c3 "WebGLRenderer"
+    let WebGLShadowMap = c3 "WebGLShadowMap"
+    let WebGLInfo = c3 "WebGLInfo"
+    let WebGLRenderInfo = c3 "WebGLRenderInfo"
+    let WebGLMemoryInfo = c3 "WebGLMemoryInfo"
+    let WebGLRenderTarget = c3 "WebGLRenderTarget"
+
+    // Animation
+    let AnimationMixer = c3 "AnimationMixer"
+    let AnimationClip = c3 "AnimationClip"
+    let AnimationAction = c3 "AnimationAction"
+    let KeyframeTrack = c3 "KeyframeTrack"
+    let NumberKeyframeTrack = c3 "NumberKeyframeTrack"
+    let VectorKeyframeTrack = c3 "VectorKeyframeTrack"
+    let ColorKeyframeTrack = c3 "ColorKeyframeTrack"
+    let QuaternionKeyframeTrack = c3 "QuaternionKeyframeTrack"
+    let BooleanKeyframeTrack = c3 "BooleanKeyframeTrack"
+    let StringKeyframeTrack = c3 "StringKeyframeTrack"
+
+    // Curves
+    let Curve = c3 "Curve"
+    let CatmullRomCurve3 = c3 "CatmullRomCurve3"
+    let LineCurve3 = c3 "LineCurve3"
+    let QuadraticBezierCurve3 = c3 "QuadraticBezierCurve3"
+    let CubicBezierCurve3 = c3 "CubicBezierCurve3"
+
+    // Geometries
+    let BoxGeometry = c3 "BoxGeometry"
+    let SphereGeometry = c3 "SphereGeometry"
+    let PlaneGeometry = c3 "PlaneGeometry"
+    let CircleGeometry = c3 "CircleGeometry"
+    let CylinderGeometry = c3 "CylinderGeometry"
+    let ConeGeometry = c3 "ConeGeometry"
+    let TorusGeometry = c3 "TorusGeometry"
+    let TorusKnotGeometry = c3 "TorusKnotGeometry"
+    let RingGeometry = c3 "RingGeometry"
+    let CapsuleGeometry = c3 "CapsuleGeometry"
+    let IcosahedronGeometry = c3 "IcosahedronGeometry"
+    let OctahedronGeometry = c3 "OctahedronGeometry"
+    let TetrahedronGeometry = c3 "TetrahedronGeometry"
+    let DodecahedronGeometry = c3 "DodecahedronGeometry"
+    let PolyhedronGeometry = c3 "PolyhedronGeometry"
+    let EdgesGeometry = c3 "EdgesGeometry"
+    let WireframeGeometry = c3 "WireframeGeometry"
+    let LatheGeometry = c3 "LatheGeometry"
+    let TubeGeometry = c3 "TubeGeometry"
+
+    // Helpers
+    let AxesHelper = c3 "AxesHelper"
+    let GridHelper = c3 "GridHelper"
+    let PolarGridHelper = c3 "PolarGridHelper"
+    let ArrowHelper = c3 "ArrowHelper"
+    let Box3Helper = c3 "Box3Helper"
+    let BoxHelper = c3 "BoxHelper"
+    let CameraHelper = c3 "CameraHelper"
+    let DirectionalLightHelper = c3 "DirectionalLightHelper"
+    let PointLightHelper = c3 "PointLightHelper"
+    let SpotLightHelper = c3 "SpotLightHelper"
+
+    // Controls (addon)
+    let Controls = c3 "Controls"
+    let OrbitControls = a3 "three/addons/controls/OrbitControls.js" "OrbitControls"
+
+    // ------------------------------------------------------------------
+    // Option and event shapes
+    // ------------------------------------------------------------------
+
+    /// <summary>An HSL color, as returned by <c>Color.GetHSL</c>.</summary>
     let HSL =
         Pattern.Config "HSL" {
             Required = []
-            Optional =
-            [
+            Optional = [
                 "h", T<float>
                 "s", T<float>
                 "l", T<float>
             ]
         }
-    
-    let ColorClass =
-        Class "THREE.Color"
-        |+> Static [
-            Constructor (T<int>?r * T<int>?g * T<int>?b)
-            Constructor (TSelf + T<int> + T<string>)?value
-        ]
-        |+> Instance [
-            "r" =@ T<int>
-            "g" =@ T<int>
-            "b" =@ T<int>
 
-            "set"                  => (TSelf + T<int> + T<string>)?value ^-> TSelf
-            "setHex"               => T<int>?hex ^-> TSelf
-            "setRGB"               => T<int>?r * T<int>?g * T<int>?b ^-> TSelf
-            "setHSL"               => T<float>?h * T<float>?s * T<float>?l ^-> TSelf
-            "setStyle"             => T<string>?style ^-> TSelf
-            "copy"                 => TSelf?color ^-> TSelf
-            "copyGammaToLinear"    => TSelf?color ^-> TSelf
-            "copyLinearToGamma"    => TSelf?color ^-> TSelf
-            "convertGammaToLinear" => O ^-> TSelf
-            "convertLinearToGamma" => O ^-> TSelf
-            "getHex"               => O ^-> T<int>
-            "getHexString"         => O ^-> T<string>
-            "getHSL"               => !? HSL?optionalTarget ^-> HSL
-            "getStyle"             => O ^-> T<string>
-            "offsetHSL"            => T<float>?h * T<float>?s * T<float>?l ^-> TSelf
-            "add "                 => TSelf?color ^-> TSelf
-            "addColors"            => TSelf?color1 * TSelf?color2 ^-> TSelf
-            "addScalar"            => T<int>?s ^-> TSelf
-            "multiply"             => TSelf?color ^-> TSelf
-            "multiplyScalar"       => T<int>?s ^-> TSelf
-            "lerp"                 => TSelf?color * T<float>?alpha ^-> TSelf
-            "equals"               => TSelf?c ^-> T<bool>
-            "fromArray"            => Tuple [T<int>; T<int>; T<int>] ^-> TSelf
-            "toArray"              => O ^-> Tuple [T<int>; T<int>; T<int>]
-            "clone"                => O ^-> TSelf
-        ]
-    
-    let Face3 =
-        Class "THREE.Face3"
-        |+> Static [
-            Constructor (T<int>?a * T<int>?b * T<int>?c * !? Vector3?normal * !? ColorClass?color * !? T<int>?materialIndex)
-        ]
-        |+> Instance [
-            "a"              =@ T<int>
-            "b"              =@ T<int>
-            "c"              =@ T<int>
-            "normal"         =@ Vector3
-            "vertexNormals"  =@ Tuple [Vector3; Vector3; Vector3]
-            "color"          =@ ColorClass
-            "vertexColors"   =@ Tuple [ColorClass; ColorClass; ColorClass]
-            "vertexTangents" =@ Tuple [T<float>; T<float>; T<float>]
-            "materialIndex"  =@ T<int>
-
-            "clone" => O ^-> TSelf
-        ]
-    
-    let MorphTarget =
-        Pattern.Config "MorphTarget" {
+    /// <summary>An RGB color, as returned by <c>Color.GetRGB</c>.</summary>
+    let RGB =
+        Pattern.Config "RGB" {
             Required = []
-            Optional =
-            [
-                "name"    , T<string>
-                "vertices", ArrayOf Vector3
+            Optional = [
+                "r", T<float>
+                "g", T<float>
+                "b", T<float>
             ]
         }
 
-    let MorphColor =
-        Pattern.Config "MorphColor" {
-            Required = []
-            Optional =
-            [
-                "name"  , T<string>
-                "colors", ArrayOf ColorClass
+    /// <summary>Anything three.js accepts where a color is expected.</summary>
+    let ColorRepresentation = Color + T<int> + T<string>
+
+    /// <summary>
+    /// The payload of an event dispatched by an <c>EventDispatcher</c>.
+    /// three.js event objects are plain objects with at least a <c>type</c>.
+    /// </summary>
+    let ThreeEvent =
+        Pattern.Config "ThreeEvent" {
+            Required = [
+                "type", T<string>
+            ]
+            Optional = [
+                "target", Object3D.Type
             ]
         }
 
-    let MorphNormal =
-        Pattern.Config "MorphNormal" {
+    /// <summary>A triangle face, as reported by the raycaster.</summary>
+    let Face =
+        Pattern.Config "Face" {
             Required = []
-            Optional =
-            [
-                "name"    , T<string>
-                "vertices", ArrayOf Vector3
+            Optional = [
+                "a", T<int>
+                "b", T<int>
+                "c", T<int>
+                "normal", Vector3.Type
+                "materialIndex", T<int>
             ]
         }
-    
-    let Matrix3 = Class "THREE.Matrix3"
 
-    let Geometry =
-        Class "THREE.Geometry"
-        |=> Inherits EventDispatcher
-        |+> Static [
-            Constructor O
-        ]
-        |+> Instance [
-            "id"                      =? T<int>
-            "uuid"                    =? T<string>
-            "name"                    =@ T<string>
-            "vertices"                =@ ArrayOf Vector3
-            "colors"                  =@ ArrayOf ColorClass
-            "faces"                   =@ ArrayOf Face3
-            "faceVertexUvs"           =@ ArrayOf (ArrayOf T<obj>)
-            "morphTargets"            =@ ArrayOf MorphTarget
-            "morphColors"             =@ ArrayOf MorphColor
-            "morphNormals"            =@ ArrayOf MorphNormal
-            "skinWeights"             =@ ArrayOf T<obj>
-            "skinIndices"             =@ ArrayOf T<int>
-            "lineDistances"           =@ ArrayOf T<float>
-            "boundingBox"             =@ Box3
-            "boundingSphere"          =@ Sphere
-            "hasTangents"             =@ T<bool>
-            "dynamic"                 =@ T<bool>
-            "verticesNeedUpdate"      =@ T<bool>
-            "elementsNeedUpdate"      =@ T<bool>
-            "uvsNeedUpdate"           =@ T<bool>
-            "normalsNeedUpdate"       =@ T<bool>
-            "tangentsNeedUpdate"      =@ T<bool>
-            "colorsNeedUpdate"        =@ T<bool>
-            "lineDistancesNeedUpdate" =@ T<bool>
-            "buffersNeedUpdate"       =@ T<bool>
-            
-            "applyMatrix"           => Matrix4?matrix ^-> O
-            "computeFaceNormals"    => O ^-> O
-            "computeVertexNormals"  => T<bool>?areaWeighted ^-> O
-            "computeMorphNormals"   => O ^-> O
-            "computeTangents"       => O ^-> O
-            "computeLineDistances"  => O ^-> O
-            "computeBoundingBox"    => O ^-> O
-            "computeBoundingSphere" => O ^-> O
-            "merge"                 => TSelf?geometry * !? Matrix3?matrix * !? T<int>?materialIndexOffset ^-> O
-            "mergeVertices"         => O ^-> T<int>
-            "makeGroups"            => T<bool>?usesFaceMaterial * T<int>?maxVerticesInGroup ^-> O
-            "clone"                 => O ^-> TSelf
-            "dispose"               => O ^-> O
-        ]
-
-    let Raycaster = Class "THREE.Raycaster"
-    let Scene = Class "THREE.Scene"
-
-    let Light = Class "THREE.Light"
-
-    let ProjectionData =
-        Class "ProjectionData"
-        |+> Instance [
-            "elements" =@ ArrayOf T<obj>
-            "lights"   =@ ArrayOf Light
-            "objects"  =@ ArrayOf Object3D
-            "sprites"  =@ ArrayOf T<obj>
-        ]
-
-    let Projector =
-        Class "THREE.Projector"
-        |+> Static [
-            Constructor O
-        ]
-        |+> Instance [
-            "projectVector"   => Vector3?vector * Camera?camera ^-> Vector3
-            "unprojectVector" => Vector3?vector * Camera?camera ^-> Vector3
-            "pickingRay"      => Vector3?vector * Camera?camera ^-> Raycaster
-            "projectScene"    => Scene?scene * Camera?camera * T<bool>?sortObjects * T<bool>?sortElements ^-> ProjectionData
-        ]
-
-    let Ray = Class "THREE.Ray"
-
+    /// <summary>A raycasting hit.</summary>
     let Intersection =
         Pattern.Config "Intersection" {
             Required = []
-            Optional =
-            [
-                "distance" , T<float>
-                "point"    , Vector3.Type
-                "face"     , Face3.Type
+            Optional = [
+                "distance", T<float>
+                "distanceToRay", T<float>
+                "point", Vector3.Type
+                "index", T<int>
+                "face", Face.Type
                 "faceIndex", T<int>
-                "object"   , Object3D.Type
+                "object", Object3D.Type
+                "uv", Vector2.Type
+                "uv1", Vector2.Type
+                "normal", Vector3.Type
+                "instanceId", T<int>
+                "pointOnLine", Vector3.Type
             ]
         }
 
-    let Raycaster' =
-        Raycaster
-        |+> Static [
-            Constructor (Vector3?origin * Vector3?direction * !? T<float>?near * !? T<float>?far)
-        ]
-        |+> Instance [
-            "ray"       =@ Ray
-            "near"      =@ T<float>
-            "far"       =@ T<float>
-            "precision" =@ T<float>
-            "linePrecision" =@ T<float>
+    /// <summary>Per-object-type raycaster thresholds.</summary>
+    let RaycasterThreshold =
+        Pattern.Config "RaycasterThreshold" {
+            Required = [
+                "threshold", T<float>
+            ]
+            Optional = []
+        }
 
-            "set"              => Vector3?origin * Vector3?direction ^-> O
-            "intersectObject"  => Object3D?``object`` * T<bool>?``recursive`` ^-> ArrayOf Intersection
-            "intersectObjects" => (ArrayOf Object3D)?objects * T<bool>?``recursive`` ^-> ArrayOf Intersection
-        ]
-    
-    let Color = ColorClass + T<int> + T<string>
-
-    let Light' =
-        Light
-        |=> Inherits Object3D
-        |+> Static [
-            Constructor Color?color
-        ]
-        |+> Instance [
-            "color" =@ Color
-
-            "clone" => !? Light?light ^-> Light
-        ]
-    
-    let AmbientLight =
-        Class "THREE.AmbientLight"
-        |=> Inherits Light
-        |+> Static [
-            Constructor Color?color
-        ]
-        |+> Instance [
-            "clone" => O ^-> TSelf
-        ]
-
-    let AreaLight =
-        Class "THREE.AreaLight"
-        |=> Inherits Light
-        |+> Static [
-            Constructor (Color?color * !? T<float>?intensity)
-        ]
-        |+> Instance [
-            "normal"               =@ Vector3
-            "right"                =@ Vector3
-            "intensity"            =@ T<float>
-            "width"                =@ T<float>
-            "height"               =@ T<float>
-            "constantAttenuation"  =@ T<float>
-            "linearAttenuation"    =@ T<float>
-            "quadraticAttenuation" =@ T<float>
-        ]
-    
-    let DirectionalLight =
-        Class "THREE.DirectionalLight"
-        |=> Inherits Light
-        |+> Static [
-            Constructor (Color?color * !? T<float>?intensity)
-        ]
-        |+> Instance [
-            "target"              =@ Object3D
-            "intensity"           =@ T<float>
-            "castShadow"          =@ T<bool>
-            "onlyShadow"          =@ T<bool>
-            "shadowCameraNear"    =@ T<float>
-            "shadowCameraFar"     =@ T<float>
-            "shadowCameraLeft"    =@ T<float>
-            "shadowCameraRight"   =@ T<float>
-            "shadowCameraTop"     =@ T<float>
-            "shadowCameraBottom"  =@ T<float>
-            "shadowCameraVisible" =@ T<bool>
-            "shadowBias"          =@ T<float>
-            "shadowDarkness"      =@ T<float>
-            "shadowMapWidth"      =@ T<float>
-            "shadowMapHeight"     =@ T<float>
-            "shadowCascade"       =@ T<bool>
-            "shadowCascadeOffset" =@ Vector3
-            "shadowCascadeCount"  =@ T<int>
-            "shadowCascadeBias"   =@ Tuple [T<float>; T<float>; T<float>]
-            "shadowCascadeWidth"  =@ Tuple [T<float>; T<float>; T<float>]
-            "shadowCascadeHeight" =@ Tuple [T<float>; T<float>; T<float>]
-            "shadowCascadeNearZ"  =@ Tuple [T<float>; T<float>; T<float>]
-            "shadowCascadeFarZ"   =@ Tuple [T<float>; T<float>; T<float>]
-            "shadowCascadeArray"  =@ ArrayOf T<obj>
-            "shadowMap"           =@ T<obj>
-            "shadowMapSize"       =@ T<float>
-            "shadowCamera"        =@ Camera
-            "shadowMatrix"        =@ T<obj>
-
-            "clone" => O ^-> TSelf
-        ]
-
-    let HemisphereLight =
-        Class "THREE.HemisphereLight"
-        |=> Inherits Light
-        |+> Static [
-            Constructor (Color?skyColor * Color?groundColor * !? T<float>?intensity)
-        ]
-        |+> Instance [
-            "groundColor" =@ Color
-            "intensity"   =@ T<float>
-
-            "clone" => O ^-> TSelf
-        ]
-    
-    let PointLight =
-        Class "THREE.PointLight"
-        |=> Inherits Light
-        |+> Static [
-            Constructor (Color?color * !? T<float>?intensity * !? T<float>?distance)
-        ]
-        |+> Instance [
-            "intensity"   =@ T<float>
-            "distance"    =@ T<float>
-
-            "clone" => O ^-> TSelf
-        ]
-    
-    let SpotLight =
-        Class "THREE.SpotLight"
-        |=> Inherits Light
-        |+> Static [
-            Constructor (Color?color * !? T<float>?intensity * !? T<float>?distance * !? T<float>?angle * !? T<float>?exponent)
-        ]
-        |+> Instance [
-            "target"              =@ Object3D
-            "intensity"           =@ T<float>
-            "distance"            =@ T<float>
-            "angle"               =@ T<float>
-            "exponent"            =@ T<float>
-            "castShadow"          =@ T<bool>
-            "onlyShadow"          =@ T<bool>
-            "shadowCameraNear"    =@ T<float>
-            "shadowCameraFar"     =@ T<float>
-            "shadowCameraFov"     =@ T<float>
-            "shadowCameraVisible" =@ T<bool>
-            "shadowBias"          =@ T<float>
-            "shadowDarkness"      =@ T<float>
-            "shadowMapWidth"      =@ T<float>
-            "shadowMapHeight"     =@ T<float>
-            "shadowMap"           =@ T<obj>
-            "shadowMapSize"       =@ T<float>
-            "shadowCamera"        =@ Camera
-            "shadowMatrix"        =@ T<obj>
-
-            "clone" => O ^-> TSelf
-        ]
-
-    let LoadingManager = Class "THREE.LoadingManager"
-
-    let BufferGeometryLoader =
-        Class "THREE.BufferGeometryLoader"
-        |+> Static [
-            Constructor !? LoadingManager?manager
-        ]
-        |+> Instance [
-            "manager"     =@ LoadingManager
-            "crossOrigin" =@ T<string>
-
-            "load"           => T<string>?url * (!? BufferGeometry ^-> O)?onLoad * !? (!? T<obj> ^-> O)?onProgress * !? (!? T<obj> ^-> O)?onError ^-> O
-            "setCrossOrigin" => T<string>?value ^-> O
-            "parse"          => T<obj>?json ^-> BufferGeometry
-        ]
-    
-    let Cache =
-        Class "THREE.Cache"
-        |+> Static [
-            Constructor O
-        ]
-        |+> Instance [
-            "files" =@ T<obj>
-
-            "add"    => (T<string> + T<int>)?key * T<obj>?file ^-> O
-            "get"    => (T<string> + T<int>)?key ^-> O
-            "remove" => (T<string> + T<int>)?key ^-> O
-            "clear"  => O ^-> O
-        ]
-    
-    open WebSharper.JavaScript.Dom
-
-    let ImageLoader =
-        Class "THREE.ImageLoader"
-        |+> Static [
-            Constructor !? LoadingManager?manager
-        ]
-        |+> Instance [
-            "cache"       =@ Cache
-            "manager"     =@ LoadingManager
-            "crossOrigin" =@ T<string>
-
-            "load"           => T<string>?url * !? (!? T<obj> ^-> O)?onLoad * !? (!? T<obj> ^-> O)?onProgress * !? (!? T<obj> ^-> O)?onError ^-> T<Element>
-            "setCrossOrigin" => T<string>?value ^-> O
-        ]
-        
-    let Material = Class "THREE.Material"
-
-    let Loader =
-        Class "THREE.Loader"
-        |+> Static [
-            Constructor T<bool>?showStatus
-        ]
-        |+> Instance [
-            "showStatus"       =@ T<bool>
-            "statusDomElement" =@ T<Element>
-            "imageLoader"      =@ ImageLoader
-            "onLoadStart"      =@ (O ^-> O)
-            "onLoadProgress"   =@ (O ^-> O)
-            "onLoadComplete"   =@ (O ^-> O)
-            "crossOrigin"      =@ T<string>
-
-            "addStatusElement" => O ^-> T<Element>
-            "updateProgress"   => T<obj>?progress ^-> O
-            "extractUrlBase"   => T<string>?url ^-> T<string>
-            "initMaterials"    => (ArrayOf Material)?materials * T<string>?texturePath ^-> ArrayOf Material
-            "needsTangents"    => (ArrayOf Material)?materials ^-> T<bool>
-            "createMaterial"   => Material?m * T<string>?texturePath ^-> Material
-        ]
-
-    let JSONLoader =
-        Class "THREE.JSONLoader"
-        |=> Inherits Loader
-        |+> Static [
-            Constructor T<bool>?showStatus
-        ]
-        |+> Instance [
-            "withCredentials" =@ T<bool>
-
-            "load"         => T<string>?url * (!? Geometry * !? (ArrayOf Material) ^-> O)?callback * !? T<string>?texturePath ^-> O
-            "loadAjaxJSON" => TSelf?context * T<string>?url * (!? Geometry * !? (ArrayOf Material) ^-> O)?callback * T<string>?texturePath * !? (!? T<obj> ^-> O)?callbackProgress ^-> O
-            "parse"        => T<obj>?json * T<string>?texturePath ^-> T<obj>
-        ]
-    
-    let LoadingManager' =
-        LoadingManager
-        |+> Static [
-            Constructor (!? (O ^-> O)?onLoad * !? (!? T<string>?url * !? T<int>?loaded * !? T<int>?total ^-> O)?onProgress * !? (O ^-> O)?onError)
-        ]
-        |+> Instance [
-            "onLoad"     =@ (O ^-> O)
-            "onProgress" =@ (!? T<string>?url * !? T<int>?loaded * !? T<int>?total ^-> O)
-            "onError"    =@ (O ^-> O)
-
-            "itemStart" => T<string>?url ^-> O
-            "itemEnd"   => T<string>?url ^-> O
-        ]
-    
-    let MaterialLoader =
-        Class "THREE.MaterialLoader"
-        |+> Static [
-            Constructor !? LoadingManager?manager
-        ]
-        |+> Static [
-            "manager"     =@ LoadingManager
-            "crossOrigin" =@ T<string>
-
-            "load"           => T<string>?url * (!? Material ^-> O)?onLoad * !? (!? T<obj> ^-> O)?onProgress * !? (!? T<obj> ^-> O)?onError ^-> O
-            "setCrossOrigin" => T<string>?value ^-> O
-            "parse"          => T<obj>?json ^-> Material
-        ]
-
-    let ObjectLoader =
-        Class "THREE.ObjectLoader"
-        |+> Static [
-            Constructor !? LoadingManager?manager
-        ]
-        |+> Instance [
-            "manager"     =@ LoadingManager
-            "crossOrigin" =@ T<string>
-
-            "load"                     => T<string>?url * (!? Object3D ^-> O)?onLoad * !? (!? T<obj> ^-> O)?onProgress * !? (!? T<obj> ^-> O)?onError ^-> O
-            "setCrossOrigin"           => T<string>?value ^-> O
-            "parse"                    => T<obj>?json ^-> Object3D
-            "parseGeometries"          => (ArrayOf T<obj>)?json ^-> T<obj>
-            "parseMaterials"           => (ArrayOf T<obj>)?json ^-> T<obj>
-            "parseObject"              => T<obj>?data * (ArrayOf Geometry)?geometries * (ArrayOf Material)?materials ^-> Object3D
-        ]
-    
-    let SceneLoader =
-        Class "THREE.SceneLoader"
-        |+> Static [
-            Constructor O
-        ]
-        |+> Instance [
-            "onLoadStart"         =@ (O ^-> O)
-            "onLoadProgress"      =@ (O ^-> O)
-            "onLoadComplete"      =@ (O ^-> O)
-            "callbackSync"        =@ (!? T<obj> ^-> O)
-            "callbackProgress"    =@ (!? T<obj> * !? T<obj> ^-> O)
-            "hierarchyHandlers"   =@ T<obj>
-            "geometryHandlers"    =@ T<obj>
-            "crossOrigin"         =@ T<string>
-
-            "load"                     => T<string>?url * (!? T<obj> ^-> O)?onLoad * !? (!? T<obj> ^-> O)?onProgress * !? (!? T<obj> ^-> O)?onError ^-> O
-            "setCrossOrigin"           => T<string>?value ^-> O
-            "addGeometryHandler"       => (T<string> + T<int>)?typeID * Loader?loaderClass ^-> O
-            "addHierarchyHandler"      => (T<string> + T<int>)?typeID * Loader?loaderClass ^-> O
-            "parse"                    => T<obj>?json * (!? T<obj> ^-> O)?callbackFinished * T<string>?url ^-> O
-        ]
-    
-    let Texture = Class "THREE.Texture"
-
-    let TextureLoader =
-        Class "THREE.TextureLoader"
-        |=> Inherits EventDispatcher
-        |+> Static [
-            Constructor !? LoadingManager?manager
-        ]
-        |+> Instance [
-            "manager"     =@ LoadingManager
-            "crossOrigin" =@ T<string>
-
-            "load"           => T<string>?url * (!? Texture ^-> O)?onLoad * !? (!? T<obj> ^-> O)?onProgress * !? (!? T<obj> ^-> O)?onError ^-> O
-            "setCrossOrigin" => T<string>?value ^-> O
-        ]
-
-    let XHRLoader =
-        Class "THREE.XHRLoader"
-        |+> Static [
-            Constructor !? LoadingManager?manager
-        ]
-        |+> Instance [
-            "cache"       =@ Cache
-            "manager"     =@ LoadingManager
-            "crossOrigin" =@ T<string>
-
-            "load"           => T<string>?url * (!? T<obj> ^-> O)?onLoad * !? (!? T<obj> ^-> O)?onProgress * !? (!? T<obj> ^-> O)?onError ^-> O
-            "setCrossOrigin" => T<string>?value ^-> O
-        ]
-
-    let Material' =
-        Material
-        |=> Inherits EventDispatcher
-        |+> Static [
-            Constructor O
-        ]
-        |+> Instance [
-            "id"                  =? T<int>
-            "uuid"                =? T<string>
-            "name"                =@ T<string>
-            "side"                =@ T<int>
-            "opacity"             =@ T<float>
-            "transparent"         =@ T<bool>
-            "blending"            =@ T<int>
-            "blendSrc"            =@ T<int>
-            "blendDst"            =@ T<int>
-            "blendEquation"       =@ T<int>
-            "depthTest"           =@ T<bool>
-            "depthWrite"          =@ T<bool>
-            "polygonOffset"       =@ T<bool>
-            "polygonOffsetFactor" =@ T<float>
-            "polygonOffsetUnits"  =@ T<float>
-            "alphaTest"           =@ T<float>
-            "overdraw"            =@ T<float>
-            "visible"             =@ T<bool>
-            "needsUpdate"         =@ T<bool>
-            
-            "setValues" => T<obj>?values ^-> O
-            "clone"     => !? Material?material ^-> Material
-            "dispose"   => O ^-> O
-        ]
-
-    let LineBasicMaterialConfiguration =
-        Pattern.Config "LineBasicMaterialConfiguration" {
+    /// <summary>Raycaster tuning parameters.</summary>
+    let RaycasterParameters =
+        Pattern.Config "RaycasterParameters" {
             Required = []
-            Optional =
-            [
-                "color"       , T<int>
-                "opacity"     , T<float>
-                "blending"    , T<int>
-                "depthTest"   , T<bool>
-                "depthWrite"  , T<bool>
-                "linewidth"   , T<float>
-                "linecap"     , T<string>
-                "linejoin"    , T<string>
-                "vertexColors", T<bool>
-                "fog"         , T<bool>
+            Optional = [
+                "Line", RaycasterThreshold.Type
+                "Points", RaycasterThreshold.Type
             ]
         }
 
-    let LineBasicMaterial =
-        Class "THREE.LineBasicMaterial"
-        |=> Inherits Material
-        |+> Static [
-            Constructor !? LineBasicMaterialConfiguration?parameters
-        ]
+    /// <summary>A named collection of vertex attributes of a geometry.</summary>
+    let BufferAttributes =
+        Class "BufferAttributes"
         |+> Instance [
-            "color"        =@ Color
-            "linewidth"    =@ T<float>
-            "linecap"      =@ T<string>
-            "linejoin"     =@ T<string>
-            "vertexColors" =@ T<bool>
-            "fog"          =@ T<bool>
-
-            "clone" => O ^-> TSelf
+            Property "" BufferAttribute.Type |> Indexed T<string>
         ]
-    
-    let LineDashedMaterialConfiguration =
-        Pattern.Config "LineDashedMaterialConfiguration" {
-            Required = []
-            Optional =
-            [
-                "color"       , T<int>
-                "opacity"     , T<float>
-                "blending"    , T<int>
-                "depthTest"   , T<bool>
-                "depthWrite"  , T<bool>
-                "linewidth"   , T<float>
-                "scale"       , T<float>
-                "dashSize"    , T<float>
-                "gapSize"     , T<float>
-                "vertexColors", T<bool>
-                "fog"         , T<bool>
+
+    /// <summary>A group of a geometry's index buffer rendering with one material.</summary>
+    let GeometryGroup =
+        Pattern.Config "GeometryGroup" {
+            Required = [
+                "start", T<int>
+                "count", T<int>
+            ]
+            Optional = [
+                "materialIndex", T<int>
             ]
         }
 
-    let LineDashedMaterial =
-        Class "THREE.LineDashedMaterial"
-        |=> Inherits Material
-        |+> Static [
-            Constructor !? LineDashedMaterialConfiguration?parameters
-        ]
+    /// <summary>One level of detail of a <c>LOD</c> object.</summary>
+    let LODLevel =
+        Pattern.Config "LODLevel" {
+            Required = [
+                "distance", T<float>
+                "object", Object3D.Type
+            ]
+            Optional = []
+        }
+
+    /// <summary>The frames returned by <c>Curve.ComputeFrenetFrames</c>.</summary>
+    let FrenetFrames =
+        Pattern.Config "FrenetFrames" {
+            Required = [
+                "tangents", !| Vector3
+                "normals", !| Vector3
+                "binormals", !| Vector3
+            ]
+            Optional = []
+        }
+
+    /// <summary>What the current WebGL context can do.</summary>
+    let WebGLCapabilities =
+        Class "WebGLCapabilities"
         |+> Instance [
-            "color"        =@ Color
-            "linewidth"    =@ T<float>
-            "scale"        =@ T<float>
-            "dashSize"     =@ T<float>
-            "gapSize"      =@ T<float>
-            "vertexColors" =@ T<bool>
-            "fog"          =@ T<bool>
-
-            "clone" => O ^-> TSelf
+            "isWebGL2" =? T<bool>
+            "maxTextures" =? T<int>
+            "maxVertexTextures" =? T<int>
+            "maxTextureSize" =? T<int>
+            "maxCubemapSize" =? T<int>
+            "maxAttributes" =? T<int>
+            "maxVertexUniforms" =? T<int>
+            "maxVaryings" =? T<int>
+            "maxFragmentUniforms" =? T<int>
+            "vertexTextures" =? T<bool>
+            "floatFragmentTextures" =? T<bool>
+            "floatVertexTextures" =? T<bool>
+            "maxSamples" =? T<int>
+            "precision" =? T<string>
         ]
 
-    let MeshBasicMaterialConfiguration =
-        Pattern.Config "MeshBasicMaterialConfiguration" {
+    /// <summary>A sub-range of the index buffer to draw.</summary>
+    let DrawRange =
+        Pattern.Config "DrawRange" {
+            Required = [
+                "start", T<int>
+                "count", T<int>
+            ]
+            Optional = []
+        }
+
+    /// <summary>Options of a WebGL render target.</summary>
+    let RenderTargetOptions =
+        Pattern.Config "RenderTargetOptions" {
             Required = []
-            Optional =
-            [
-                "color"             , T<int>
-                "opacity"           , T<float>
-                "map"               , Texture.Type
-                "lightMap"          , Texture.Type
-                "specularMap"       , Texture.Type
-                "envMap"            , T<obj>
-                "combine"           , T<int>
-                "reflectivity"      , T<float>
-                "refractionRatio"   , T<float>
-                "shading"           , T<int>
-                "blending"          , T<int>
-                "depthTest"         , T<bool>
-                "depthWrite"        , T<bool>
-                "wireframe"         , T<bool>
-                "wireframeLinewidth", T<float>
-                "vertexColors"      , T<int>
-                "skinning"          , T<bool>
-                "morphTargets"      , T<bool>
-                "fog"               , T<bool>
+            Optional = [
+                "minFilter", TextureFilter.Type
+                "magFilter", TextureFilter.Type
+                "format", TextureFormat.Type
+                "type", TextureType.Type
+                "wrapS", Wrapping.Type
+                "wrapT", Wrapping.Type
+                "anisotropy", T<int>
+                "colorSpace", ColorSpace.Type
+                "depthBuffer", T<bool>
+                "stencilBuffer", T<bool>
+                "generateMipmaps", T<bool>
+                "samples", T<int>
             ]
         }
 
-    let MeshBasicMaterial =
-        Class "THREE.MeshBasicMaterial"
-        |=> Inherits Material
-        |+> Static [
-            Constructor !? MeshBasicMaterialConfiguration?parameters
-        ]
-        |+> Instance [
-            "color"              =@ Color
-            "map"                =@ Texture
-            "lightMap"           =@ Texture
-            "specularMap"        =@ Texture
-            "envMap"             =@ T<obj>
-            "combine"            =@ T<int>
-            "reflectivity"       =@ T<float>
-            "refractionRatio"    =@ T<float>
-            "fog"                =@ T<bool>
-            "shading"            =@ T<int>
-            "wireframe"          =@ T<bool>
-            "wireframeLinewidth" =@ T<float>
-            "wireframeLinecap"   =@ T<string>
-            "wireframeLinejoin"  =@ T<string>
-            "vertexColors"       =@ T<int>
-            "skinning"           =@ T<bool>
-            "morphTargets"       =@ T<bool>
-            
-            "clone" => O ^-> TSelf
+    /// <summary>The preferred power profile of the WebGL context.</summary>
+    let WebGLPowerPreference =
+        Pattern.EnumInlines "WebGLPowerPreference" [
+            "Default", "'default'"
+            "HighPerformance", "'high-performance'"
+            "LowPower", "'low-power'"
         ]
 
-    let MeshDepthMaterialConfiguration =
-        Pattern.Config "MeshDepthMaterialConfiguration" {
+    /// <summary>Shader precision requested from the GPU.</summary>
+    let ShaderPrecision =
+        Pattern.EnumStrings "ShaderPrecision" [
+            "highp"
+            "mediump"
+            "lowp"
+        ]
+
+    /// <summary>Options accepted by the <c>WebGLRenderer</c> constructor.</summary>
+    let WebGLRendererOptions =
+        Pattern.Config "WebGLRendererOptions" {
             Required = []
-            Optional =
-            [
-                "opacity"           , T<float>
-                "blending"          , T<int>
-                "depthTest"         , T<bool>
-                "depthWrite"        , T<bool>
-                "wireframe"         , T<bool>
-                "wireframeLinewidth", T<float>
+            Optional = [
+                "canvas", T<JavaScript.HTMLCanvasElement>
+                "context", T<JavaScript.WebGL.RenderingContext>
+                "alpha", T<bool>
+                "premultipliedAlpha", T<bool>
+                "antialias", T<bool>
+                "stencil", T<bool>
+                "depth", T<bool>
+                "preserveDrawingBuffer", T<bool>
+                "powerPreference", WebGLPowerPreference.Type
+                "failIfMajorPerformanceCaveat", T<bool>
+                "logarithmicDepthBuffer", T<bool>
+                "precision", ShaderPrecision.Type
+                "outputBufferType", TextureType.Type
             ]
         }
 
-    let MeshDepthMaterial =
-        Class "THREE.MeshDepthMaterial"
-        |+> Static [
-            Constructor !? MeshDepthMaterialConfiguration?parameters
-        ]
-        |+> Instance [
-            "morphTargets"       =@ T<bool>
-            "wireframe"          =@ T<bool>
-            "wireframeLinewidth" =@ T<float>
-
-            "clone" => O ^-> TSelf
-        ]
-
-    let MeshFaceMaterial =
-        Class "THREE.MeshFaceMaterial"
-        |=> Inherits Material
-        |+> Static [
-            Constructor !? (ArrayOf Material)?materials
-        ]
-        |+> Static [
-            "materials" =@ ArrayOf Material
-
-            "clone" => O ^-> TSelf
-        ]
-
-    let MeshLambertMaterialConfiguration =
-        Pattern.Config "MeshLambertMaterialConfiguration" {
+    /// <summary>Options shared by every material.</summary>
+    let MaterialParameters =
+        Pattern.Config "MaterialParameters" {
             Required = []
-            Optional =
-            [
-                "color"             , T<int>
-                "ambient"           , T<int>
-                "emissive"          , T<int>
-                "opacity"           , T<float>
-                "map"               , Texture.Type
-                "lightMap"          , Texture.Type
-                "specularMap"       , Texture.Type
-                "envMap"            , T<obj>
-                "combine"           , T<int>
-                "reflectivity"      , T<float>
-                "refractionRatio"   , T<float>
-                "shading"           , T<int>
-                "blending"          , T<int>
-                "depthTest"         , T<bool>
-                "depthWrite"        , T<bool>
-                "wireframe"         , T<bool>
-                "wireframeLinewidth", T<float>
-                "vertexColors"      , T<int>
-                "skinning"          , T<bool>
-                "morphTargets"      , T<bool>
-                "morphNormals"      , T<bool>
-                "fog"               , T<bool>
-                "overdraw"          , T<float>
-            ]
-        }
-
-    let MeshLambertMaterial =
-        Class "THREE.MeshLambertMaterial"
-        |=> Inherits Material
-        |+> Static [
-            Constructor !? MeshLambertMaterialConfiguration?parameters
-        ]
-        |+> Instance [
-            "color"              =@ Color
-            "ambient"            =@ Color
-            "emissive"           =@ Color
-            "wrapAround"         =@ T<bool>
-            "wrapRGB"            =@ Vector3
-            "map"                =@ Texture
-            "lightMap"           =@ Texture
-            "specularMap"        =@ Texture
-            "envMap"             =@ T<obj>
-            "combine"            =@ T<int>
-            "reflectivity"       =@ T<float>
-            "refractionRatio"    =@ T<float>
-            "fog"                =@ T<bool>
-            "shading"            =@ T<int>
-            "wireframe"          =@ T<bool>
-            "wireframeLinewidth" =@ T<float>
-            "wireframeLinecap"   =@ T<string>
-            "wireframeLinejoin"  =@ T<string>
-            "vertexColors"       =@ T<int>
-            "skinning"           =@ T<bool>
-            "morphTargets"       =@ T<bool>
-            "morphNormals"       =@ T<bool>
-
-            "clone" => O ^-> TSelf
-        ]
-
-    let MeshNormalMaterialConfiguration =
-        Pattern.Config "MeshNormalMaterialConfiguration" {
-            Required = []
-            Optional =
-            [
-                "opacity"           , T<float>
-                "shading"           , T<int>
-                "blending"          , T<int>
-                "depthTest"         , T<bool>
-                "depthWrite"        , T<bool>
-                "wireframe"         , T<bool>
-                "wireframeLinewidth", T<float>
-            ]
-        }
-    
-    let MeshNormalMaterial =
-        Class "THREE.MeshNormalMaterial"
-        |=> Inherits Material
-        |+> Static [
-            Constructor !? MeshNormalMaterialConfiguration?parameters
-        ]
-        |+> Instance [
-            "shading"            =@ T<float>
-            "wireframe"          =@ T<bool>
-            "wireframeLinewidth" =@ T<float>
-            "morphTargets"       =@ T<bool>
-            
-            "clone" => O ^-> TSelf
-        ]
-
-    let Vector2 = Class "THREE.Vector2"
-
-    let MeshPhongMaterialConfiguration =
-        Pattern.Config "MeshPhongMaterialConfiguration" {
-            Required = []
-            Optional =
-            [
-                "color"             , T<int>
-                "ambient"           , T<int>
-                "emissive"          , T<int>
-                "specular"          , T<int>
-                "shininess"         , T<float>
-                "opacity"           , T<float>
-                "map"               , Texture.Type
-                "lightMap"          , Texture.Type
-                "bumpMap"           , Texture.Type
-                "bumpScale"         , T<float>
-                "normalMap"         , Texture.Type
-                "normalScale"       , Vector2.Type
-                "specularMap"       , Texture.Type
-                "envMap"            , T<obj>
-                "combine"           , T<int>
-                "reflectivity"      , T<float>
-                "refractionRatio"   , T<float>
-                "shading"           , T<int>
-                "blending"          , T<int>
-                "depthTest"         , T<bool>
-                "depthWrite"        , T<bool>
-                "wireframe"         , T<bool>
-                "wireframeLinewidth", T<float>
-                "vertexColors"      , T<int>
-                "skinning"          , T<bool>
-                "morphTargets"      , T<bool>
-                "morphNormals"      , T<bool>
-                "fog"               , T<bool>
-            ]
-        }
-
-    let MeshPhongMaterial =
-        Class "THREE.MeshPhongMaterial"
-        |=> Inherits Material
-        |+> Static [
-            Constructor !? MeshPhongMaterialConfiguration?parameters
-        ]
-        |+> Instance [
-            "color"              =@ Color
-            "ambient"            =@ Color
-            "emissive"           =@ Color
-            "specular"           =@ Color
-            "shininess"          =@ T<float>
-            "metal"              =@ T<bool>
-            "wrapAround"         =@ T<bool>
-            "wrapRGB"            =@ Vector3
-            "map"                =@ Texture
-            "lightMap"           =@ Texture
-            "bumpMap"            =@ T<obj>
-            "bumpScale"          =@ T<float>
-            "normalMap"          =@ T<obj>
-            "normalScale"        =@ Vector2
-            "specularMap"        =@ Texture
-            "envMap"             =@ T<obj>
-            "combine"            =@ T<int>
-            "reflectivity"       =@ T<float>
-            "refractionRatio"    =@ T<float>
-            "fog"                =@ T<bool>
-            "shading"            =@ T<int>
-            "wireframe"          =@ T<bool>
-            "wireframeLinewidth" =@ T<float>
-            "wireframeLinecap"   =@ T<string>
-            "wireframeLinejoin"  =@ T<string>
-            "vertexColors"       =@ T<int>
-            "skinning"           =@ T<bool>
-            "morphTargets"       =@ T<bool>
-            "morphNormals"       =@ T<bool>
-
-            "clone" => O ^-> TSelf
-        ]
-    
-    let ParticleSystemMaterialConfiguration =
-        Pattern.Config "ParticleSystemMaterialConfiguration" {
-            Required = []
-            Optional =
-            [
-                "color"       , T<int>
-                "opacity"     , T<float>
-                "map"         , Texture.Type
-                "size"        , T<float>
-                "blending"    , T<int>
-                "depthTest"   , T<bool>
-                "depthWrite"  , T<bool>
-                "vertexColors", T<bool>
-                "fog"         , T<bool>
-            ]
-        }
-
-    let ParticleSystemMaterial =
-        Class "THREE.ParticleSystemMaterial"
-        |=> Inherits Material
-        |+> Static [
-            Constructor !? ParticleSystemMaterialConfiguration?parameters
-        ]
-        |+> Instance [
-            "color"           =@ Color
-            "map"             =@ Texture
-            "size"            =@ T<float>
-            "sizeAttenuation" =@ T<bool>
-            "vertexColors"    =@ T<bool>
-            "fog"             =@ T<bool>
-
-            "clone" => O ^-> TSelf
-        ]
-
-    let ShaderMaterialConfiguration =
-        Pattern.Config "ShaderMaterialConfiguration" {
-            Required = []
-            Optional =
-            [
-                "fragmentShader"    , T<string>
-                "vertexShader"      , T<string>
-                "uniforms"          , T<obj>
-                "defines"           , T<obj>
-                "shading"           , T<int>
-                "blending"          , T<int>
-                "depthTest"         , T<bool>
-                "depthWrite"        , T<bool>
-                "wireframe"         , T<bool>
-                "wireframeLinewidth", T<float>
-                "lights"            , T<bool>
-                "vertexColors"      , T<int>
-                "skinning"          , T<bool>
-                "morphTargets"      , T<bool>
-                "morphNormals"      , T<bool>
-                "fog"               , T<bool>
-            ]
-        }
-
-    let DefaultAttributeValues =
-        Class "DefaultAttributeValues"
-        |+> Instance [
-            "color" =@ Tuple [T<float>; T<float>; T<float>]
-            "uv"    =@ Tuple [T<float>; T<float>]
-            "uv2"   =@ Tuple [T<float>; T<float>]
-        ]
-
-    let ShaderMaterial =
-        Class "THREE.ShaderMaterial"
-        |=> Inherits Material
-        |+> Static [
-            Constructor !? ShaderMaterialConfiguration?parameters
-        ]
-        |+> Instance [
-            "fragmentShader"         =@ T<string>
-            "vertexShader"           =@ T<string>
-            "uniforms"               =@ T<obj>
-            "defines"                =@ T<obj>
-            "attributes"             =@ T<obj>
-            "shading"                =@ T<int>
-            "linewidth"              =@ T<float>
-            "wireframe"              =@ T<bool>
-            "wireframeLinewidth"     =@ T<float>
-            "fog"                    =@ T<bool>
-            "lights"                 =@ T<bool>
-            "vertexColors"           =@ T<float>
-            "skinning"               =@ T<bool>
-            "morphTargets"           =@ T<bool>
-            "morphNormals"           =@ T<bool>
-            "defaultAttributeValues" =@ DefaultAttributeValues
-                                            
-            "index0AttributeName"    =@ T<string>
-
-            "clone" => O ^-> TSelf
-        ]
-
-    let RawShaderMaterial =
-        Class "THREE.RawShaderMaterial"
-        |=> Inherits ShaderMaterial
-        |+> Static [
-            Constructor !? T<obj>?parameters
-        ]
-        |+> Instance [
-            "clone" => O ^-> TSelf
-        ]
-
-    let SpriteCanvasMaterialConfiguration =
-        Pattern.Config "SpriteCanvasMaterialConfiguration" {
-            Required = []
-            Optional =
-            [
-                "color"   , T<int>
-                "program" , (T<obj>?context * T<obj>?color ^-> O)
-                "opacity" , T<float>
-                "blending", T<int>
-            ]
-        }
-
-    let SpriteCanvasMaterial =
-        Class "THREE.SpriteCanvasMaterial"
-        |=> Inherits Material
-        |+> Static [
-            Constructor !? SpriteCanvasMaterialConfiguration?parameters
-        ]
-        |+> Instance [
-            "color"   =@ Color
-            "program" =@ (T<obj>?context * T<obj>?color ^-> O)
-
-            "clone" => O ^-> TSelf
-        ]
-    
-    let SpriteMaterialConfiguration =
-        Pattern.Config "SpriteMaterialConfiguration" {
-            Required = []
-            Optional =
-            [
-                "color"     , T<int>
-                "opacity"   , T<float>
-                "map"       , Texture.Type
-                "blending"  , T<int>
-                "depthTest" , T<bool>
+            Optional = [
+                "name", T<string>
+                "side", Side.Type
+                "shadowSide", Side.Type
+                "opacity", T<float>
+                "transparent", T<bool>
+                "alphaTest", T<float>
+                "alphaHash", T<bool>
+                "blending", Blending.Type
+                "depthTest", T<bool>
                 "depthWrite", T<bool>
-                "uvOffset"  , Vector2.Type
-                "uvScale"   , Vector2.Type
-                "fog"       , T<bool>
+                "colorWrite", T<bool>
+                "polygonOffset", T<bool>
+                "polygonOffsetFactor", T<float>
+                "polygonOffsetUnits", T<float>
+                "vertexColors", T<bool>
+                "dithering", T<bool>
+                "toneMapped", T<bool>
+                "visible", T<bool>
+                "premultipliedAlpha", T<bool>
             ]
         }
 
-    let SpriteMaterial =
-        Class "THREE.SpriteMaterial"
-        |=> Inherits Material
-        |+> Static [
-            Constructor !? SpriteMaterialConfiguration?parameters
-        ]
-        |+> Instance [
-            "color"    =@ Color
-            "map"      =@ Texture
-            "rotation" =@ T<float>
-            "fog"      =@ T<bool>
-
-            "clone" => O ^-> TSelf
-        ]
-
-    let Box2 =
-        Class "THREE.Box2"
-        |+> Static [
-            Constructor (!? Vector2?min * !? Vector2?max)
-        ]
-        |+> Instance [
-            "min" =@ Vector2
-            "max" =@ Vector2
-            
-            "set"                  => Vector2?min * Vector2?max ^-> TSelf
-            "setFromPoints"        => (ArrayOf Vector2)?points ^-> TSelf
-            "setFromCenterAndSize" => Vector2?center * Vector2?size ^-> TSelf
-            "copy"                 => TSelf?box ^-> TSelf
-            "makeEmpty"            => O ^-> TSelf
-            "empty"                => O ^-> T<bool>
-            "center"               => !? Vector2?optionalTarget ^-> Vector2
-            "size"                 => !? Vector2?optionalTarget ^-> Vector2
-            "expandByPoint"        => Vector2?point ^-> TSelf
-            "expandByVector"       => Vector2?vector ^-> TSelf
-            "expandByScalar"       => T<float>?scalar ^-> TSelf
-            "containsPoint"        => Vector2?point ^-> T<bool>
-            "containsBox"          => TSelf?box ^-> T<bool>
-            "getParameter"         => Vector2?point * !? Vector2?optionalTarget ^-> Vector2
-            "isIntersectionBox"    => TSelf?box ^-> T<bool>
-            "clampPoint"           => Vector2?point * !? Vector2?optionalTarget ^-> Vector2
-            "distanceToPoint"      => Vector2?point ^-> T<float>
-            "intersect"            => TSelf?box ^-> TSelf
-            "union"                => TSelf?box ^-> TSelf
-            "translate"            => Vector2?offset ^-> TSelf
-            "equals"               => TSelf?box ^-> T<bool>
-            "clone"                => O ^-> TSelf
-        ]
-    
-    let Box3' =
-        Box3
-        |+> Static [
-            Constructor (!? Vector3?min * !? Vector3?max)
-        ]
-        |+> Instance [
-            "min" =@ Vector3
-            "max" =@ Vector3
-            
-            "set"                  => Vector3?min * Vector3?max ^-> Box3
-            "addPoint"             => Vector3?point ^-> Box3
-            "setFromPoints"        => (ArrayOf Vector3)?points ^-> Box3
-            "setFromCenterAndSize" => Vector3?center * Vector3?size ^-> Box3
-            "setFromObject"        => Object3D?``object`` ^-> Box3
-            "copy"                 => Box3?box ^-> Box3
-            "makeEmpty"            => O ^-> Box3
-            "empty"                => O ^-> T<bool>
-            "center"               => !? Vector3?optionalTarget ^-> Vector3
-            "size"                 => !? Vector3?optionalTarget ^-> Vector3
-            "expandByPoint"        => Vector3?point ^-> Box3
-            "expandByVector"       => Vector3?vector ^-> Box3
-            "expandByScalar"       => T<float>?scalar ^-> Box3
-            "containsPoint"        => Vector3?point ^-> T<bool>
-            "containsBox"          => Box3?box ^-> T<bool>
-            "getParameter"         => Vector3?point * !? Vector3?optionalTarget ^-> Vector3
-            "isIntersectionBox"    => Box3?box ^-> T<bool>
-            "clampPoint"           => Vector3?point * !? Vector3?optionalTarget ^-> Vector3
-            "distanceToPoint"      => Vector3?point ^-> T<float>
-            "getBoundingSphere"    => !? Sphere?optionalTarget ^-> Sphere
-            "intersect"            => Box3?box ^-> Box3
-            "union"                => Box3?box ^-> Box3
-            "applyMatrix4"         => Matrix4?matrix ^-> Box3
-            "translate"            => Vector3?offset ^-> Box3
-            "equals"               => Box3?box ^-> T<bool>
-            "clone"                => O ^-> Box3
-        ]
-
-    let Euler' =
-        Euler
-        |+> Static [
-            Constructor (!? T<float>?x * !? T<float>?y * !? T<float>?z * !? T<string>?order)
-        ]
-        |+> Instance [
-            "x"                =@ T<float>
-            "y"                =@ T<float>
-            "z"                =@ T<float>
-            "order"            =@ T<string>
-            "onChangeCallback" =@ (O ^-> O)
-
-            "set"                   => T<float>?x * T<float>?y * T<float>?z * !? T<string>?order ^-> Euler
-            "copy"                  => Euler?euler ^-> Euler
-            "setFromRotationMatrix" => Matrix4?m * T<string>?order ^-> Euler
-            "setFromQuaternion"     => Quaternion?q * !? T<string>?order * !? T<bool>?update ^-> Euler
-            "reorder"               => T<string>?newOrder ^-> O
-            "equals"                => Euler?euler ^-> T<bool>
-            "fromArray"             => (Tuple [T<float>; T<float>; T<float>])?array ^-> Euler
-            "fromArray"             => (Tuple [T<float>; T<float>; T<float>; T<string>])?array ^-> Euler
-            "toArray"               => O ^-> Tuple [T<float>; T<float>; T<float>; T<string>]
-            "onChange"              => (O ^-> O)?callback ^-> Euler
-            "clone"                 => O ^-> Euler
-        ]
-
-    let Plane = Class "THREE.Plane"
-
-    let Frustum =
-        Class "THREE.Frustum"
-        |+> Static [
-            Constructor (!? Plane?p0 * !? Plane?p1 * !? Plane?p2 * !? Plane?p3 * !? Plane?p4 * !? Plane?p5)
-        ]
-        |+> Instance [
-            "planes" =@ ArrayOf Plane
-
-            "set"              => Plane?p0 * Plane?p1 * Plane?p2 * Plane?p3 * Plane?p4 * Plane?p5 ^-> TSelf
-            "copy"             => TSelf?frustum ^-> TSelf
-            "setFromMatrix"    => Matrix4?m ^-> TSelf
-            "intersectsObject" => Object3D?``object`` ^-> T<bool>
-            "intersectsSphere" => Sphere?sphere ^-> T<bool>
-            "intersectsBox"    => T<obj>?box ^-> T<bool>
-            "containsPoint"    => Vector3?point ^-> T<bool>
-            "clone"            => O ^-> TSelf
-        ]
-
-    let Line3 =
-        Class "THREE.Line3"
-        |+> Static [
-            Constructor (!? Vector3?start * !? Vector3?``end``)
-        ]
-        |+> Instance [
-            "start" =@ Vector3
-            "end"   =@ Vector3
-
-            "set"                          => Vector3?start * Vector3?``end`` ^-> TSelf
-            "copy"                         => TSelf?line ^-> TSelf
-            "center"                       => !? Vector3?optionalTarget ^-> Vector3
-            "delta"                        => !? Vector3?optionalTarget ^-> Vector3
-            "distanceSq"                   => O ^-> T<float>
-            "distance"                     => O ^-> T<float>
-            "at"                           => T<float>?t * !? Vector3?optionalTarget ^-> Vector3
-            "closestPointToPointParameter" => Vector3?point * T<bool>?clampToLine ^-> T<float>
-            "closestPointToPoint"          => Vector3?point * T<bool>?clampToLine * !? Vector3?optionalTarget ^-> Vector3
-            "applyMatrix4"                 => Matrix4?matrix ^-> TSelf
-            "equals"                       => TSelf?line ^-> T<bool>
-            "clone"                        => O ^-> TSelf
-        ]
-
-    let Math =
-        Class "THREE.Math"
-        |+> Static [
-            "generateUUID"    => O ^-> T<string>
-            "clamp"           => T<float>?x * T<float>?a * T<float>?b ^-> T<float>
-            "clampBottom"     => T<float>?x * T<float>?a ^-> T<float>
-            "mapLinear"       => T<float>?x * T<float>?a1 * T<float>?a2 * T<float>?b1 * T<float>?b2 ^-> T<float>
-            "smoothstep"      => T<float>?x * T<float>?min * T<float>?max ^-> T<float>
-            "smootherstep"    => T<float>?x * T<float>?min * T<float>?max ^-> T<float>
-            "random16"        => O ^-> T<float>
-            "randInt"         => T<int>?low * T<int>?high ^-> T<int>
-            "randFloat"       => T<float>?low * T<float>?high ^-> T<float>
-            "randFloatSpread" => T<float>?range ^-> T<float>
-            "sign"            => T<float>?x ^-> T<int>
-            "degToRad"        => T<float>?degrees ^-> T<float>
-            "radToDeg"        => T<float>?radians ^-> T<float>
-            "isPowerOfTwo"    => T<float>?value ^-> T<bool>
-        ]
-    
-    let Matrix3' =
-        Matrix3
-        |+> Static [
-            Constructor (!? T<float>?n11 * !? T<float>?n12 * !? T<float>?n13 * !? T<float>?n21 * !? T<float>?n22 * !? T<float>?n23 * !? T<float>?n31 * !? T<float>?n32 * !? T<float>?n33)
-        ]
-        |+> Instance [
-            "elements" =@ T<JavaScript.Float32Array>
-
-            "set"                  => T<float>?n11 * T<float>?n12 * T<float>?n13 * T<float>?n21 * T<float>?n22 * T<float>?n23 * T<float>?n31 * T<float>?n32 * T<float>?n33 ^-> Matrix3
-            "identity"             => O ^-> Matrix3
-            "copy"                 => Matrix3?matrix ^-> Matrix3
-            "applyToVector3Array"  => (ArrayOf T<float>)?array * T<int>?offset * T<int>?length ^-> ArrayOf T<float>
-            "multiplyScalar"       => T<float>?scalar ^-> Matrix3
-            "determinant"          => O ^-> T<float>
-            "getInverse"           => Matrix4?matrix4 * !? T<bool>?throwOnInvertible ^-> Matrix3
-            "transpose"            => O ^-> Matrix3
-            "flattenToArrayOffset" => (ArrayOf T<float>)?array * T<int>?offset ^-> ArrayOf T<float>
-            "getNormalMatrix"      => Matrix4?matrix4 ^-> Matrix3
-            "transposeIntoArray"   => (ArrayOf T<float>)?array ^-> Matrix3
-            "fromArray"            => (ArrayOf T<float>)?array ^-> Matrix3
-            "toArray"              => O ^-> ArrayOf T<float>
-            "clone"                => O ^-> Matrix3
-        ]
-
-    let Matrix4' =
-        Matrix4
-        |+> Static [
-            Constructor (!? T<float>?n11 * !? T<float>?n12 * !? T<float>?n13 * !? T<float>?n14 * !? T<float>?n21 * !? T<float>?n22 * !? T<float>?n23 * !? T<float>?n24 * !? T<float>?n31 * !? T<float>?n32 * !? T<float>?n33 * !? T<float>?n34 * !? T<float>?n41 * !? T<float>?n42 * !? T<float>?n43 * !? T<float>?n44)
-        ]
-        |+> Static [
-            "elements" =@ T<JavaScript.Float32Array>
-
-            "set"                        => T<float>?n11 * T<float>?n12 * T<float>?n13 * T<float>?n14 * T<float>?n21 * T<float>?n22 * T<float>?n23 * T<float>?n24 * T<float>?n31 * T<float>?n32 * T<float>?n33 * T<float>?n34 * T<float>?n41 * T<float>?n42 * T<float>?n43 * T<float>?n44 ^-> Matrix4
-            "identity"                   => O ^-> Matrix4
-            "copy"                       => Matrix4?m ^-> Matrix4
-            "copyPosition"               => Matrix4?m ^-> Matrix4
-            "extractRotation"            => Matrix4?m ^-> Matrix4
-            "makeRotationFromEuler"      => Vector3?euler ^-> Matrix4
-            "makeRotationFromQuaternion" => Quaternion?q ^-> Matrix4
-            "lookAt"                     => Vector3?eye * Vector3?target * Vector3?up ^-> Matrix4
-            "multiply"                   => Matrix4?m ^-> Matrix4
-            "multiplyMatrices"           => Matrix4?a * Matrix4?b ^-> Matrix4
-            "multiplyToArray"            => Matrix4?a * Matrix4?b * ((ArrayOf T<float>) + T<JavaScript.Float32Array>)?r ^-> Matrix4
-            "multiplyScalar"             => T<float>?s ^-> Matrix4
-            "applyToVector3Array"        => (ArrayOf T<float>)?array * !? T<int>?offset * !? T<int>?length ^-> ArrayOf T<float>
-            "determinant"                => O ^-> T<float>
-            "transpose"                  => O ^-> Matrix4
-            "flattenToArrayOffset"       => (ArrayOf T<float>)?array * T<int>?offset ^-> ArrayOf T<float>
-            "setPosition"                => Vector3?v ^-> Matrix4
-            "getInverse"                 => Matrix4?m * !? T<bool>?throwOnInvertible ^-> Matrix4
-            "scale"                      => Vector3?v ^-> Matrix4
-            "getMaxScaleOnAxis"          => O ^-> T<float>
-            "makeTranslation"            => T<float>?x * T<float>?y * T<float>?z ^-> Matrix4
-            "makeRotationX"              => T<float>?theta ^-> Matrix4
-            "makeRotationY"              => T<float>?theta ^-> Matrix4
-            "makeRotationZ"              => T<float>?theta ^-> Matrix4
-            "makeRotationAxis"           => Vector3?axis * T<float>?angle ^-> Matrix4
-            "makeScale"                  => T<float>?x * T<float>?y * T<float>?z ^-> Matrix4
-            "compose"                    => Vector3?position * Quaternion?quaternion * Vector3?scale ^-> Matrix4
-            "decompose"                  => Vector3?position * Quaternion?quaternion * Vector3?scale ^-> Tuple [Vector3; Quaternion; Vector3]
-            "makeFrustum"                => T<float>?left * T<float>?right * T<float>?bottom * T<float>?top * T<float>?near * T<float>?far ^-> Matrix4
-            "makePerspective"            => T<float>?fov * T<float>?aspect * T<float>?near * T<float>?far ^-> Matrix4
-            "makeOrthographic"           => T<float>?left * T<float>?right * T<float>?top * T<float>?bottom * T<float>?near * T<float>?far ^-> Matrix4
-            "fromArray"                  => (ArrayOf T<float>)?array ^-> Matrix3
-            "toArray"                    => O ^-> ArrayOf T<float>
-            "clone"                      => O ^-> Matrix4
-        ]
-
-    let Plane' =
-        Plane
-        |+> Static [
-            Constructor (!? Vector3?normal * !? T<float>?constant)
-        ]
-        |+> Instance [
-            "normal"   =@ Vector3
-            "constant" =@ T<float>
-
-            "set"                           => Vector3?normal * T<float>?constant ^-> Plane
-            "setComponents"                 => T<float>?x * T<float>?y * T<float>?z * T<float>?w ^-> Plane
-            "setFromNormalAndCoplanarPoint" => Vector3?normal * Vector3?point ^-> Vector3
-            "setFromCoplanarPoints"         => Vector3?a * Vector3?b * Vector3?c ^-> Plane
-            "copy"                          => Plane?plane ^-> Plane
-            "normalize"                     => O ^-> Plane
-            "negate"                        => O ^-> Plane
-            "distanceToPoint"               => Vector3?point ^-> T<float>
-            "distanceToSphere"              => Sphere?sphere ^-> T<float>
-            "projectPoint"                  => Vector3?point * !? Vector3?optionalTarget ^-> Vector3
-            "orthoPoint"                    => Vector3?point * !? Vector3?optionalTarget ^-> Vector3
-            "isIntersectionLine"            => Line3?line ^-> T<bool>
-            "intersectLine"                 => Line3?line * !? Vector3?optionalTarget ^-> Vector3
-            "coplanarPoint"                 => !? Vector3?optionalTarget ^-> Vector3
-            "applyMatrix4"                  => Matrix4?matrix * !? Matrix3?optionalNormalMatrix ^-> Plane
-            "translate"                     => Vector3?offset ^-> Plane
-            "equals"                        => Plane?plane ^-> T<bool>
-            "clone"                         => O ^-> Plane
-        ]
-
-    let Quaternion' =
-        Quaternion
-        |+> Static [
-            Constructor (!? T<float>?x * !? T<float>?y * !? T<float>?z * !? T<float>?w)
-        ]
-        |+> Instance [
-            "x"                =@ T<float>
-            "y"                =@ T<float>
-            "z"                =@ T<float>
-            "w"                =@ T<float>
-            "onChangeCallback" =@ (O ^-> O)
-
-            "set"                   => T<float>?x * T<float>?y * T<float>?z * T<float>?w ^-> Quaternion
-            "copy"                  => Quaternion?quaternion ^-> Quaternion
-            "setFromEuler"          => Euler?euler * !? T<bool>?update ^-> Quaternion
-            "setFromAxisAngle"      => Vector3?axis * T<float>?angle ^-> Quaternion
-            "setFromRotationMatrix" => Matrix4?m ^-> Quaternion
-            "setFromUnitVectors"    => Vector3?vFrom * Vector3?vTo ^-> Quaternion
-            "inverse"               => O ^-> Quaternion
-            "conjugate"             => O ^-> Quaternion
-            "lengthSq"              => O ^-> T<float>
-            "length"                => O ^-> T<float>
-            "normalize"             => O ^-> Quaternion
-            "multiply"              => Quaternion?q ^-> Quaternion
-            "multiplyQuaternions"   => Quaternion?a * Quaternion?b ^-> Quaternion
-            "slerp"                 => Quaternion?qb * T<float>?t ^-> Quaternion
-            "equals"                => Quaternion?quaternion ^-> T<bool>
-            "fromArray"             => (Tuple [T<float>; T<float>; T<float>; T<float>])?array ^-> Quaternion
-            "toArray"               => O ^-> Tuple [T<float>; T<float>; T<float>; T<float>]
-            "onChange"              => (O ^-> O)?callback ^-> Quaternion
-            "clone"                 => O ^-> Quaternion
-        ]
-
-    let Ray' =
-        Ray
-        |+> Static [
-            Constructor (!? Vector3?origin * !? Vector3?direction)
-        ]
-        |+> Instance [
-            "origin"    =@ Vector3
-            "direction" =@ Vector3
-
-            "set"                  => Vector3?origin * Vector3?direction ^-> Ray
-            "copy"                 => Ray?ray ^-> Ray
-            "at"                   => T<float>?t * !? Vector3?optionalTarget ^-> Vector3
-            "recast"               => T<float>?t ^-> O
-            "closestPointToPoint"  => Vector3?point * !? Vector3?optionalTarget ^-> Vector3
-            "distanceToPoint"      => Vector3?point ^-> T<float>
-            "distanceSqToSegment"  => Vector3?v0 * Vector3?v1 * !? Vector3?optionalPointOnRay * !? Vector3?optionalPointOnSegment ^-> T<float>
-            "isIntersectionSphere" => Sphere?sphere ^-> T<bool>
-            "isIntersectionPlane"  => Plane?plane ^-> T<bool>
-            "distanceToPlane"      => Plane?plane ^-> T<float>
-            "intersectPlane"       => Plane?plane * !? Vector3?optionalTarget ^-> Vector3
-            "isIntersectionBox"    => Box3?box ^-> T<bool>
-            "intersectBox"         => Box3?box * !? Vector3?optionalTarget ^-> Vector3
-            "intersectTriangle"    => Vector3?a * Vector3?b * Vector3?c * !? T<bool>?backfaceCulling * !? Vector3?optionalTarget ^-> Vector3
-            "applyMatrix4"         => Matrix4?matrix4 ^-> Ray
-            "equals"               => Ray?ray ^-> T<bool>
-            "clone"                => O ^-> Ray
-        ]
-
-    let Sphere' =
-        Sphere
-        |+> Static [
-            Constructor (!? Vector3?center * !? T<float>?radius)
-        ]
-        |+> Instance [
-            "center" =@ Vector3
-            "radius" =@ T<float>
-
-            "set"              => Vector3?center * T<float>?radius ^-> Sphere
-            "setFromPoints"    => (ArrayOf Vector3)?points * !? Vector3?optionalCenter ^-> Sphere
-            "copy"             => Sphere?sphere ^-> Sphere
-            "empty"            => O ^-> T<bool>
-            "containsPoint"    => Vector3?point ^-> T<bool>
-            "distanceToPoint"  => Vector3?point ^-> T<float>
-            "intersectsSphere" => Sphere?sphere ^-> T<bool>
-            "clampPoint"       => Vector3?point * !? Vector3?optionalTarget ^-> Vector3
-            "getBoundingBox"   => !? Box3?optionalTarget ^-> Box3
-            "applyMatrix4"     => Matrix4?matrix ^-> Sphere
-            "translate"        => Vector3?offset ^-> Sphere
-            "equals"           => Sphere?sphere ^-> T<bool>
-            "clone"            => O ^-> Sphere
-        ]
-
-    let Spline =
-        let Length =
-            Class "Length"
-            |+> Instance [
-                "chunkLengths" =? ArrayOf T<float> + T<float>
+    /// <summary>Options of a <c>MeshBasicMaterial</c>.</summary>
+    let MeshBasicMaterialParameters =
+        Pattern.Config "MeshBasicMaterialParameters" {
+            Required = []
+            Optional = [
+                "color", ColorRepresentation
+                "map", Texture.Type
+                "lightMap", Texture.Type
+                "lightMapIntensity", T<float>
+                "aoMap", Texture.Type
+                "aoMapIntensity", T<float>
+                "specularMap", Texture.Type
+                "alphaMap", Texture.Type
+                "envMap", Texture.Type
+                "combine", T<int>
+                "reflectivity", T<float>
+                "refractionRatio", T<float>
+                "wireframe", T<bool>
+                "wireframeLinewidth", T<float>
+                "wireframeLinecap", T<string>
+                "wireframeLinejoin", T<string>
+                "fog", T<bool>
+                "side", Side.Type
+                "opacity", T<float>
+                "transparent", T<bool>
+                "blending", Blending.Type
+                "depthTest", T<bool>
+                "depthWrite", T<bool>
+                "vertexColors", T<bool>
+                "toneMapped", T<bool>
             ]
-        
-        Class "THREE.Spline"
-        |+> Static [
-            Constructor (ArrayOf Vector3)?points
-        ]
-        |+> Instance [
-            "points" =@ ArrayOf Vector3
+        }
 
-            "initFromArray"            => (ArrayOf Vector3)?a ^-> O
-            "getPoint"                 => T<int>?k ^-> Vector3
-            "getControlPointsArray"    => O ^-> ArrayOf (Tuple [T<float>; T<float>; T<float>])
-            "getLength"                => !? T<int>?nSubDivisions ^-> Length
-            "reparametrizeByArcLength" => T<float>?samplingCoef ^-> O
-            "interpolate"              => T<float>?p0 * T<float>?p1 * T<float>?p2 * T<float>?p3 * T<float>?t * T<float>?t2 * T<float>?t3 ^-> T<float>
-        ]
-        |=> Nested [
-            Length
-        ]
+    /// <summary>Options of a <c>MeshStandardMaterial</c>.</summary>
+    let MeshStandardMaterialParameters =
+        Pattern.Config "MeshStandardMaterialParameters" {
+            Required = []
+            Optional = [
+                "color", ColorRepresentation
+                "roughness", T<float>
+                "metalness", T<float>
+                "map", Texture.Type
+                "lightMap", Texture.Type
+                "lightMapIntensity", T<float>
+                "aoMap", Texture.Type
+                "aoMapIntensity", T<float>
+                "emissive", ColorRepresentation
+                "emissiveIntensity", T<float>
+                "emissiveMap", Texture.Type
+                "bumpMap", Texture.Type
+                "bumpScale", T<float>
+                "normalMap", Texture.Type
+                "normalScale", Vector2.Type
+                "displacementMap", Texture.Type
+                "displacementScale", T<float>
+                "displacementBias", T<float>
+                "roughnessMap", Texture.Type
+                "metalnessMap", Texture.Type
+                "alphaMap", Texture.Type
+                "envMap", Texture.Type
+                "envMapIntensity", T<float>
+                "wireframe", T<bool>
+                "wireframeLinewidth", T<float>
+                "flatShading", T<bool>
+                "fog", T<bool>
+                "side", Side.Type
+                "opacity", T<float>
+                "transparent", T<bool>
+                "blending", Blending.Type
+                "depthTest", T<bool>
+                "depthWrite", T<bool>
+                "vertexColors", T<bool>
+                "toneMapped", T<bool>
+            ]
+        }
 
-    let Triangle =
-        Class "THREE.Triangle"
-        |+> Static [
-            Constructor (!? Vector3?a * !? Vector3?b * !? Vector3?c)
-        ]
-        |+> Instance [
-            "a" =@ Vector3
-            "c" =@ Vector3
-            "b" =@ Vector3
+    /// <summary>Options of a <c>MeshPhysicalMaterial</c>.</summary>
+    let MeshPhysicalMaterialParameters =
+        Pattern.Config "MeshPhysicalMaterialParameters" {
+            Required = []
+            Optional = [
+                "color", ColorRepresentation
+                "roughness", T<float>
+                "metalness", T<float>
+                "map", Texture.Type
+                "emissive", ColorRepresentation
+                "emissiveIntensity", T<float>
+                "normalMap", Texture.Type
+                "normalScale", Vector2.Type
+                "envMap", Texture.Type
+                "envMapIntensity", T<float>
+                "clearcoat", T<float>
+                "clearcoatMap", Texture.Type
+                "clearcoatRoughness", T<float>
+                "clearcoatRoughnessMap", Texture.Type
+                "clearcoatNormalMap", Texture.Type
+                "clearcoatNormalScale", Vector2.Type
+                "ior", T<float>
+                "sheen", T<float>
+                "sheenColor", ColorRepresentation
+                "sheenRoughness", T<float>
+                "transmission", T<float>
+                "transmissionMap", Texture.Type
+                "thickness", T<float>
+                "attenuationColor", ColorRepresentation
+                "attenuationDistance", T<float>
+                "specularIntensity", T<float>
+                "specularColor", ColorRepresentation
+                "iridescence", T<float>
+                "iridescenceIOR", T<float>
+                "iridescenceThicknessMinimum", T<float>
+                "iridescenceThicknessMaximum", T<float>
+                "anisotropy", T<float>
+                "anisotropyRotation", T<float>
+                "dispersion", T<float>
+                "wireframe", T<bool>
+                "flatShading", T<bool>
+                "fog", T<bool>
+                "side", Side.Type
+                "opacity", T<float>
+                "transparent", T<bool>
+                "blending", Blending.Type
+                "depthTest", T<bool>
+                "depthWrite", T<bool>
+                "vertexColors", T<bool>
+                "toneMapped", T<bool>
+            ]
+        }
 
-            "set"                     => Vector3?a * Vector3?b * Vector3?c ^-> TSelf
-            "setFromPointsAndIndices" => (ArrayOf Vector3)?points * T<int>?i0 * T<int>?i1 * T<int>?i2 ^-> TSelf
-            "copy"                    => TSelf?triangle ^-> TSelf
-            "area"                    => O ^-> T<float>
-            "midpoint"                => !? Vector3?optionalTarget ^-> Vector3
-            "normal"                  => !? Vector3?optionalTarget ^-> Vector3
-            "plane"                   => !? Plane?optionalTarget ^-> Plane
-            "barycoordFromPoint"      => Vector3?point * !? Vector3?optionalTarget ^-> Vector3
-            "containsPoint"           => Vector3?point ^-> T<bool>
-            "equals"                  => TSelf?triangle ^-> T<bool>
-            "clone"                   => O ^-> TSelf
-        ]
+    /// <summary>Options of a <c>MeshPhongMaterial</c>.</summary>
+    let MeshPhongMaterialParameters =
+        Pattern.Config "MeshPhongMaterialParameters" {
+            Required = []
+            Optional = [
+                "color", ColorRepresentation
+                "specular", ColorRepresentation
+                "shininess", T<float>
+                "emissive", ColorRepresentation
+                "emissiveIntensity", T<float>
+                "map", Texture.Type
+                "lightMap", Texture.Type
+                "aoMap", Texture.Type
+                "emissiveMap", Texture.Type
+                "bumpMap", Texture.Type
+                "bumpScale", T<float>
+                "normalMap", Texture.Type
+                "normalScale", Vector2.Type
+                "specularMap", Texture.Type
+                "alphaMap", Texture.Type
+                "envMap", Texture.Type
+                "envMapIntensity", T<float>
+                "reflectivity", T<float>
+                "refractionRatio", T<float>
+                "combine", T<int>
+                "wireframe", T<bool>
+                "wireframeLinewidth", T<float>
+                "flatShading", T<bool>
+                "fog", T<bool>
+                "side", Side.Type
+                "opacity", T<float>
+                "transparent", T<bool>
+                "blending", Blending.Type
+                "depthTest", T<bool>
+                "depthWrite", T<bool>
+                "vertexColors", T<bool>
+            ]
+        }
 
-    let Vector2' =
-        Vector2
+    /// <summary>Options of a <c>MeshLambertMaterial</c>.</summary>
+    let MeshLambertMaterialParameters =
+        Pattern.Config "MeshLambertMaterialParameters" {
+            Required = []
+            Optional = [
+                "color", ColorRepresentation
+                "emissive", ColorRepresentation
+                "emissiveIntensity", T<float>
+                "map", Texture.Type
+                "lightMap", Texture.Type
+                "aoMap", Texture.Type
+                "emissiveMap", Texture.Type
+                "alphaMap", Texture.Type
+                "envMap", Texture.Type
+                "combine", T<int>
+                "reflectivity", T<float>
+                "refractionRatio", T<float>
+                "wireframe", T<bool>
+                "wireframeLinewidth", T<float>
+                "flatShading", T<bool>
+                "fog", T<bool>
+                "side", Side.Type
+                "opacity", T<float>
+                "transparent", T<bool>
+                "blending", Blending.Type
+                "depthTest", T<bool>
+                "depthWrite", T<bool>
+                "vertexColors", T<bool>
+            ]
+        }
+
+    /// <summary>Options of a <c>MeshNormalMaterial</c>.</summary>
+    let MeshNormalMaterialParameters =
+        Pattern.Config "MeshNormalMaterialParameters" {
+            Required = []
+            Optional = [
+                "bumpMap", Texture.Type
+                "bumpScale", T<float>
+                "normalMap", Texture.Type
+                "normalScale", Vector2.Type
+                "displacementMap", Texture.Type
+                "displacementScale", T<float>
+                "displacementBias", T<float>
+                "wireframe", T<bool>
+                "wireframeLinewidth", T<float>
+                "flatShading", T<bool>
+                "side", Side.Type
+                "opacity", T<float>
+                "transparent", T<bool>
+                "blending", Blending.Type
+                "depthTest", T<bool>
+                "depthWrite", T<bool>
+            ]
+        }
+
+    /// <summary>Options of a <c>MeshDepthMaterial</c>.</summary>
+    let MeshDepthMaterialParameters =
+        Pattern.Config "MeshDepthMaterialParameters" {
+            Required = []
+            Optional = [
+                "map", Texture.Type
+                "alphaMap", Texture.Type
+                "displacementMap", Texture.Type
+                "displacementScale", T<float>
+                "displacementBias", T<float>
+                "wireframe", T<bool>
+                "wireframeLinewidth", T<float>
+                "side", Side.Type
+                "opacity", T<float>
+                "transparent", T<bool>
+                "blending", Blending.Type
+                "depthTest", T<bool>
+                "depthWrite", T<bool>
+            ]
+        }
+
+    /// <summary>Options of a <c>MeshToonMaterial</c>.</summary>
+    let MeshToonMaterialParameters =
+        Pattern.Config "MeshToonMaterialParameters" {
+            Required = []
+            Optional = [
+                "color", ColorRepresentation
+                "map", Texture.Type
+                "gradientMap", Texture.Type
+                "emissive", ColorRepresentation
+                "emissiveIntensity", T<float>
+                "normalMap", Texture.Type
+                "normalScale", Vector2.Type
+                "alphaMap", Texture.Type
+                "wireframe", T<bool>
+                "wireframeLinewidth", T<float>
+                "fog", T<bool>
+                "side", Side.Type
+                "opacity", T<float>
+                "transparent", T<bool>
+                "blending", Blending.Type
+                "depthTest", T<bool>
+                "depthWrite", T<bool>
+            ]
+        }
+
+    /// <summary>Options of a <c>MeshMatcapMaterial</c>.</summary>
+    let MeshMatcapMaterialParameters =
+        Pattern.Config "MeshMatcapMaterialParameters" {
+            Required = []
+            Optional = [
+                "color", ColorRepresentation
+                "matcap", Texture.Type
+                "map", Texture.Type
+                "alphaMap", Texture.Type
+                "normalMap", Texture.Type
+                "normalScale", Vector2.Type
+                "wireframe", T<bool>
+                "flatShading", T<bool>
+                "fog", T<bool>
+                "side", Side.Type
+                "opacity", T<float>
+                "transparent", T<bool>
+                "blending", Blending.Type
+                "depthTest", T<bool>
+                "depthWrite", T<bool>
+            ]
+        }
+
+    /// <summary>Options of a <c>PointsMaterial</c>.</summary>
+    let PointsMaterialParameters =
+        Pattern.Config "PointsMaterialParameters" {
+            Required = []
+            Optional = [
+                "color", ColorRepresentation
+                "map", Texture.Type
+                "alphaMap", Texture.Type
+                "size", T<float>
+                "sizeAttenuation", T<bool>
+                "fog", T<bool>
+                "opacity", T<float>
+                "transparent", T<bool>
+                "blending", Blending.Type
+                "depthTest", T<bool>
+                "depthWrite", T<bool>
+                "vertexColors", T<bool>
+            ]
+        }
+
+    /// <summary>Options of a <c>LineBasicMaterial</c>.</summary>
+    let LineBasicMaterialParameters =
+        Pattern.Config "LineBasicMaterialParameters" {
+            Required = []
+            Optional = [
+                "color", ColorRepresentation
+                "map", Texture.Type
+                "linewidth", T<float>
+                "linecap", T<string>
+                "linejoin", T<string>
+                "fog", T<bool>
+                "opacity", T<float>
+                "transparent", T<bool>
+                "blending", Blending.Type
+                "depthTest", T<bool>
+                "depthWrite", T<bool>
+                "vertexColors", T<bool>
+            ]
+        }
+
+    /// <summary>Options of a <c>LineDashedMaterial</c>.</summary>
+    let LineDashedMaterialParameters =
+        Pattern.Config "LineDashedMaterialParameters" {
+            Required = []
+            Optional = [
+                "color", ColorRepresentation
+                "map", Texture.Type
+                "scale", T<float>
+                "dashSize", T<float>
+                "gapSize", T<float>
+                "fog", T<bool>
+                "opacity", T<float>
+                "transparent", T<bool>
+                "blending", Blending.Type
+                "depthTest", T<bool>
+                "depthWrite", T<bool>
+                "vertexColors", T<bool>
+            ]
+        }
+
+    /// <summary>Options of a <c>SpriteMaterial</c>.</summary>
+    let SpriteMaterialParameters =
+        Pattern.Config "SpriteMaterialParameters" {
+            Required = []
+            Optional = [
+                "color", ColorRepresentation
+                "map", Texture.Type
+                "alphaMap", Texture.Type
+                "rotation", T<float>
+                "sizeAttenuation", T<bool>
+                "fog", T<bool>
+                "opacity", T<float>
+                "transparent", T<bool>
+                "blending", Blending.Type
+                "depthTest", T<bool>
+                "depthWrite", T<bool>
+            ]
+        }
+
+    /// <summary>Options of a <c>ShadowMaterial</c>.</summary>
+    let ShadowMaterialParameters =
+        Pattern.Config "ShadowMaterialParameters" {
+            Required = []
+            Optional = [
+                "color", ColorRepresentation
+                "fog", T<bool>
+                "opacity", T<float>
+                "transparent", T<bool>
+                "depthWrite", T<bool>
+            ]
+        }
+
+    /// <summary>Options of a <c>ShaderMaterial</c>.</summary>
+    let ShaderMaterialParameters =
+        Pattern.Config "ShaderMaterialParameters" {
+            Required = [
+                "vertexShader", T<string>
+                "fragmentShader", T<string>
+            ]
+            Optional = [
+                "uniforms", T<obj>
+                "defines", T<obj>
+                "linewidth", T<float>
+                "wireframe", T<bool>
+                "wireframeLinewidth", T<float>
+                "fog", T<bool>
+                "lights", T<bool>
+                "clipping", T<bool>
+                "glslVersion", T<string>
+                "side", Side.Type
+                "opacity", T<float>
+                "transparent", T<bool>
+                "blending", Blending.Type
+                "depthTest", T<bool>
+                "depthWrite", T<bool>
+                "vertexColors", T<bool>
+            ]
+        }
+
+    // ------------------------------------------------------------------
+    // Inheritance
+    // ------------------------------------------------------------------
+
+    Group |=> Inherits Object3D |> ignore
+    Scene |=> Inherits Object3D |> ignore
+    Camera |=> Inherits Object3D |> ignore
+    PerspectiveCamera |=> Inherits Camera |> ignore
+    OrthographicCamera |=> Inherits Camera |> ignore
+    Light |=> Inherits Object3D |> ignore
+    Mesh |=> Inherits Object3D |> ignore
+    Line |=> Inherits Object3D |> ignore
+    LineSegments |=> Inherits Line |> ignore
+    LineLoop |=> Inherits Line |> ignore
+    Points |=> Inherits Object3D |> ignore
+    Sprite |=> Inherits Object3D |> ignore
+    LOD |=> Inherits Object3D |> ignore
+    InstancedMesh |=> Inherits Mesh |> ignore
+    AmbientLight |=> Inherits Light |> ignore
+    DirectionalLight |=> Inherits Light |> ignore
+    HemisphereLight |=> Inherits Light |> ignore
+    PointLight |=> Inherits Light |> ignore
+    SpotLight |=> Inherits Light |> ignore
+    RectAreaLight |=> Inherits Light |> ignore
+    DirectionalLightShadow |=> Inherits LightShadow |> ignore
+    PointLightShadow |=> Inherits LightShadow |> ignore
+    SpotLightShadow |=> Inherits LightShadow |> ignore
+    CanvasTexture |=> Inherits Texture |> ignore
+    DataTexture |=> Inherits Texture |> ignore
+    VideoTexture |=> Inherits Texture |> ignore
+    CubeTexture |=> Inherits Texture |> ignore
+    Controls |=> Inherits EventDispatcher |> ignore
+    OrbitControls |=> Inherits Controls |> ignore
+
+    MeshBasicMaterial |=> Inherits Material |> ignore
+    MeshStandardMaterial |=> Inherits Material |> ignore
+    MeshPhysicalMaterial |=> Inherits MeshStandardMaterial |> ignore
+    MeshPhongMaterial |=> Inherits Material |> ignore
+    MeshLambertMaterial |=> Inherits Material |> ignore
+    MeshNormalMaterial |=> Inherits Material |> ignore
+    MeshDepthMaterial |=> Inherits Material |> ignore
+    MeshToonMaterial |=> Inherits Material |> ignore
+    MeshMatcapMaterial |=> Inherits Material |> ignore
+    PointsMaterial |=> Inherits Material |> ignore
+    LineBasicMaterial |=> Inherits Material |> ignore
+    LineDashedMaterial |=> Inherits LineBasicMaterial |> ignore
+    SpriteMaterial |=> Inherits Material |> ignore
+    ShadowMaterial |=> Inherits Material |> ignore
+    ShaderMaterial |=> Inherits Material |> ignore
+
+    BoxGeometry |=> Inherits BufferGeometry |> ignore
+    SphereGeometry |=> Inherits BufferGeometry |> ignore
+    PlaneGeometry |=> Inherits BufferGeometry |> ignore
+    CircleGeometry |=> Inherits BufferGeometry |> ignore
+    CylinderGeometry |=> Inherits BufferGeometry |> ignore
+    ConeGeometry |=> Inherits CylinderGeometry |> ignore
+    TorusGeometry |=> Inherits BufferGeometry |> ignore
+    TorusKnotGeometry |=> Inherits BufferGeometry |> ignore
+    RingGeometry |=> Inherits BufferGeometry |> ignore
+    CapsuleGeometry |=> Inherits LatheGeometry |> ignore
+    PolyhedronGeometry |=> Inherits BufferGeometry |> ignore
+    IcosahedronGeometry |=> Inherits PolyhedronGeometry |> ignore
+    OctahedronGeometry |=> Inherits PolyhedronGeometry |> ignore
+    TetrahedronGeometry |=> Inherits PolyhedronGeometry |> ignore
+    DodecahedronGeometry |=> Inherits PolyhedronGeometry |> ignore
+    EdgesGeometry |=> Inherits BufferGeometry |> ignore
+    WireframeGeometry |=> Inherits BufferGeometry |> ignore
+    LatheGeometry |=> Inherits BufferGeometry |> ignore
+    TubeGeometry |=> Inherits BufferGeometry |> ignore
+
+    CatmullRomCurve3 |=> Inherits Curve |> ignore
+    LineCurve3 |=> Inherits Curve |> ignore
+    QuadraticBezierCurve3 |=> Inherits Curve |> ignore
+    CubicBezierCurve3 |=> Inherits Curve |> ignore
+
+    NumberKeyframeTrack |=> Inherits KeyframeTrack |> ignore
+    VectorKeyframeTrack |=> Inherits KeyframeTrack |> ignore
+    ColorKeyframeTrack |=> Inherits KeyframeTrack |> ignore
+    QuaternionKeyframeTrack |=> Inherits KeyframeTrack |> ignore
+    BooleanKeyframeTrack |=> Inherits KeyframeTrack |> ignore
+    StringKeyframeTrack |=> Inherits KeyframeTrack |> ignore
+
+    AxesHelper |=> Inherits LineSegments |> ignore
+    GridHelper |=> Inherits LineSegments |> ignore
+    PolarGridHelper |=> Inherits LineSegments |> ignore
+    ArrowHelper |=> Inherits Object3D |> ignore
+    Box3Helper |=> Inherits LineSegments |> ignore
+    BoxHelper |=> Inherits LineSegments |> ignore
+    CameraHelper |=> Inherits LineSegments |> ignore
+    DirectionalLightHelper |=> Inherits Object3D |> ignore
+    PointLightHelper |=> Inherits Mesh |> ignore
+    SpotLightHelper |=> Inherits Object3D |> ignore
+    // ------------------------------------------------------------------
+    // Math
+    // ------------------------------------------------------------------
+
+    Vector2
         |+> Static [
             Constructor (!? T<float>?x * !? T<float>?y)
         ]
         |+> Instance [
             "x" =@ T<float>
             "y" =@ T<float>
+            "width" =@ T<float>
+            "height" =@ T<float>
 
-            "set"               => T<float>?x * T<float>?y ^-> Vector2
-            "setX"              => T<float>?x ^-> Vector2
-            "setY"              => T<float>?y ^-> Vector2
-            "setComponent"      => T<int>?index * T<float>?value ^-> O
-            "getComponent"      => T<int>?index ^-> T<float>
-            "copy"              => Vector2?v ^-> Vector2
-            "add"               => Vector2?v ^-> Vector2
-            "addVectors"        => Vector2?a * Vector2?b ^-> Vector2
-            "addScalar"         => T<float>?s ^-> Vector2
-            "sub"               => Vector2?v ^-> Vector2
-            "subVectors"        => Vector2?a * Vector2?b ^-> Vector2
-            "multiply"          => Vector2?v ^-> Vector2
-            "multiplyScalar"    => T<float>?s ^-> Vector2
-            "divide"            => Vector2?v ^-> Vector2
-            "divideScalar"      => T<float>?s ^-> Vector2
-            "min"               => Vector2?v ^-> Vector2
-            "max"               => Vector2?v ^-> Vector2
-            "clamp"             => Vector2?min * Vector2?max ^-> Vector2
-            "clampScalar"       => T<float>?minVal * T<float>?maxVal ^-> Vector2
-            "floor"             => O ^-> Vector2
-            "ceil"              => O ^-> Vector2
-            "round"             => O ^-> Vector2
-            "roundToZero"       => O ^-> Vector2
-            "negate"            => O ^-> Vector2
-            "dot"               => Vector2?v ^-> T<float>
-            "lengthSq"          => O ^-> T<float>
-            "length"            => O ^-> T<float>
-            "normalize"         => O ^-> Vector2
-            "distanceTo"        => Vector2?v ^-> T<float>
-            "distanceToSquared" => Vector2?v ^-> T<float>
-            "setLength"         => T<float>?l ^-> Vector2
-            "lerp"              => Vector2?v * T<float>?alpha ^-> Vector2
-            "equals"            => Vector2?v ^-> T<bool>
-            "fromArray"         => (Tuple [T<float>; T<float>])?array ^-> Vector2
-            "toArray"           => O ^-> Tuple [T<float>; T<float>]
-            "clone"             => O ^-> Vector2
+            "set"                   => T<float>?x * T<float>?y ^-> TSelf
+            "setScalar"             => T<float>?scalar ^-> TSelf
+            "setX"                  => T<float>?x ^-> TSelf
+            "setY"                  => T<float>?y ^-> TSelf
+            "setComponent"          => T<int>?index * T<float>?value ^-> TSelf
+            "getComponent"          => T<int>?index ^-> T<float>
+            "clone"                 => Unit ^-> TSelf
+            "copy"                  => Vector2?v ^-> TSelf
+            "add"                   => Vector2?v ^-> TSelf
+            "addScalar"             => T<float>?s ^-> TSelf
+            "addVectors"            => Vector2?a * Vector2?b ^-> TSelf
+            "addScaledVector"       => Vector2?v * T<float>?s ^-> TSelf
+            "sub"                   => Vector2?v ^-> TSelf
+            "subScalar"             => T<float>?s ^-> TSelf
+            "subVectors"            => Vector2?a * Vector2?b ^-> TSelf
+            "multiply"              => Vector2?v ^-> TSelf
+            "multiplyScalar"        => T<float>?s ^-> TSelf
+            "divide"                => Vector2?v ^-> TSelf
+            "divideScalar"          => T<float>?s ^-> TSelf
+            "min"                   => Vector2?v ^-> TSelf
+            "max"                   => Vector2?v ^-> TSelf
+            "clamp"                 => Vector2?min * Vector2?max ^-> TSelf
+            "clampScalar"           => T<float>?min * T<float>?max ^-> TSelf
+            "clampLength"           => T<float>?min * T<float>?max ^-> TSelf
+            "floor"                 => Unit ^-> TSelf
+            "ceil"                  => Unit ^-> TSelf
+            "round"                 => Unit ^-> TSelf
+            "roundToZero"           => Unit ^-> TSelf
+            "negate"                => Unit ^-> TSelf
+            "dot"                   => Vector2?v ^-> T<float>
+            "cross"                 => Vector2?v ^-> T<float>
+            "lengthSq"              => Unit ^-> T<float>
+            "length"                => Unit ^-> T<float>
+            "manhattanLength"       => Unit ^-> T<float>
+            "normalize"             => Unit ^-> TSelf
+            "angle"                 => Unit ^-> T<float>
+            "angleTo"               => Vector2?v ^-> T<float>
+            "distanceTo"            => Vector2?v ^-> T<float>
+            "distanceToSquared"     => Vector2?v ^-> T<float>
+            "manhattanDistanceTo"   => Vector2?v ^-> T<float>
+            "setLength"             => T<float>?length ^-> TSelf
+            "lerp"                  => Vector2?v * T<float>?alpha ^-> TSelf
+            "lerpVectors"           => Vector2?v1 * Vector2?v2 * T<float>?alpha ^-> TSelf
+            "equals"                => Vector2?v ^-> T<bool>
+            "fromArray"             => (!| T<float>)?array * !? T<int>?offset ^-> TSelf
+            "toArray"               => !? (!| T<float>)?array * !? T<int>?offset ^-> !| T<float>
+            "fromBufferAttribute"   => BufferAttribute?attribute * T<int>?index ^-> TSelf
+            "rotateAround"          => Vector2?center * T<float>?angle ^-> TSelf
+            "random"                => Unit ^-> TSelf
         ]
+        |> ignore
 
-    let Vector3' =
-        Vector3
+    Vector3
         |+> Static [
             Constructor (!? T<float>?x * !? T<float>?y * !? T<float>?z)
         ]
@@ -1723,65 +1168,224 @@ module Definition =
             "y" =@ T<float>
             "z" =@ T<float>
 
-            "set"                   => T<float>?x * T<float>?y * T<float>?z ^-> Vector3
-            "setX"                  => T<float>?x ^-> Vector3
-            "setY"                  => T<float>?y ^-> Vector3
-            "setZ"                  => T<float>?z ^-> Vector3
-            "setComponent"          => T<int>?index * T<float>?value ^-> Vector3
-            "getComponent"          => T<int>?index ^-> T<float>
-            "copy"                  => Vector3?v ^-> Vector3
-            "add"                   => Vector3?v ^-> Vector3
-            "addScalar"             => T<float>?s ^-> Vector3
-            "addVectors"            => Vector3?a * Vector3?b ^-> Vector3
-            "sub"                   => Vector3?v ^-> Vector3
-            "subVectors"            => Vector3?a * Vector3?b ^-> Vector3
-            "multiply"              => Vector3?v ^-> Vector3
-            "multiplyScalar"        => T<float>?s ^-> Vector3
-            "multiplyVectors"       => Vector3?a * Vector3?b ^-> Vector3
-            "applyEuler"            => Euler?euler ^-> Vector3
-            "applyAxisAngle"        => Vector3?axis * T<float>?angle ^-> Vector3
-            "applyMatrix3"          => Matrix3?m ^-> Vector3
-            "applyMatrix4"          => Matrix4?m ^-> Vector3
-            "applyProjection"       => Matrix4?m ^-> Vector3
-            "applyQuaternion"       => Quaternion?quaternion ^-> Vector3
-            "transformDirection"    => Matrix4?m ^-> Vector3
-            "divide"                => Vector3?v ^-> Vector3
-            "divideScalar"          => T<float>?s ^-> Vector3
-            "min"                   => Vector3?v ^-> Vector3
-            "max"                   => Vector3?v ^-> Vector3
-            "clamp"                 => Vector3?min * Vector3?max ^-> Vector3
-            "clampScalar"           => T<float>?minVal * T<float>?maxVal ^-> Vector3
-            "floor"                 => O ^-> Vector3
-            "ceil"                  => O ^-> Vector3
-            "round"                 => O ^-> Vector3
-            "roundToZero"           => O ^-> Vector3
-            "negate"                => O ^-> Vector3
-            "dot"                   => Vector3?v ^-> T<float>
-            "lengthSq"              => O ^-> T<float>
-            "length"                => O ^-> T<float>
-            "lengthManhattan"       => O ^-> T<float>
-            "normalize"             => O ^-> Vector3
-            "setLength"             => T<float>?l ^-> Vector3
-            "lerp"                  => Vector3?v * T<float>?alpha ^-> Vector3
-            "cross"                 => Vector3?v ^-> Vector3
-            "crossVectors"          => Vector3?a * Vector3?b ^-> Vector3
-            "projectOnVector"       => Vector3?vector ^-> Vector3
-            "projectOnPlane"        => Vector3?planeNormal ^-> Vector3
-            "reflect"               => Vector3?normal ^-> Vector3
-            "angleTo"               => Vector3?v ^-> T<float>
-            "distanceTo"            => Vector3?v ^-> T<float>
-            "distanceToSquared"     => Vector3?v ^-> T<float>
-            "setFromMatrixPosition" => Matrix4?m ^-> Vector3
-            "setFromMatrixScale"    => Matrix4?m ^-> Vector3
-            "setFromMatrixColumn"   => T<int>?index * Matrix4?matrix ^-> Vector3
-            "equals"                => Vector3?v ^-> T<bool>
-            "fromArray"             => (Tuple [T<float>; T<float>; T<float>])?array ^-> Vector3
-            "toArray"               => O ^-> Tuple [T<float>; T<float>; T<float>]
-            "clone"                 => O ^-> Vector3
+            "set"                     => T<float>?x * T<float>?y * !? T<float>?z ^-> TSelf
+            "setScalar"               => T<float>?scalar ^-> TSelf
+            "setX"                    => T<float>?x ^-> TSelf
+            "setY"                    => T<float>?y ^-> TSelf
+            "setZ"                    => T<float>?z ^-> TSelf
+            "setComponent"            => T<int>?index * T<float>?value ^-> TSelf
+            "getComponent"            => T<int>?index ^-> T<float>
+            "clone"                   => Unit ^-> TSelf
+            "copy"                    => Vector3?v ^-> TSelf
+            "add"                     => Vector3?v ^-> TSelf
+            "addScalar"               => T<float>?s ^-> TSelf
+            "addVectors"              => Vector3?a * Vector3?b ^-> TSelf
+            "addScaledVector"         => Vector3?v * T<float>?s ^-> TSelf
+            "sub"                     => Vector3?v ^-> TSelf
+            "subScalar"               => T<float>?s ^-> TSelf
+            "subVectors"              => Vector3?a * Vector3?b ^-> TSelf
+            "multiply"                => Vector3?v ^-> TSelf
+            "multiplyScalar"          => T<float>?s ^-> TSelf
+            "multiplyVectors"         => Vector3?a * Vector3?b ^-> TSelf
+            "applyEuler"              => Euler?euler ^-> TSelf
+            "applyAxisAngle"          => Vector3?axis * T<float>?angle ^-> TSelf
+            "applyNormalMatrix"       => Matrix3?m ^-> TSelf
+            "applyMatrix3"            => Matrix3?m ^-> TSelf
+            "applyMatrix4"            => Matrix4?m ^-> TSelf
+            "applyQuaternion"         => Quaternion?q ^-> TSelf
+            "project"                 => Camera?camera ^-> TSelf
+            "unproject"               => Camera?camera ^-> TSelf
+            "transformDirection"      => Matrix4?m ^-> TSelf
+            "divide"                  => Vector3?v ^-> TSelf
+            "divideScalar"            => T<float>?s ^-> TSelf
+            "min"                     => Vector3?v ^-> TSelf
+            "max"                     => Vector3?v ^-> TSelf
+            "clamp"                   => Vector3?min * Vector3?max ^-> TSelf
+            "clampScalar"             => T<float>?min * T<float>?max ^-> TSelf
+            "clampLength"             => T<float>?min * T<float>?max ^-> TSelf
+            "floor"                   => Unit ^-> TSelf
+            "ceil"                    => Unit ^-> TSelf
+            "round"                   => Unit ^-> TSelf
+            "roundToZero"             => Unit ^-> TSelf
+            "negate"                  => Unit ^-> TSelf
+            "dot"                     => Vector3?v ^-> T<float>
+            "lengthSq"                => Unit ^-> T<float>
+            "length"                  => Unit ^-> T<float>
+            "manhattanLength"         => Unit ^-> T<float>
+            "normalize"               => Unit ^-> TSelf
+            "setLength"               => T<float>?l ^-> TSelf
+            "lerp"                    => Vector3?v * T<float>?alpha ^-> TSelf
+            "lerpVectors"             => Vector3?v1 * Vector3?v2 * T<float>?alpha ^-> TSelf
+            "cross"                   => Vector3?v ^-> TSelf
+            "crossVectors"            => Vector3?a * Vector3?b ^-> TSelf
+            "projectOnVector"         => Vector3?v ^-> TSelf
+            "projectOnPlane"           => Vector3?planeNormal ^-> TSelf
+            "reflect"                 => Vector3?normal ^-> TSelf
+            "angleTo"                 => Vector3?v ^-> T<float>
+            "distanceTo"              => Vector3?v ^-> T<float>
+            "distanceToSquared"       => Vector3?v ^-> T<float>
+            "manhattanDistanceTo"     => Vector3?v ^-> T<float>
+            "setFromSpherical"        => Spherical?s ^-> TSelf
+            "setFromSphericalCoords"  => T<float>?r * T<float>?phi * T<float>?theta ^-> TSelf
+            "setFromMatrixPosition"   => Matrix4?m ^-> TSelf
+            "setFromMatrixScale"      => Matrix4?m ^-> TSelf
+            "setFromMatrixColumn"     => Matrix4?matrix * T<int>?index ^-> TSelf
+            "setFromEuler"            => Euler?e ^-> TSelf
+            "equals"                  => Vector3?v ^-> T<bool>
+            "fromArray"               => (!| T<float>)?array * !? T<int>?offset ^-> TSelf
+            "toArray"                 => !? (!| T<float>)?array * !? T<int>?offset ^-> !| T<float>
+            "fromBufferAttribute"     => BufferAttribute?attribute * T<int>?index ^-> TSelf
+            "random"                  => Unit ^-> TSelf
+            "randomDirection"         => Unit ^-> TSelf
         ]
+        |> ignore
 
-    let Vector4 =
-        Class "THREE.Vector4"
+    Vector4
+        |+> Static [
+            Constructor (!? T<float>?x * !? T<float>?y * !? T<float>?z * !? T<float>?w)
+        ]
+        |+> Instance [
+            "x" =@ T<float>
+            "y" =@ T<float>
+            "z" =@ T<float>
+            "w" =@ T<float>
+            "width" =@ T<float>
+            "height" =@ T<float>
+
+            "set"                            => T<float>?x * T<float>?y * T<float>?z * T<float>?w ^-> TSelf
+            "setScalar"                      => T<float>?scalar ^-> TSelf
+            "setX"                           => T<float>?x ^-> TSelf
+            "setY"                           => T<float>?y ^-> TSelf
+            "setZ"                           => T<float>?z ^-> TSelf
+            "setW"                           => T<float>?w ^-> TSelf
+            "setComponent"                   => T<int>?index * T<float>?value ^-> TSelf
+            "getComponent"                   => T<int>?index ^-> T<float>
+            "clone"                          => Unit ^-> TSelf
+            "copy"                           => Vector4?v ^-> TSelf
+            "add"                            => Vector4?v ^-> TSelf
+            "addScalar"                      => T<float>?s ^-> TSelf
+            "addVectors"                     => Vector4?a * Vector4?b ^-> TSelf
+            "addScaledVector"                => Vector4?v * T<float>?s ^-> TSelf
+            "sub"                            => Vector4?v ^-> TSelf
+            "subScalar"                      => T<float>?s ^-> TSelf
+            "subVectors"                     => Vector4?a * Vector4?b ^-> TSelf
+            "multiply"                       => Vector4?v ^-> TSelf
+            "multiplyScalar"                 => T<float>?s ^-> TSelf
+            "divide"                         => Vector4?v ^-> TSelf
+            "divideScalar"                   => T<float>?s ^-> TSelf
+            "setAxisAngleFromQuaternion"     => Quaternion?q ^-> TSelf
+            "setAxisAngleFromRotationMatrix" => Matrix4?m ^-> TSelf
+            "setFromMatrixPosition"          => Matrix4?m ^-> TSelf
+            "min"                            => Vector4?v ^-> TSelf
+            "max"                            => Vector4?v ^-> TSelf
+            "clamp"                          => Vector4?min * Vector4?max ^-> TSelf
+            "clampScalar"                    => T<float>?min * T<float>?max ^-> TSelf
+            "floor"                          => Unit ^-> TSelf
+            "ceil"                           => Unit ^-> TSelf
+            "round"                          => Unit ^-> TSelf
+            "roundToZero"                    => Unit ^-> TSelf
+            "negate"                         => Unit ^-> TSelf
+            "dot"                            => Vector4?v ^-> T<float>
+            "lengthSq"                       => Unit ^-> T<float>
+            "length"                         => Unit ^-> T<float>
+            "manhattanLength"                => Unit ^-> T<float>
+            "normalize"                      => Unit ^-> TSelf
+            "setLength"                      => T<float>?length ^-> TSelf
+            "lerp"                           => Vector4?v * T<float>?alpha ^-> TSelf
+            "lerpVectors"                    => Vector4?v1 * Vector4?v2 * T<float>?alpha ^-> TSelf
+            "equals"                         => Vector4?v ^-> T<bool>
+            "fromArray"                      => (!| T<float>)?array * !? T<int>?offset ^-> TSelf
+            "toArray"                        => !? (!| T<float>)?array * !? T<int>?offset ^-> !| T<float>
+            "fromBufferAttribute"            => BufferAttribute?attribute * T<int>?index ^-> TSelf
+            "random"                         => Unit ^-> TSelf
+        ]
+        |> ignore
+
+    Matrix3
+        |+> Static [
+            Constructor Unit
+            Constructor (T<float>?n11 * T<float>?n12 * T<float>?n13 * T<float>?n21 * T<float>?n22 * T<float>?n23 * T<float>?n31 * T<float>?n32 * T<float>?n33)
+        ]
+        |+> Instance [
+            "elements" =@ !| T<float>
+
+            "set"                  => T<float>?n11 * T<float>?n12 * T<float>?n13 * T<float>?n21 * T<float>?n22 * T<float>?n23 * T<float>?n31 * T<float>?n32 * T<float>?n33 ^-> TSelf
+            "identity"             => Unit ^-> TSelf
+            "copy"                 => Matrix3?m ^-> TSelf
+            "extractBasis"         => Vector3?xAxis * Vector3?yAxis * Vector3?zAxis ^-> TSelf
+            "multiply"             => Matrix3?m ^-> TSelf
+            "premultiply"          => Matrix3?m ^-> TSelf
+            "multiplyMatrices"     => Matrix3?a * Matrix3?b ^-> TSelf
+            "multiplyScalar"       => T<float>?s ^-> TSelf
+            "determinant"          => Unit ^-> T<float>
+            "invert"               => Unit ^-> TSelf
+            "transpose"            => Unit ^-> TSelf
+            "getNormalMatrix"      => Matrix4?matrix4 ^-> TSelf
+            "transposeIntoArray"   => (!| T<float>)?r ^-> TSelf
+            "setUvTransform"       => T<float>?tx * T<float>?ty * T<float>?sx * T<float>?sy * T<float>?rotation * T<float>?cx * T<float>?cy ^-> TSelf
+            "scale"                => T<float>?sx * T<float>?sy ^-> TSelf
+                                      |> ObsoleteWithMessage "Matrix3.scale is deprecated in three.js; use MakeScale."
+            "rotate"               => T<float>?theta ^-> TSelf
+                                      |> ObsoleteWithMessage "Matrix3.rotate is deprecated in three.js; use MakeRotation."
+            "translate"            => T<float>?tx * T<float>?ty ^-> TSelf
+                                      |> ObsoleteWithMessage "Matrix3.translate is deprecated in three.js; use MakeTranslation."
+            "makeTranslation"      => Vector2?v ^-> TSelf
+            "makeRotation"         => T<float>?theta ^-> TSelf
+            "makeScale"            => T<float>?x * T<float>?y ^-> TSelf
+            "equals"               => Matrix3?matrix ^-> T<bool>
+            "fromArray"            => (!| T<float>)?array * !? T<int>?offset ^-> TSelf
+            "toArray"              => Unit ^-> !| T<float>
+            "clone"                => Unit ^-> TSelf
+        ]
+        |> ignore
+
+    Matrix4
+        |+> Static [
+            Constructor Unit
+            Constructor (T<float>?n11 * T<float>?n12 * T<float>?n13 * T<float>?n14 * T<float>?n21 * T<float>?n22 * T<float>?n23 * T<float>?n24 * T<float>?n31 * T<float>?n32 * T<float>?n33 * T<float>?n34 * T<float>?n41 * T<float>?n42 * T<float>?n43 * T<float>?n44)
+        ]
+        |+> Instance [
+            "elements" =@ !| T<float>
+
+            "set"                        => T<float>?n11 * T<float>?n12 * T<float>?n13 * T<float>?n14 * T<float>?n21 * T<float>?n22 * T<float>?n23 * T<float>?n24 * T<float>?n31 * T<float>?n32 * T<float>?n33 * T<float>?n34 * T<float>?n41 * T<float>?n42 * T<float>?n43 * T<float>?n44 ^-> TSelf
+            "identity"                   => Unit ^-> TSelf
+            "clone"                      => Unit ^-> TSelf
+            "copy"                       => Matrix4?m ^-> TSelf
+            "copyPosition"               => Matrix4?m ^-> TSelf
+            "extractBasis"               => Vector3?xAxis * Vector3?yAxis * Vector3?zAxis ^-> TSelf
+            "makeBasis"                  => Vector3?xAxis * Vector3?yAxis * Vector3?zAxis ^-> TSelf
+            "extractRotation"            => Matrix4?m ^-> TSelf
+            "makeRotationFromEuler"      => Euler?euler ^-> TSelf
+            "makeRotationFromQuaternion" => Quaternion?q ^-> TSelf
+            "lookAt"                     => Vector3?eye * Vector3?target * Vector3?up ^-> TSelf
+            "multiply"                   => Matrix4?m ^-> TSelf
+            "premultiply"                => Matrix4?m ^-> TSelf
+            "multiplyMatrices"           => Matrix4?a * Matrix4?b ^-> TSelf
+            "multiplyScalar"             => T<float>?s ^-> TSelf
+            "determinant"                => Unit ^-> T<float>
+            "transpose"                  => Unit ^-> TSelf
+            "setPosition"                => Vector3?v ^-> TSelf
+            "invert"                     => Unit ^-> TSelf
+            "scale"                      => Vector3?v ^-> TSelf
+            "getMaxScaleOnAxis"          => Unit ^-> T<float>
+            "makeTranslation"            => Vector3?v ^-> TSelf
+            "makeRotationX"              => T<float>?theta ^-> TSelf
+            "makeRotationY"              => T<float>?theta ^-> TSelf
+            "makeRotationZ"              => T<float>?theta ^-> TSelf
+            "makeRotationAxis"           => Vector3?axis * T<float>?angle ^-> TSelf
+            "makeScale"                  => T<float>?x * T<float>?y * T<float>?z ^-> TSelf
+            "makeShear"                  => T<float>?xy * T<float>?xz * T<float>?yx * T<float>?yz * T<float>?zx * T<float>?zy ^-> TSelf
+            "compose"                    => Vector3?position * Quaternion?quaternion * Vector3?scale ^-> TSelf
+            "decompose"                  => Vector3?position * Quaternion?quaternion * Vector3?scale ^-> TSelf
+            "makePerspective"            => T<float>?left * T<float>?right * T<float>?top * T<float>?bottom * T<float>?near * T<float>?far ^-> TSelf
+            "makeOrthographic"           => T<float>?left * T<float>?right * T<float>?top * T<float>?bottom * T<float>?near * T<float>?far ^-> TSelf
+            "equals"                     => Matrix4?matrix ^-> T<bool>
+            "fromArray"                  => (!| T<float>)?array * !? T<int>?offset ^-> TSelf
+            "toArray"                    => Unit ^-> !| T<float>
+        ]
+        |> ignore
+
+    Quaternion
         |+> Static [
             Constructor (!? T<float>?x * !? T<float>?y * !? T<float>?z * !? T<float>?w)
         ]
@@ -1791,1060 +1395,2180 @@ module Definition =
             "z" =@ T<float>
             "w" =@ T<float>
 
-            "set"                            => T<float>?x * T<float>?y * T<float>?z * T<float>?w ^-> TSelf
-            "setX"                           => T<float>?x ^-> TSelf
-            "setY"                           => T<float>?y ^-> TSelf
-            "setZ"                           => T<float>?z ^-> TSelf
-            "setW"                           => T<float>?w ^-> TSelf
-            "setComponent"                   => T<int>?index * T<float>?value ^-> O
-            "getComponent"                   => T<int>?index ^-> T<float>
-            "copy"                           => TSelf?v ^-> TSelf
-            "add"                            => TSelf?v ^-> TSelf
-            "addScalar"                      => T<float>?s ^-> TSelf
-            "addVectors"                     => TSelf?a * TSelf?b ^-> TSelf
-            "sub"                            => TSelf?v ^-> TSelf
-            "subVectors"                     => TSelf?a * TSelf?b ^-> TSelf
-            "multiplyScalar"                 => T<float>?s ^-> TSelf
-            "applyMatrix4"                   => Matrix4?m ^-> TSelf
-            "divideScalar"                   => T<float>?s ^-> TSelf
-            "setAxisAngleFromQuaternion"     => Quaternion?q ^-> TSelf
-            "setAxisAngleFromRotationMatrix" => Matrix4?m ^-> TSelf
-            "min"                            => TSelf?v ^-> TSelf
-            "max"                            => TSelf?v ^-> TSelf
-            "clamp"                          => TSelf?min * TSelf?max ^-> TSelf
-            "clampScalar"                    => T<float>?minVal * T<float>?maxVal ^-> TSelf
-            "floor"                          => O ^-> TSelf
-            "ceil"                           => O ^-> TSelf
-            "round"                          => O ^-> TSelf
-            "roundToZero"                    => O ^-> TSelf
-            "negate"                         => O ^-> TSelf
-            "dot"                            => TSelf?v ^-> T<float>
-            "lengthSq"                       => O ^-> T<float>
-            "length"                         => O ^-> T<float>
-            "lengthManhattan"                => O ^-> T<float>
-            "normalize"                      => O ^-> TSelf
-            "setLength"                      => T<float>?l ^-> TSelf
-            "lerp"                           => TSelf?v * T<float>?alpha ^-> TSelf
-            "equals"                         => TSelf?v ^-> T<bool>
-            "fromArray"                      => (Tuple [T<float>; T<float>; T<float>; T<float>])?array ^-> TSelf
-            "toArray"                        => O ^-> Tuple [T<float>; T<float>; T<float>; T<float>]
-            "clone"                          => O ^-> TSelf
+            "set"                   => T<float>?x * T<float>?y * T<float>?z * T<float>?w ^-> TSelf
+            "clone"                 => Unit ^-> TSelf
+            "copy"                  => Quaternion?q ^-> TSelf
+            "setFromEuler"          => Euler?euler * !? T<bool>?update ^-> TSelf
+            "setFromAxisAngle"      => Vector3?axis * T<float>?angle ^-> TSelf
+            "setFromRotationMatrix" => Matrix4?m ^-> TSelf
+            "setFromUnitVectors"    => Vector3?vFrom * Vector3?vTo ^-> TSelf
+            "angleTo"               => Quaternion?q ^-> T<float>
+            "rotateTowards"         => Quaternion?q * T<float>?step ^-> TSelf
+            "identity"              => Unit ^-> TSelf
+            "invert"                => Unit ^-> TSelf
+            "conjugate"             => Unit ^-> TSelf
+            "dot"                   => Quaternion?v ^-> T<float>
+            "lengthSq"              => Unit ^-> T<float>
+            "length"                => Unit ^-> T<float>
+            "normalize"             => Unit ^-> TSelf
+            "multiply"              => Quaternion?q ^-> TSelf
+            "premultiply"           => Quaternion?q ^-> TSelf
+            "multiplyQuaternions"   => Quaternion?a * Quaternion?b ^-> TSelf
+            "slerp"                 => Quaternion?qb * T<float>?t ^-> TSelf
+            "slerpQuaternions"      => Quaternion?qa * Quaternion?qb * T<float>?t ^-> TSelf
+            "equals"                => Quaternion?v ^-> T<bool>
+            "fromArray"             => (!| T<float>)?array * !? T<int>?offset ^-> TSelf
+            "toArray"               => Unit ^-> !| T<float>
+            "random"                => Unit ^-> TSelf
         ]
-    
-    let SkinnedMesh = Class "THREE.SkinnedMesh"
+        |> ignore
 
-    let Bone =
-        Class "THREE.Bone"
-        |=> Inherits Object3D
+    Euler
         |+> Static [
-            Constructor (SkinnedMesh?belongsToSkin)
+            Constructor (!? T<float>?x * !? T<float>?y * !? T<float>?z * !? T<string>?order)
         ]
         |+> Instance [
-            "skin"                 =@ SkinnedMesh
-            "skinMatrix"           =@ Matrix4
-            "accumulatedRotWeight" =@ T<float>
-            "accumulatedPosWeight" =@ T<float>
-            "accumulatedSclWeight" =@ T<float>
+            "x" =@ T<float>
+            "y" =@ T<float>
+            "z" =@ T<float>
+            "order" =@ T<string>
 
-            "update" => Matrix4?parentSkinMatrix * !? T<bool>?forceUpdate ^-> O
+            "set"                   => T<float>?x * T<float>?y * T<float>?z * !? T<string>?order ^-> TSelf
+            "clone"                 => Unit ^-> TSelf
+            "copy"                  => Euler?euler ^-> TSelf
+            "setFromRotationMatrix" => Matrix4?m * !? T<string>?order * !? T<bool>?update ^-> TSelf
+            "setFromQuaternion"     => Quaternion?q * !? T<string>?order * !? T<bool>?update ^-> TSelf
+            "setFromVector3"        => Vector3?v ^-> TSelf
+            "reorder"               => T<string>?newOrder ^-> TSelf
+            "equals"                => Euler?euler ^-> T<bool>
+            "fromArray"             => (!| T<float>)?array ^-> TSelf
+            "toArray"               => Unit ^-> !| T<float>
         ]
+        |> ignore
 
-    let Line =
-        Class "THREE.Line"
-        |=> Inherits Object3D
+    Color
         |+> Static [
-            Constructor (!? Geometry?geometry * !? Material?material * !? T<int>?``type``)
+            Constructor (!? ColorRepresentation?color)
+            Constructor (T<float>?r * T<float>?g * T<float>?b)
         ]
         |+> Instance [
-            "geometry" =@ Geometry
-            "material" =@ Material
-            "type"     =@ T<int>
+            "r" =@ T<float>
+            "g" =@ T<float>
+            "b" =@ T<float>
 
-            "clone" => !? TSelf?``object`` ^-> TSelf
+            "set"                 => ColorRepresentation?value ^-> TSelf
+            "setScalar"           => T<float>?scalar ^-> TSelf
+            "setHex"              => T<int>?hex ^-> TSelf
+            "setRGB"              => T<float>?r * T<float>?g * T<float>?b ^-> TSelf
+            "setHSL"              => T<float>?h * T<float>?s * T<float>?l ^-> TSelf
+            "setStyle"            => T<string>?style ^-> TSelf
+            "setColorName"        => T<string>?style ^-> TSelf
+            "clone"               => Unit ^-> TSelf
+            "copy"                => Color?color ^-> TSelf
+            "convertSRGBToLinear" => Unit ^-> TSelf
+            "convertLinearToSRGB" => Unit ^-> TSelf
+            "getHex"              => Unit ^-> T<int>
+            "getHexString"        => Unit ^-> T<string>
+            "getHSL"              => HSL?target ^-> HSL
+            "getRGB"              => RGB?target ^-> RGB
+            "getStyle"            => Unit ^-> T<string>
+            "offsetHSL"           => T<float>?h * T<float>?s * T<float>?l ^-> TSelf
+            "add"                 => Color?color ^-> TSelf
+            "addColors"           => Color?color1 * Color?color2 ^-> TSelf
+            "addScalar"           => T<float>?s ^-> TSelf
+            "multiply"            => Color?color ^-> TSelf
+            "multiplyScalar"      => T<float>?s ^-> TSelf
+            "lerp"                => Color?color * T<float>?alpha ^-> TSelf
+            "lerpColors"          => Color?color1 * Color?color2 * T<float>?alpha ^-> TSelf
+            "lerpHSL"             => Color?color * T<float>?alpha ^-> TSelf
+            "equals"              => Color?color ^-> T<bool>
+            "fromArray"           => (!| T<float>)?array * !? T<int>?offset ^-> TSelf
+            "toArray"             => !? (!| T<float>)?array * !? T<int>?offset ^-> !| T<float>
         ]
-    
-    let LOD =
-        Class "THREE.LOD"
-        |=> Inherits Object3D
+        |> ignore
+
+    Box2
         |+> Static [
-            Constructor O
+            Constructor (!? Vector2?min * !? Vector2?max)
         ]
         |+> Instance [
-            "objects" =@ ArrayOf Object3D
+            "min" =@ Vector2
+            "max" =@ Vector2
 
-            "addLevel"             => Object3D?``object`` * !? T<float>?distance ^-> O
-            "getObjectForDistance" => T<float>?distance ^-> Object3D
-            "update"               => Camera?camera ^-> O
-            "clone"                => !? TSelf?``object`` ^-> TSelf
+            "set"                  => Vector2?min * Vector2?max ^-> TSelf
+            "setFromPoints"        => (!| Vector2)?points ^-> TSelf
+            "setFromCenterAndSize" => Vector2?center * Vector2?size ^-> TSelf
+            "clone"                => Unit ^-> TSelf
+            "copy"                 => Box2?box ^-> TSelf
+            "makeEmpty"            => Unit ^-> TSelf
+            "isEmpty"              => Unit ^-> T<bool>
+            "getCenter"            => Vector2?target ^-> Vector2
+            "getSize"              => Vector2?target ^-> Vector2
+            "expandByPoint"        => Vector2?point ^-> TSelf
+            "expandByVector"       => Vector2?vector ^-> TSelf
+            "expandByScalar"       => T<float>?scalar ^-> TSelf
+            "containsPoint"        => Vector2?point ^-> T<bool>
+            "containsBox"          => Box2?box ^-> T<bool>
+            "getParameter"         => Vector2?point * Vector2?target ^-> Vector2
+            "intersectsBox"        => Box2?box ^-> T<bool>
+            "clampPoint"           => Vector2?point * Vector2?target ^-> Vector2
+            "distanceToPoint"      => Vector2?point ^-> T<float>
+            "intersect"            => Box2?box ^-> TSelf
+            "union"                => Box2?box ^-> TSelf
+            "translate"            => Vector2?offset ^-> TSelf
+            "equals"               => Box2?box ^-> T<bool>
         ]
-    
-    let Mesh =
-        Class "THREE.Mesh"
-        |=> Inherits Object3D
+        |> ignore
+
+    Box3
         |+> Static [
-            Constructor (!? Geometry?geometry * !? Material?material)
+            Constructor (!? Vector3?min * !? Vector3?max)
         ]
         |+> Instance [
-            "geometry" =@ Geometry
-            "material" =@ Material
+            "min" =@ Vector3
+            "max" =@ Vector3
 
-            "updateMorphTargets"        => O ^-> O
-            "getMorphTargetIndexByName" => T<string>?name ^-> T<int>
-            "clone"                     => !? TSelf?``object`` * !? T<bool>?``recursive`` ^-> TSelf
-            
+            "set"                  => Vector3?min * Vector3?max ^-> TSelf
+            "setFromArray"         => (!| T<float>)?array ^-> TSelf
+            "setFromBufferAttribute" => BufferAttribute?attribute ^-> TSelf
+            "setFromPoints"        => (!| Vector3)?points ^-> TSelf
+            "setFromCenterAndSize" => Vector3?center * Vector3?size ^-> TSelf
+            "setFromObject"        => Object3D?``object`` * !? T<bool>?precise ^-> TSelf
+            "clone"                => Unit ^-> TSelf
+            "copy"                 => Box3?box ^-> TSelf
+            "makeEmpty"            => Unit ^-> TSelf
+            "isEmpty"              => Unit ^-> T<bool>
+            "getCenter"            => Vector3?target ^-> Vector3
+            "getSize"              => Vector3?target ^-> Vector3
+            "expandByPoint"        => Vector3?point ^-> TSelf
+            "expandByVector"       => Vector3?vector ^-> TSelf
+            "expandByScalar"       => T<float>?scalar ^-> TSelf
+            "expandByObject"       => Object3D?``object`` * !? T<bool>?precise ^-> TSelf
+            "containsPoint"        => Vector3?point ^-> T<bool>
+            "containsBox"          => Box3?box ^-> T<bool>
+            "getParameter"         => Vector3?point * Vector3?target ^-> Vector3
+            "intersectsBox"        => Box3?box ^-> T<bool>
+            "intersectsSphere"     => Sphere?sphere ^-> T<bool>
+            "intersectsPlane"      => Plane?plane ^-> T<bool>
+            "intersectsTriangle"   => Triangle?triangle ^-> T<bool>
+            "clampPoint"           => Vector3?point * Vector3?target ^-> Vector3
+            "distanceToPoint"      => Vector3?point ^-> T<float>
+            "getBoundingSphere"    => Sphere?target ^-> Sphere
+            "intersect"            => Box3?box ^-> TSelf
+            "union"                => Box3?box ^-> TSelf
+            "translate"            => Vector3?offset ^-> TSelf
+            "equals"               => Box3?box ^-> T<bool>
         ]
+        |> ignore
 
-    let MorphAnimMesh =
-        Class "THREE.MorphAnimMesh"
-        |=> Inherits Mesh
+    Sphere
         |+> Static [
-            Constructor (Geometry?geometry * Material?material)
+            Constructor (!? Vector3?center * !? T<float>?radius)
         ]
         |+> Instance [
-            "duration"     =@ T<int>
-            "mirroredLoop" =@ T<bool>
-            "time"         =@ T<int>
+            "center" =@ Vector3
+            "radius" =@ T<float>
 
-            "setFrameRange"        => T<int>?start * T<int>?``end`` ^-> O
-            "setDirectionForward"  => O ^-> O
-            "setDirectionBackward" => O ^-> O
-            "parseAnimations"      => O ^-> O
-            "setAnimationLabel"    => T<string>?label * T<int>?start * T<int>?``end`` ^-> O
-            "playAnimation"        => T<string>?label * T<int>?fps ^-> O
-            "updateAnimation"      => T<int>?delta ^-> O
-            "clone"                => !? TSelf?``object`` ^-> TSelf
+            "set"              => Vector3?center * T<float>?radius ^-> TSelf
+            "setFromPoints"    => (!| Vector3)?points * !? Vector3?optionalCenter ^-> TSelf
+            "clone"            => Unit ^-> TSelf
+            "copy"             => Sphere?sphere ^-> TSelf
+            "expandByPoint"    => Vector3?point ^-> TSelf
+            "isEmpty"          => Unit ^-> T<bool>
+            "makeEmpty"        => Unit ^-> TSelf
+            "containsPoint"    => Vector3?point ^-> T<bool>
+            "distanceToPoint"  => Vector3?point ^-> T<float>
+            "intersectsSphere" => Sphere?sphere ^-> T<bool>
+            "intersectsBox"    => Box3?box ^-> T<bool>
+            "intersectsPlane"  => Plane?plane ^-> T<bool>
+            "clampPoint"       => Vector3?point * Vector3?target ^-> Vector3
+            "getBoundingBox"   => Box3?target ^-> Box3
+            "translate"        => Vector3?offset ^-> TSelf
+            "equals"           => Sphere?sphere ^-> T<bool>
+            "union"            => Sphere?sphere ^-> TSelf
         ]
+        |> ignore
 
-    let ParticleSystem =
-        Class "THREE.ParticleSystem"
-        |=> Inherits Object3D
+    Plane
         |+> Static [
-            Constructor (!? Geometry?geometry * !? Material?material)
+            Constructor (!? Vector3?normal * !? T<float>?constant)
         ]
         |+> Instance [
-            "geometry"       =@ Geometry
-            "material"       =@ Material
-            "sortParticles"  =@ T<bool>
-            "frustrumCulled" =@ T<bool>
+            "normal" =@ Vector3
+            "constant" =@ T<float>
 
-            "clone" => !? TSelf ^-> TSelf
+            "set"                         => Vector3?normal * T<float>?constant ^-> TSelf
+            "setComponents"               => T<float>?x * T<float>?y * T<float>?z * T<float>?w ^-> TSelf
+            "setFromNormalAndCoplanarPoint" => Vector3?normal * Vector3?point ^-> TSelf
+            "setFromCoplanarPoints"       => Vector3?a * Vector3?b * Vector3?c ^-> TSelf
+            "clone"                       => Unit ^-> TSelf
+            "copy"                        => Plane?plane ^-> TSelf
+            "normalize"                   => Unit ^-> TSelf
+            "negate"                      => Unit ^-> TSelf
+            "distanceToPoint"             => Vector3?point ^-> T<float>
+            "distanceToSphere"            => Sphere?sphere ^-> T<float>
+            "projectPoint"                => Vector3?point * Vector3?target ^-> Vector3
+            "intersectLine"               => Line3?line * Vector3?target * !? T<bool>?clampToLine ^-> Vector3
+            "intersectsLine"              => Line3?line ^-> T<bool>
+            "intersectsBox"               => Box3?box ^-> T<bool>
+            "intersectsSphere"            => Sphere?sphere ^-> T<bool>
+            "coplanarPoint"               => Vector3?target ^-> Vector3
+            "applyMatrix4"                => Matrix4?matrix * !? Matrix3?optionalNormalMatrix ^-> TSelf
+            "translate"                   => Vector3?offset ^-> TSelf
+            "equals"                      => Plane?plane ^-> T<bool>
         ]
+        |> ignore
 
-    let SkinnedMesh' =
-        SkinnedMesh
-        |=> Inherits Mesh
+    Ray
         |+> Static [
-            Constructor (Geometry?geometry * Material?material * T<bool>?useVertexTexture)
+            Constructor (!? Vector3?origin * !? Vector3?direction)
         ]
         |+> Instance [
-            "skeleton"       =@ T<obj>
-            "identityMatrix" =@ Matrix4
+            "origin" =@ Vector3
+            "direction" =@ Vector3
 
-            "updateMatrixWorld"    => T<bool>?force ^-> O
-            "pose"                 => O ^-> O
-            "normalizeSkinWeights" => O ^-> O
-            "clone"                => !? SkinnedMesh?``object`` ^-> SkinnedMesh
+            "set"                  => Vector3?origin * Vector3?direction ^-> TSelf
+            "clone"                => Unit ^-> TSelf
+            "copy"                 => Ray?ray ^-> TSelf
+            "at"                   => T<float>?t * Vector3?target ^-> Vector3
+            "lookAt"               => Vector3?v ^-> TSelf
+            "recast"               => T<float>?t ^-> TSelf
+            "closestPointToPoint"  => Vector3?point * Vector3?target ^-> Vector3
+            "distanceToPoint"      => Vector3?point ^-> T<float>
+            "distanceSqToPoint"    => Vector3?point ^-> T<float>
+            "distanceSqToSegment"  => Vector3?v0 * Vector3?v1 * !? Vector3?optionalPointOnRay * !? Vector3?optionalPointOnSegment ^-> T<float>
+            "intersectSphere"      => Sphere?sphere * Vector3?target ^-> Vector3
+            "intersectsSphere"     => Sphere?sphere ^-> T<bool>
+            "distanceToPlane"      => Plane?plane ^-> T<float>
+            "intersectPlane"       => Plane?plane * Vector3?target ^-> Vector3
+            "intersectsPlane"      => Plane?plane ^-> T<bool>
+            "intersectBox"         => Box3?box * Vector3?target ^-> Vector3
+            "intersectsBox"        => Box3?box ^-> T<bool>
+            "intersectTriangle"    => Vector3?a * Vector3?b * Vector3?c * T<bool>?backfaceCulling * Vector3?target ^-> Vector3
+            "equals"               => Ray?ray ^-> T<bool>
         ]
+        |> ignore
 
-    let Sprite =
-        Class "THREE.Sprite"
-        |=> Inherits Object3D
+    Line3
         |+> Static [
-            Constructor (!? Material?material)
+            Constructor (!? Vector3?start * !? Vector3?``end``)
         ]
         |+> Instance [
-            "geometry" =@ Geometry
-            "material" =@ SpriteMaterial
+            "start" =@ Vector3
+            "end" =@ Vector3
 
-            "updateMatrix" => O ^-> O
-            "clone"        => !? TSelf?``object`` ^-> TSelf
+            "set"                          => Vector3?start * Vector3?``end`` ^-> TSelf
+            "clone"                        => Unit ^-> TSelf
+            "copy"                         => Line3?line ^-> TSelf
+            "getCenter"                    => Vector3?target ^-> Vector3
+            "delta"                        => Vector3?target ^-> Vector3
+            "distanceSq"                   => Unit ^-> T<float>
+            "distance"                     => Unit ^-> T<float>
+            "at"                           => T<float>?t * Vector3?target ^-> Vector3
+            "closestPointToPointParameter" => Vector3?point * !? T<bool>?clampToLine ^-> T<float>
+            "closestPointToPoint"          => Vector3?point * T<bool>?clampToLine * Vector3?target ^-> Vector3
+            "equals"                       => Line3?line ^-> T<bool>
         ]
+        |> ignore
 
-    let CanvasRendererConfiguration =
-        Pattern.Config "CanvasRendererConfiguration" {
-            Required = []
-            Optional =
-            [
-                "canvas"          , T<Element>
-                "devicePixelRatio", T<float>
-            ]
-        }
-
-    let CanvasRenderer =
-        Class "THREE.CanvasRenderer"
+    Triangle
         |+> Static [
-            Constructor !? CanvasRendererConfiguration?parameters
+            Constructor (!? Vector3?a * !? Vector3?b * !? Vector3?c)
+            "getNormal"       => Vector3?a * Vector3?b * Vector3?c * Vector3?target ^-> Vector3
+            "getBarycoord"    => Vector3?point * Vector3?a * Vector3?b * Vector3?c * Vector3?target ^-> Vector3
+            "containsPoint"   => Vector3?point * Vector3?a * Vector3?b * Vector3?c ^-> T<bool>
+            "isFrontFacing"   => Vector3?a * Vector3?b * Vector3?c * Vector3?direction ^-> T<bool>
         ]
         |+> Instance [
-            "domElement"       =@ T<Element>
-            "devicePixelRatio" =@ T<float>
-            "autoClear"        =@ T<bool>
-            "sortObjects"      =@ T<bool>
-            "sortElements"     =@ T<bool>
-            "info"             =@ T<obj>
-            
-            "setSize"                => T<int>?width * T<int>?height * !? T<bool>?updateStyle ^-> O
-            "setViewport"            => T<float>?x * T<float>?y * T<float>?width * T<float>?height ^-> O
-            "setClearColor"          => Color?color * !? T<float>?alpha ^-> O
-            "getMaxAnisotropy"       => O ^-> T<int>
-            "clear"                  => O ^-> O
-            "render"                 => Scene?scene * Camera?camera ^-> O
+            "a" =@ Vector3
+            "b" =@ Vector3
+            "c" =@ Vector3
+
+            "set"                     => Vector3?a * Vector3?b * Vector3?c ^-> TSelf
+            "setFromPointsAndIndices" => (!| Vector3)?points * T<int>?i0 * T<int>?i1 * T<int>?i2 ^-> TSelf
+            "clone"                   => Unit ^-> TSelf
+            "copy"                    => Triangle?triangle ^-> TSelf
+            "getArea"                 => Unit ^-> T<float>
+            "getMidpoint"             => Vector3?target ^-> Vector3
+            "getNormal"               => Vector3?target ^-> Vector3
+            "getPlane"                => Plane?target ^-> Plane
+            "getBarycoord"            => Vector3?point * Vector3?target ^-> Vector3
+            "containsPoint"           => Vector3?point ^-> T<bool>
+            "intersectsBox"           => Box3?box ^-> T<bool>
+            "isFrontFacing"           => Vector3?direction ^-> T<bool>
+            "closestPointToPoint"     => Vector3?point * Vector3?target ^-> Vector3
+            "equals"                  => Triangle?triangle ^-> T<bool>
         ]
-    
-    let WebGLRendererPrecision =
-        Pattern.EnumStrings "WebGLRendererPrecision" [
-            "lowp"
-            "mediump"
-            "highp"
-        ]
+        |> ignore
 
-    let WebGLRendererConfiguration =
-        Pattern.Config "WebGLRendererConfiguration" {
-            Required = []
-            Optional =
-            [
-                "canvas"               , T<Element>
-                "precision"            , WebGLRendererPrecision.Type
-                "alpha"                , T<bool>
-                "premultipliedAlpha"   , T<bool>
-                "antialias"            , T<bool>
-                "stencil"              , T<bool>
-                "preserveDrawingBuffer", T<bool>
-                "maxLights"            , T<int>
-            ]
-        }
-
-    let ShadowMapPlugin   = Type.New ()
-    let Fog               = Type.New ()
-    let WebGLRenderTarget = Type.New ()
-
-    let MemoryInfo =
-        Class "MemoryInfo"
-        |+> Instance [
-            "programs"   =@ T<int>
-            "geometries" =@ T<int>
-            "textures"   =@ T<int>
-        ]
-
-    let RenderInfo =
-        Class "RenderInfo"
-        |+> Instance [
-            "calls"    =@ T<int>
-            "vertices" =@ T<int>
-            "faces"    =@ T<int>
-            "points"   =@ T<int>
-        ]
-
-    let Info =
-        Class "Info"
-        |+> Instance [
-            "memory" =@ MemoryInfo
-            "render" =@ RenderInfo
-        ]
-
-    let WebGLRenderer =
-        Class "THREE.WebGLRenderer"
+    Frustum
         |+> Static [
-            Constructor !? WebGLRendererConfiguration?parameters
+            Constructor (!? Plane?p0 * !? Plane?p1 * !? Plane?p2 * !? Plane?p3 * !? Plane?p4 * !? Plane?p5)
         ]
         |+> Instance [
-            "domElement"          =@ T<Element>
-            "context"             =@ T<JavaScript.WebGL.RenderingContext>
-            "devicePixelRatio"    =@ T<float>
-            "autoClear"           =@ T<bool>
-            "autoClearColor"      =@ T<bool>
-            "autoClearDepth"      =@ T<bool>
-            "autoClearStencil"    =@ T<bool>
-            "sortObjects"         =@ T<bool>
-            "autoUpdateObjects"   =@ T<bool>
-            "gammaInput"          =@ T<bool>
-            "gammaOutput"         =@ T<bool>
-            "shadowMapEnabled"    =@ T<bool>
-            "shadowMapAutoUpdate" =@ T<bool>
-            "shadowMapType"       =@ T<int>
-            "shadowMapCullFace"   =@ T<int>
-            "shadowMapDebug"      =@ T<bool>
-            "shadowMapCascade"    =@ T<bool>
-            "maxMorphTargets"     =@ T<int>
-            "maxMorphNormals"     =@ T<int>
-            "autoScaleCubemaps"   =@ T<bool>
-            "renderPluginsPre"    =@ ArrayOf T<obj>
-            "renderPluginsPost"   =@ ArrayOf T<obj>
-            "info"                =@ Info
-            "shadowMapPlugin"     =@ ShadowMapPlugin
-            
+            "planes" =@ !| Plane
 
-            "getContext"                      => O ^-> T<JavaScript.WebGL.RenderingContext>
-            "supportsVertexTextures"          => O ^-> T<bool>
-            "supportsFloatTextures"           => O ^-> T<bool>
-            "supportsStandardDerivatives"     => O ^-> T<bool>
-            "supportsCompressedTextureS3TC"   => O ^-> T<bool>
-            "getMaxAnisotropy"                => O ^-> T<int>
-            "getPrecision"                    => O ^-> T<string>
-            "setSize"                         => T<int>?width * T<int>?height * !? T<bool>?updateStyle ^-> O
-            "setViewport"                     => T<float>?x * T<float>?y * T<float>?width * T<float>?height ^-> O
-            "setScissor"                      => T<float>?x * T<float>?y * T<float>?width * T<float>?height ^-> O
-            "enableScissorTest"               => T<bool>?enable ^-> O
-            "setClearColor"                   => Color?color * !? T<float>?alpha ^-> O
-            "getClearColor"                   => O ^-> Color
-            "getClearAlpha"                   => O ^-> T<float>
-            "clear"                           => !? T<bool>?color * !? T<bool>?depth * !? T<bool>?stencil ^-> O
-            "clearColor"                      => O ^-> O
-            "clearDepth"                      => O ^-> O
-            "clearStencil"                    => O ^-> O
-            "clearTarget"                     => WebGLRenderTarget?renderTarget * T<bool>?color * T<bool>?depth * T<bool>?stencil ^-> O
-            "addPostPlugin"                   => T<obj> ^-> O
-            "addPrePlugin"                    => T<obj> ^-> O
-            "updateShadowMap"                 => Scene?scene * Camera?camera ^-> O
-            "renderBufferImmediate"           => Object3D?``object`` * T<obj>?program * Material?material ^-> O
-            "renderBufferDirect"              => Camera?camera * (ArrayOf Light)?lights * Fog?fog * Material?material * T<obj>?geometry * Object3D?``object`` ^-> O
-            "renderBuffer"                    => Camera?camera * (ArrayOf Light)?lights * Fog?fog * Material?material * T<obj>?geometryGroup * Object3D?``object`` ^-> O
-            "render"                          => Scene?scene * Camera?camera * !? T<obj>?renderTarget * !? T<bool>?forceClear ^-> O
-            "renderImmediateObject"           => Camera?camera * (ArrayOf Light)?lights * Fog?fog * Material?material * Object3D?``object`` ^-> O
-            "initWebGLObjects"                => Scene?scene ^-> O
-            "initMaterial"                    => Material?material * (ArrayOf Light)?lights * Fog?fog * Object3D?``object`` ^-> O
-            "setFaceCulling"                  => T<int>?cullFace * T<int>?frontFaceDirection ^-> O
-            "setMaterialFaces"                => Material?material ^-> O
-            "setDepthTest"                    => T<bool>?depthTest ^-> O
-            "setDepthWrite"                   => T<bool>?depthWrite ^-> O
-            "setBlending"                     => T<int>?blending * T<int>?blendEquation * T<int>?blendSrc * T<int>?blendDst ^-> O
-            "setTexture"                      => Texture?texture * T<int>?slot ^-> O
-            "setRenderTarget"                 => WebGLRenderTarget?renderTarget ^-> O
+            "set"                     => Plane?p0 * Plane?p1 * Plane?p2 * Plane?p3 * Plane?p4 * Plane?p5 ^-> TSelf
+            "clone"                   => Unit ^-> TSelf
+            "copy"                    => Frustum?frustum ^-> TSelf
+            "setFromProjectionMatrix" => Matrix4?m ^-> TSelf
+            "intersectsObject"        => Object3D?``object`` ^-> T<bool>
+            "intersectsSphere"        => Sphere?sphere ^-> T<bool>
+            "intersectsBox"           => Box3?box ^-> T<bool>
+            "containsPoint"           => Vector3?point ^-> T<bool>
         ]
-    
-    let WebGLRenderTargetClass =
-        Class "THREE.WebGLRenderTarget"
-        |=> WebGLRenderTarget
-        |=> Inherits EventDispatcher
+        |> ignore
+
+    Spherical
         |+> Static [
-            Constructor (T<float>?width * T<float>?height * !? T<obj>?options)
+            Constructor (!? T<float>?radius * !? T<float>?phi * !? T<float>?theta)
         ]
         |+> Instance [
-            "wrapS"           =@ T<int>
-            "wrapT"           =@ T<int>
-            "magFilter"       =@ T<int>
-            "minFilter"       =@ T<int>
-            "anisotropy"      =@ T<float>
-            "offset"          =@ Vector2
-            "repeat"          =@ Vector2
-            "format"          =@ T<int>
-            "type"            =@ T<int>
-            "depthBuffer"     =@ T<bool>
-            "stencilBuffer"   =@ T<bool>
+            "radius" =@ T<float>
+            "phi" =@ T<float>
+            "theta" =@ T<float>
+
+            "set"                   => T<float>?radius * T<float>?phi * T<float>?theta ^-> TSelf
+            "clone"                 => Unit ^-> TSelf
+            "copy"                  => Spherical?other ^-> TSelf
+            "makeSafe"              => Unit ^-> TSelf
+            "setFromCartesianCoords" => T<float>?x * T<float>?y * T<float>?z ^-> TSelf
+        ]
+        |> ignore
+
+    MathUtils
+        |+> Static [
+            "generateUUID"    => Unit ^-> T<string>
+            "clamp"           => T<float>?value * T<float>?min * T<float>?max ^-> T<float>
+            "euclideanModulo" => T<float>?n * T<float>?m ^-> T<float>
+            "mapLinear"       => T<float>?x * T<float>?a1 * T<float>?a2 * T<float>?b1 * T<float>?b2 ^-> T<float>
+            "inverseLerp"     => T<float>?x * T<float>?y * T<float>?value ^-> T<float>
+            "lerp"            => T<float>?x * T<float>?y * T<float>?t ^-> T<float>
+            "damp"            => T<float>?x * T<float>?y * T<float>?lambda * T<float>?dt ^-> T<float>
+            "pingpong"        => T<float>?x * T<float>?length ^-> T<float>
+            "smoothstep"      => T<float>?x * T<float>?min * T<float>?max ^-> T<float>
+            "smootherstep"    => T<float>?x * T<float>?min * T<float>?max ^-> T<float>
+            "randInt"         => T<int>?low * T<int>?high ^-> T<int>
+            "randFloat"       => T<float>?low * T<float>?high ^-> T<float>
+            "randFloatSpread" => T<float>?range ^-> T<float>
+            "seededRandom"    => T<int>?seed ^-> T<float>
+            "degToRad"        => T<float>?degrees ^-> T<float>
+            "radToDeg"        => T<float>?radians ^-> T<float>
+            "isPowerOfTwo"    => T<int>?value ^-> T<bool>
+            "ceilPowerOfTwo"  => T<float>?value ^-> T<float>
+            "floorPowerOfTwo" => T<float>?value ^-> T<float>
+        ]
+        |> ignore
+
+    Clock
+        |+> Static [
+            Constructor !? T<bool>?autoStart
+        ]
+        |+> Instance [
+            "autoStart"   =@ T<bool>
+            "startTime"   =@ T<float>
+            "oldTime"     =@ T<float>
+            "elapsedTime" =? T<float>
+            "running"     =? T<bool>
+
+            "start"          => Unit ^-> Unit
+            "stop"           => Unit ^-> Unit
+            "getElapsedTime" => Unit ^-> T<float>
+            "getDelta"       => Unit ^-> T<float>
+        ]
+        |> ignore
+
+    Timer
+        |+> Static [
+            Constructor Unit
+        ]
+        |+> Instance [
+            "connect"      => T<JavaScript.Dom.Document>?document ^-> Unit
+            "disconnect"   => Unit ^-> Unit
+            "getDelta"     => Unit ^-> T<float>
+            "getElapsed"   => Unit ^-> T<float>
+            "getTimescale" => Unit ^-> T<float>
+            "setTimescale" => T<float>?timescale ^-> TSelf
+            "reset"        => Unit ^-> TSelf
+            "dispose"      => Unit ^-> Unit
+            "update"       => !? T<float>?timestamp ^-> TSelf
+        ]
+        |> ignore
+
+    Layers
+        |+> Static [
+            Constructor Unit
+        ]
+        |+> Instance [
+            "mask" =@ T<int>
+
+            "set"        => T<int>?layer ^-> Unit
+            "enable"     => T<int>?layer ^-> Unit
+            "enableAll"  => Unit ^-> Unit
+            "toggle"     => T<int>?layer ^-> Unit
+            "disable"    => T<int>?layer ^-> Unit
+            "disableAll" => Unit ^-> Unit
+            "test"       => Layers?layers ^-> T<bool>
+            "isEnabled"  => T<int>?layer ^-> T<bool>
+        ]
+        |> ignore
+
+    // ------------------------------------------------------------------
+    // Core scene graph
+    // ------------------------------------------------------------------
+
+    EventDispatcher
+        |+> Static [
+            Constructor Unit
+        ]
+        |+> Instance [
+            "addEventListener"    => T<string>?``type`` * (ThreeEvent ^-> Unit)?listener ^-> TSelf
+            "hasEventListener"    => T<string>?``type`` * (ThreeEvent ^-> Unit)?listener ^-> T<bool>
+            "removeEventListener" => T<string>?``type`` * (ThreeEvent ^-> Unit)?listener ^-> TSelf
+            "dispatchEvent"       => ThreeEvent?``event`` ^-> TSelf
+        ]
+        |> ignore
+
+    Object3D
+        |+> Static [
+            Constructor Unit
+        ]
+        |+> Instance [
+            "id" =? T<int>
+            "uuid" =@ T<string>
+            "name" =@ T<string>
+            "parent" =? Object3D
+            "children" =? !| Object3D
+            "up" =@ Vector3
+            "position" =? Vector3
+            "rotation" =? Euler
+            "quaternion" =? Quaternion
+            "scale" =? Vector3
+            "modelViewMatrix" =? Matrix4
+            "normalMatrix" =? Matrix3
+            "matrix" =@ Matrix4
+            "matrixWorld" =@ Matrix4
+            "matrixAutoUpdate" =@ T<bool>
+            "matrixWorldAutoUpdate" =@ T<bool>
+            "matrixWorldNeedsUpdate" =@ T<bool>
+            "layers" =? Layers
+            "visible" =@ T<bool>
+            "castShadow" =@ T<bool>
+            "receiveShadow" =@ T<bool>
+            "frustumCulled" =@ T<bool>
+            "renderOrder" =@ T<int>
+            "userData" =@ T<obj>
+
+            "applyMatrix4"                => Matrix4?matrix ^-> Unit
+            "applyQuaternion"             => Quaternion?quaternion ^-> TSelf
+            "setRotationFromAxisAngle"    => Vector3?axis * T<float>?angle ^-> Unit
+            "setRotationFromEuler"        => Euler?euler ^-> Unit
+            "setRotationFromMatrix"       => Matrix4?m ^-> Unit
+            "setRotationFromQuaternion"   => Quaternion?q ^-> Unit
+            "rotateOnAxis"                => Vector3?axis * T<float>?angle ^-> TSelf
+            "rotateOnWorldAxis"           => Vector3?axis * T<float>?angle ^-> TSelf
+            "rotateX"                     => T<float>?angle ^-> TSelf
+            "rotateY"                     => T<float>?angle ^-> TSelf
+            "rotateZ"                     => T<float>?angle ^-> TSelf
+            "translateOnAxis"             => Vector3?axis * T<float>?distance ^-> TSelf
+            "translateX"                  => T<float>?distance ^-> TSelf
+            "translateY"                  => T<float>?distance ^-> TSelf
+            "translateZ"                  => T<float>?distance ^-> TSelf
+            "localToWorld"                => Vector3?vector ^-> Vector3
+            "worldToLocal"                => Vector3?vector ^-> Vector3
+            "lookAt"                      => Vector3?vector ^-> Unit
+            "add"                         => Object3D?``object`` ^-> TSelf
+            "remove"                      => Object3D?``object`` ^-> TSelf
+            "removeFromParent"            => Unit ^-> TSelf
+            "clear"                       => Unit ^-> TSelf
+            "attach"                      => Object3D?``object`` ^-> TSelf
+            "getObjectById"               => T<int>?id ^-> Object3D
+            "getObjectByName"             => T<string>?name ^-> Object3D
+            "getWorldPosition"            => Vector3?target ^-> Vector3
+            "getWorldQuaternion"          => Quaternion?target ^-> Quaternion
+            "getWorldScale"               => Vector3?target ^-> Vector3
+            "getWorldDirection"           => Vector3?target ^-> Vector3
+            "traverse"                    => (Object3D ^-> Unit)?callback ^-> Unit
+            "traverseVisible"             => (Object3D ^-> Unit)?callback ^-> Unit
+            "traverseAncestors"           => (Object3D ^-> Unit)?callback ^-> Unit
+            "updateMatrix"                => Unit ^-> Unit
+            "updateMatrixWorld"           => !? T<bool>?force ^-> Unit
+            "updateWorldMatrix"           => T<bool>?updateParents * T<bool>?updateChildren * !? T<bool>?force ^-> Unit
+            "clone"                       => !? T<bool>?``recursive`` ^-> TSelf
+            "copy"                        => Object3D?``object`` * !? T<bool>?``recursive`` ^-> TSelf
+            "dispose"                     => Unit ^-> Unit
+        ]
+        |> ignore
+
+    Group
+        |+> Static [
+            Constructor Unit
+        ]
+        |> ignore
+
+    Scene
+        |+> Static [
+            Constructor Unit
+        ]
+        |+> Instance [
+            "background" =@ (Color + Texture)
+            "environment" =@ Texture
+            "fog" =@ (Fog + FogExp2)
+            "overrideMaterial" =@ Material
+        ]
+        |> ignore
+
+    Camera
+        |+> Static [
+            Constructor Unit
+        ]
+        |+> Instance [
+            "matrixWorldInverse" =? Matrix4
+            "projectionMatrix" =? Matrix4
+
+            "lookAt" => Vector3?vector ^-> Unit
+        ]
+        |> ignore
+
+    PerspectiveCamera
+        |+> Static [
+            Constructor (!? T<float>?fov * !? T<float>?aspect * !? T<float>?near * !? T<float>?far)
+        ]
+        |+> Instance [
+            "fov" =@ T<float>
+            "aspect" =@ T<float>
+            "near" =@ T<float>
+            "far" =@ T<float>
+            "zoom" =@ T<float>
+            "focus" =@ T<float>
+            "filmGauge" =@ T<float>
+            "filmOffset" =@ T<float>
+
+            "setFocalLength"         => T<float>?focalLength ^-> Unit
+            "getFocalLength"         => Unit ^-> T<float>
+            "getFilmWidth"           => Unit ^-> T<float>
+            "getFilmHeight"          => Unit ^-> T<float>
+            "setViewOffset"          => T<float>?fullWidth * T<float>?fullHeight * T<float>?x * T<float>?y * T<float>?width * T<float>?height ^-> Unit
+            "clearViewOffset"        => Unit ^-> Unit
+            "updateProjectionMatrix" => Unit ^-> Unit
+            "clone"                  => Unit ^-> TSelf
+        ]
+        |> ignore
+
+    OrthographicCamera
+        |+> Static [
+            Constructor (!? T<float>?left * !? T<float>?right * !? T<float>?top * !? T<float>?bottom * !? T<float>?near * !? T<float>?far)
+        ]
+        |+> Instance [
+            "left" =@ T<float>
+            "right" =@ T<float>
+            "top" =@ T<float>
+            "bottom" =@ T<float>
+            "near" =@ T<float>
+            "far" =@ T<float>
+            "zoom" =@ T<float>
+
+            "setViewOffset"          => T<float>?fullWidth * T<float>?fullHeight * T<float>?x * T<float>?y * T<float>?width * T<float>?height ^-> Unit
+            "clearViewOffset"        => Unit ^-> Unit
+            "updateProjectionMatrix" => Unit ^-> Unit
+            "clone"                  => Unit ^-> TSelf
+        ]
+        |> ignore
+
+    BufferAttribute
+        |+> Static [
+            Constructor (TypedArray?array * T<int>?itemSize * !? T<bool>?normalized)
+        ]
+        |+> Instance [
+            "name" =@ T<string>
+            "array" =? TypedArray
+            "itemSize" =? T<int>
+            "count" =? T<int>
+            "normalized" =? T<bool>
+            "usage" =@ Usage
+            "needsUpdate" =@ T<bool>
+
+            "onUpload"                      => (Unit ^-> Unit)?callback ^-> TSelf
+            "setUsage"                      => Usage?usage ^-> TSelf
+            "clone"                         => Unit ^-> TSelf
+            "copy"                          => BufferAttribute?source ^-> TSelf
+            "copyAt"                        => T<int>?index1 * BufferAttribute?attribute * T<int>?index2 ^-> TSelf
+            "copyArray"                     => TypedArray?array ^-> TSelf
+            "applyNormalMatrix"             => Matrix3?m ^-> TSelf
+            "transformDirection"            => Matrix4?m ^-> TSelf
+            "set"                           => (!| T<float>)?value * !? T<int>?offset ^-> TSelf
+            "getComponent"                  => T<int>?index * T<int>?componentIndex ^-> T<float>
+            "setComponent"                  => T<int>?index * T<int>?componentIndex * T<float>?value ^-> Unit
+            "getX"                          => T<int>?index ^-> T<float>
+            "getY"                          => T<int>?index ^-> T<float>
+            "getZ"                          => T<int>?index ^-> T<float>
+            "getW"                          => T<int>?index ^-> T<float>
+            "setX"                          => T<int>?index * T<float>?x ^-> TSelf
+            "setY"                          => T<int>?index * T<float>?y ^-> TSelf
+            "setZ"                          => T<int>?index * T<float>?z ^-> TSelf
+            "setW"                          => T<int>?index * T<float>?w ^-> TSelf
+            "setXY"                         => T<int>?index * T<float>?x * T<float>?y ^-> TSelf
+            "setXYZ"                        => T<int>?index * T<float>?x * T<float>?y * T<float>?z ^-> TSelf
+            "setXYZW"                       => T<int>?index * T<float>?x * T<float>?y * T<float>?z * T<float>?w ^-> TSelf
+            "dispose"                       => Unit ^-> Unit
+        ]
+        |> ignore
+
+    BufferGeometry
+        |+> Static [
+            Constructor Unit
+        ]
+        |+> Instance [
+            "id" =? T<int>
+            "uuid" =@ T<string>
+            "name" =@ T<string>
+            "index" =@ BufferAttribute
+            "attributes" =? BufferAttributes
+            "groups" =? !| GeometryGroup
+            "boundingBox" =@ Box3
+            "boundingSphere" =@ Sphere
+            "drawRange" =@ DrawRange
+            "morphTargetsRelative" =@ T<bool>
+            "userData" =@ T<obj>
+
+            "getIndex"              => Unit ^-> BufferAttribute
+            "setIndex"              => !? (BufferAttribute + (!| T<int>))?index ^-> TSelf
+            "setAttribute"          => T<string>?name * BufferAttribute?attribute ^-> TSelf
+            "getAttribute"          => T<string>?name ^-> BufferAttribute
+            "deleteAttribute"       => T<string>?name ^-> TSelf
+            "hasAttribute"          => T<string>?name ^-> T<bool>
+            "addGroup"              => T<int>?start * T<int>?count * !? T<int>?materialIndex ^-> Unit
+            "clearGroups"           => Unit ^-> Unit
+            "setDrawRange"          => T<int>?start * T<int>?count ^-> Unit
+            "applyMatrix4"          => Matrix4?matrix ^-> TSelf
+            "applyQuaternion"       => Quaternion?quaternion ^-> TSelf
+            "rotateX"               => T<float>?angle ^-> TSelf
+            "rotateY"               => T<float>?angle ^-> TSelf
+            "rotateZ"               => T<float>?angle ^-> TSelf
+            "translate"             => T<float>?x * T<float>?y * T<float>?z ^-> TSelf
+            "scale"                 => T<float>?x * T<float>?y * T<float>?z ^-> TSelf
+            "lookAt"                => Vector3?vector ^-> TSelf
+            "center"                => Unit ^-> TSelf
+            "setFromPoints"         => (!| Vector3)?points ^-> TSelf
+            "computeBoundingBox"    => Unit ^-> Unit
+            "computeBoundingSphere" => Unit ^-> Unit
+            "computeTangents"       => Unit ^-> Unit
+            "computeVertexNormals"  => Unit ^-> Unit
+            "normalizeNormals"      => Unit ^-> Unit
+            "toNonIndexed"          => Unit ^-> TSelf
+            "clone"                 => Unit ^-> TSelf
+            "copy"                  => BufferGeometry?source ^-> TSelf
+            "dispose"               => Unit ^-> Unit
+        ]
+        |> ignore
+
+    Raycaster
+        |+> Static [
+            Constructor (!? Vector3?origin * !? Vector3?direction * !? T<float>?near * !? T<float>?far)
+        ]
+        |+> Instance [
+            "ray" =? Ray
+            "near" =@ T<float>
+            "far" =@ T<float>
+            "camera" =? Camera
+            "layers" =@ Layers
+            "params" =@ RaycasterParameters
+
+            "set"             => Vector3?origin * Vector3?direction ^-> Unit
+            "setFromCamera"   => Vector2?coords * Camera?camera ^-> Unit
+            "intersectObject" => Object3D?``object`` * !? T<bool>?``recursive`` ^-> !| Intersection
+            "intersectObjects" => (!| Object3D)?objects * !? T<bool>?``recursive`` ^-> !| Intersection
+        ]
+        |> ignore
+
+    // ------------------------------------------------------------------
+    // Textures and loaders
+    // ------------------------------------------------------------------
+
+    Texture
+        |+> Static [
+            Constructor Unit
+            Constructor (T<JavaScript.HTMLCanvasElement>?image)
+        ]
+        |+> Instance [
+            "id" =? T<int>
+            "uuid" =? T<string>
+            "name" =@ T<string>
+            "image" =@ T<obj>
+            "mapping" =@ TextureMapping
+            "channel" =@ T<int>
+            "wrapS" =@ Wrapping
+            "wrapT" =@ Wrapping
+            "magFilter" =@ TextureFilter
+            "minFilter" =@ TextureFilter
+            "anisotropy" =@ T<int>
+            "format" =@ TextureFormat
+            "type" =@ TextureType
+            "colorSpace" =@ ColorSpace
+            "offset" =? Vector2
+            "repeat" =? Vector2
+            "center" =? Vector2
+            "rotation" =@ T<float>
+            "matrix" =? Matrix3
+            "matrixAutoUpdate" =@ T<bool>
             "generateMipmaps" =@ T<bool>
-            "shareDepthFrom"  =@ T<obj>
+            "premultiplyAlpha" =@ T<bool>
+            "flipY" =@ T<bool>
+            "unpackAlignment" =@ T<int>
+            "needsUpdate" =@ T<bool>
+            "userData" =@ T<obj>
 
-            "setSize" => T<float>?width * T<float>?height ^-> O
-            "clone"   => O ^-> WebGLRenderTarget
-            "dispose" => O ^-> O
+            "clone"       => Unit ^-> TSelf
+            "copy"        => Texture?source ^-> TSelf
+            "updateMatrix" => Unit ^-> Unit
+            "dispose"     => Unit ^-> Unit
         ]
-    
-    let WebGLRenderTargetCube =
-        Class "THREE.WebGLRenderTargetCube"
-        |=> Inherits WebGLRenderTargetClass
-        |+> Instance [
-            "activeCubeFace" =@ T<int>
-        ]
+        |> ignore
 
-    let RenderableVertex = Type.New ()
-
-    let RenderableFace =
-        Class "THREE.RenderableFace"
+    CanvasTexture
         |+> Static [
-            Constructor O
+            Constructor (T<JavaScript.HTMLCanvasElement>?canvas)
         ]
-        |+> Instance [
-            "id"                  =? T<int>
-            "v1"                  =@ RenderableVertex
-            "v2"                  =@ RenderableVertex
-            "v3"                  =@ RenderableVertex
-            "normalModel"         =@ Vector3
-            "vertexNormalsModel"  =@ Tuple [Vector3; Vector3; Vector3]
-            "vertexNormalsLength" =@ T<int>
-            "color"               =@ Color
-            "material"            =@ Material
-            "uvs"                 =@ Tuple [Vector2; Vector2; Vector2]
-            "z"                   =@ T<float>
-        ]
-    
-    let RenderableLine =
-        Class "THREE.RenderableLine"
-        |+> Static [
-            Constructor O
-        ]
-        |+> Instance [
-            "id"           =? T<int>
-            "v1"           =@ RenderableVertex
-            "v2"           =@ RenderableVertex
-            "vertexColors" =@ Tuple [Color; Color]
-            "material"     =@ Material
-            "z"            =@ T<obj>
-            
-        ]
+        |> ignore
 
-    let RenderableObject =
-        Class "THREE.RenderableObject"
+    DataTexture
         |+> Static [
-            Constructor O
+            Constructor (TypedArray?data * T<int>?width * T<int>?height * !? TextureFormat?format * !? TextureType?``type``)
         ]
-        |+> Instance [
-            "id"     =@ T<int>
-            "object" =@ Object3D
-            "z"      =@ T<float>
-        ]
+        |> ignore
 
-    let RenderableSprite =
-        Class "THREE.RenderableSprite"
+    VideoTexture
         |+> Static [
-            Constructor O
+            Constructor (T<JavaScript.HTMLVideoElement>?video)
         ]
-        |+> Instance [
-            "id"           =? T<int>
-            "object"       =@ Object3D
-            "x"            =@ T<float>
-            "y"            =@ T<float>
-            "z"            =@ T<float>
-            "rotation"     =@ T<float>
-            "scale"        =@ Vector2
-            "material"     =@ Material
-        ]
+        |> ignore
 
-    let RenderableVertexClass =
-        Class "THREE.RenderableVertex"
-        |=> RenderableVertex
+    CubeTexture
         |+> Static [
-            Constructor O
+            Constructor (!? (!| T<JavaScript.HTMLImageElement>)?images)
         ]
-        |+> Instance [
-            "position"       =@ Vector3
-            "positionWorld"  =@ Vector3
-            "positionScreen" =@ Vector4
-            "visible"        =@ T<bool>
-            
-            "copy" => RenderableVertex?vertex ^-> O
-        ]
+        |> ignore
 
-    let FogClass =
-        Class "THREE.Fog"
-        |=> Fog
+    Loader
         |+> Static [
-            Constructor (Color?color * !? T<float>?near * !? T<float>?far)
+            Constructor Unit
         ]
         |+> Instance [
-            "name"  =@ T<string>
+            "manager" =? LoadingManager
+            "crossOrigin" =@ T<string>
+            "path" =@ T<string>
+            "resourcePath" =@ T<string>
+
+            "setCrossOrigin"     => T<string>?crossOrigin ^-> TSelf
+            "setPath"            => T<string>?path ^-> TSelf
+            "setResourcePath"    => T<string>?resourcePath ^-> TSelf
+            "setRequestHeader"   => T<string>?name * T<string>?value ^-> TSelf
+        ]
+        |> ignore
+
+    LoadingManager
+        |+> Static [
+            Constructor (!? (Unit ^-> Unit)?onLoad * !? (T<string> * T<int> * T<int> ^-> Unit)?onProgress * !? (T<string> ^-> Unit)?onError)
+        ]
+        |+> Instance [
+            "onStart" =@ (T<string> * T<int> * T<int> ^-> Unit)
+            "onLoad" =@ (Unit ^-> Unit)
+            "onProgress" =@ (T<string> * T<int> * T<int> ^-> Unit)
+            "onError" =@ (T<string> ^-> Unit)
+
+            "itemStart"      => T<string>?url ^-> Unit
+            "itemEnd"        => T<string>?url ^-> Unit
+            "itemError"      => T<string>?url ^-> Unit
+            "resolveURL"     => T<string>?url ^-> T<string>
+            "setURLModifier" => !? (T<string> ^-> T<string>)?callback ^-> TSelf
+        ]
+        |> ignore
+
+    TextureLoader
+        |+> Static [
+            Constructor !? LoadingManager?manager
+        ]
+        |+> Instance [
+            "load" => T<string>?url * !? (Texture ^-> Unit)?onLoad * !? (T<JavaScript.ProgressEvent> ^-> Unit)?onProgress * !? (T<string> ^-> Unit)?onError ^-> Texture
+        ]
+        |> ignore
+
+    // ------------------------------------------------------------------
+    // Materials
+    // ------------------------------------------------------------------
+
+    Material
+        |+> Static [
+            Constructor Unit
+        ]
+        |+> Instance [
+            "name" =@ T<string>
+            "side" =@ Side
+            "shadowSide" =@ Side
+            "opacity" =@ T<float>
+            "transparent" =@ T<bool>
+            "alphaTest" =@ T<float>
+            "alphaHash" =@ T<bool>
+            "blending" =@ Blending
+            "depthTest" =@ T<bool>
+            "depthWrite" =@ T<bool>
+            "colorWrite" =@ T<bool>
+            "polygonOffset" =@ T<bool>
+            "polygonOffsetFactor" =@ T<float>
+            "polygonOffsetUnits" =@ T<float>
+            "vertexColors" =@ T<bool>
+            "dithering" =@ T<bool>
+            "toneMapped" =@ T<bool>
+            "visible" =@ T<bool>
+            "premultipliedAlpha" =@ T<bool>
+            "needsUpdate" =@ T<bool>
+            "userData" =@ T<obj>
+
+            "setValues" => MaterialParameters?values ^-> Unit
+            "clone"     => Unit ^-> TSelf
+            "dispose"   => Unit ^-> Unit
+        ]
+        |> ignore
+
+    MeshBasicMaterial
+        |+> Static [
+            Constructor !? MeshBasicMaterialParameters?parameters
+        ]
+        |+> Instance [
             "color" =@ Color
-            "near"  =@ T<float>
-            "far"   =@ T<float>
+            "map" =@ Texture
+            "lightMap" =@ Texture
+            "lightMapIntensity" =@ T<float>
+            "aoMap" =@ Texture
+            "aoMapIntensity" =@ T<float>
+            "specularMap" =@ Texture
+            "alphaMap" =@ Texture
+            "envMap" =@ Texture
+            "combine" =@ T<int>
+            "reflectivity" =@ T<float>
+            "refractionRatio" =@ T<float>
+            "wireframe" =@ T<bool>
+            "wireframeLinewidth" =@ T<float>
+            "wireframeLinecap" =@ T<string>
+            "wireframeLinejoin" =@ T<string>
+            "fog" =@ T<bool>
 
-            "clone" => O ^-> Fog
+            "clone" => Unit ^-> TSelf
         ]
+        |> ignore
 
-    let FogExp2 =
-        let FogExp2 = Type.New ()
-        
-        Class "THREE.FogExp2"
-        |=> FogExp2
+    MeshStandardMaterial
         |+> Static [
-            Constructor (Color?color * !? T<float>?density)
+            Constructor !? MeshStandardMaterialParameters?parameters
         ]
         |+> Instance [
-            "name"    =@ T<string>
-            "color"   =@ Color
+            "color" =@ Color
+            "roughness" =@ T<float>
+            "metalness" =@ T<float>
+            "map" =@ Texture
+            "lightMap" =@ Texture
+            "lightMapIntensity" =@ T<float>
+            "aoMap" =@ Texture
+            "aoMapIntensity" =@ T<float>
+            "emissive" =@ Color
+            "emissiveIntensity" =@ T<float>
+            "emissiveMap" =@ Texture
+            "bumpMap" =@ Texture
+            "bumpScale" =@ T<float>
+            "normalMap" =@ Texture
+            "normalScale" =@ Vector2
+            "displacementMap" =@ Texture
+            "displacementScale" =@ T<float>
+            "displacementBias" =@ T<float>
+            "roughnessMap" =@ Texture
+            "metalnessMap" =@ Texture
+            "alphaMap" =@ Texture
+            "envMap" =@ Texture
+            "envMapIntensity" =@ T<float>
+            "wireframe" =@ T<bool>
+            "wireframeLinewidth" =@ T<float>
+            "flatShading" =@ T<bool>
+            "fog" =@ T<bool>
+
+            "clone" => Unit ^-> TSelf
+        ]
+        |> ignore
+
+    MeshPhysicalMaterial
+        |+> Static [
+            Constructor !? MeshPhysicalMaterialParameters?parameters
+        ]
+        |+> Instance [
+            "clearcoat" =@ T<float>
+            "clearcoatMap" =@ Texture
+            "clearcoatRoughness" =@ T<float>
+            "clearcoatRoughnessMap" =@ Texture
+            "clearcoatNormalMap" =@ Texture
+            "clearcoatNormalScale" =@ Vector2
+            "ior" =@ T<float>
+            "sheen" =@ T<float>
+            "sheenColor" =@ Color
+            "sheenRoughness" =@ T<float>
+            "transmission" =@ T<float>
+            "transmissionMap" =@ Texture
+            "thickness" =@ T<float>
+            "thicknessMap" =@ Texture
+            "attenuationDistance" =@ T<float>
+            "attenuationColor" =@ Color
+            "specularIntensity" =@ T<float>
+            "specularColor" =@ Color
+            "iridescence" =@ T<float>
+            "iridescenceIOR" =@ T<float>
+            "iridescenceThicknessMinimum" =@ T<float>
+            "iridescenceThicknessMaximum" =@ T<float>
+            "anisotropy" =@ T<float>
+            "anisotropyRotation" =@ T<float>
+            "dispersion" =@ T<float>
+        ]
+        |> ignore
+
+    MeshPhongMaterial
+        |+> Static [
+            Constructor !? MeshPhongMaterialParameters?parameters
+        ]
+        |+> Instance [
+            "color" =@ Color
+            "specular" =@ Color
+            "shininess" =@ T<float>
+            "emissive" =@ Color
+            "emissiveIntensity" =@ T<float>
+            "map" =@ Texture
+            "lightMap" =@ Texture
+            "aoMap" =@ Texture
+            "emissiveMap" =@ Texture
+            "bumpMap" =@ Texture
+            "bumpScale" =@ T<float>
+            "normalMap" =@ Texture
+            "normalScale" =@ Vector2
+            "specularMap" =@ Texture
+            "alphaMap" =@ Texture
+            "envMap" =@ Texture
+            "envMapIntensity" =@ T<float>
+            "combine" =@ T<int>
+            "reflectivity" =@ T<float>
+            "refractionRatio" =@ T<float>
+            "wireframe" =@ T<bool>
+            "wireframeLinewidth" =@ T<float>
+            "flatShading" =@ T<bool>
+            "fog" =@ T<bool>
+
+            "clone" => Unit ^-> TSelf
+        ]
+        |> ignore
+
+    MeshLambertMaterial
+        |+> Static [
+            Constructor !? MeshLambertMaterialParameters?parameters
+        ]
+        |+> Instance [
+            "color" =@ Color
+            "emissive" =@ Color
+            "emissiveIntensity" =@ T<float>
+            "map" =@ Texture
+            "lightMap" =@ Texture
+            "aoMap" =@ Texture
+            "emissiveMap" =@ Texture
+            "alphaMap" =@ Texture
+            "envMap" =@ Texture
+            "combine" =@ T<int>
+            "reflectivity" =@ T<float>
+            "refractionRatio" =@ T<float>
+            "wireframe" =@ T<bool>
+            "wireframeLinewidth" =@ T<float>
+            "flatShading" =@ T<bool>
+            "fog" =@ T<bool>
+
+            "clone" => Unit ^-> TSelf
+        ]
+        |> ignore
+
+    MeshNormalMaterial
+        |+> Static [
+            Constructor !? MeshNormalMaterialParameters?parameters
+        ]
+        |+> Instance [
+            "bumpMap" =@ Texture
+            "bumpScale" =@ T<float>
+            "normalMap" =@ Texture
+            "normalScale" =@ Vector2
+            "displacementMap" =@ Texture
+            "displacementScale" =@ T<float>
+            "displacementBias" =@ T<float>
+            "wireframe" =@ T<bool>
+            "wireframeLinewidth" =@ T<float>
+            "flatShading" =@ T<bool>
+
+            "clone" => Unit ^-> TSelf
+        ]
+        |> ignore
+
+    MeshDepthMaterial
+        |+> Static [
+            Constructor !? MeshDepthMaterialParameters?parameters
+        ]
+        |+> Instance [
+            "map" =@ Texture
+            "alphaMap" =@ Texture
+            "displacementMap" =@ Texture
+            "displacementScale" =@ T<float>
+            "displacementBias" =@ T<float>
+            "wireframe" =@ T<bool>
+            "wireframeLinewidth" =@ T<float>
+
+            "clone" => Unit ^-> TSelf
+        ]
+        |> ignore
+
+    MeshToonMaterial
+        |+> Static [
+            Constructor !? MeshToonMaterialParameters?parameters
+        ]
+        |+> Instance [
+            "gradientMap" =@ Texture
+            "normalScale" =@ Vector2
+        ]
+        |> ignore
+
+    MeshMatcapMaterial
+        |+> Static [
+            Constructor !? MeshMatcapMaterialParameters?parameters
+        ]
+        |+> Instance [
+            "color" =@ Color
+            "matcap" =@ Texture
+            "map" =@ Texture
+            "alphaMap" =@ Texture
+            "normalMap" =@ Texture
+            "normalScale" =@ Vector2
+            "flatShading" =@ T<bool>
+            "fog" =@ T<bool>
+        ]
+        |> ignore
+
+    PointsMaterial
+        |+> Static [
+            Constructor !? PointsMaterialParameters?parameters
+        ]
+        |+> Instance [
+            "color" =@ Color
+            "map" =@ Texture
+            "alphaMap" =@ Texture
+            "size" =@ T<float>
+            "sizeAttenuation" =@ T<bool>
+            "fog" =@ T<bool>
+
+            "clone" => Unit ^-> TSelf
+        ]
+        |> ignore
+
+    LineBasicMaterial
+        |+> Static [
+            Constructor !? LineBasicMaterialParameters?parameters
+        ]
+        |+> Instance [
+            "color" =@ Color
+            "map" =@ Texture
+            "linewidth" =@ T<float>
+            "linecap" =@ T<string>
+            "linejoin" =@ T<string>
+            "fog" =@ T<bool>
+
+            "clone" => Unit ^-> TSelf
+        ]
+        |> ignore
+
+    LineDashedMaterial
+        |+> Static [
+            Constructor !? LineDashedMaterialParameters?parameters
+        ]
+        |+> Instance [
+            "scale" =@ T<float>
+            "dashSize" =@ T<float>
+            "gapSize" =@ T<float>
+
+            "clone" => Unit ^-> TSelf
+        ]
+        |> ignore
+
+    SpriteMaterial
+        |+> Static [
+            Constructor !? SpriteMaterialParameters?parameters
+        ]
+        |+> Instance [
+            "color" =@ Color
+            "map" =@ Texture
+            "alphaMap" =@ Texture
+            "rotation" =@ T<float>
+            "sizeAttenuation" =@ T<bool>
+            "fog" =@ T<bool>
+
+            "clone" => Unit ^-> TSelf
+        ]
+        |> ignore
+
+    ShadowMaterial
+        |+> Static [
+            Constructor !? ShadowMaterialParameters?parameters
+        ]
+        |+> Instance [
+            "color" =@ Color
+            "fog" =@ T<bool>
+        ]
+        |> ignore
+
+    ShaderMaterial
+        |+> Static [
+            Constructor !? ShaderMaterialParameters?parameters
+        ]
+        |+> Instance [
+            "vertexShader" =@ T<string>
+            "fragmentShader" =@ T<string>
+            "uniforms" =@ T<obj>
+            "defines" =@ T<obj>
+            "linewidth" =@ T<float>
+            "wireframe" =@ T<bool>
+            "wireframeLinewidth" =@ T<float>
+            "fog" =@ T<bool>
+            "lights" =@ T<bool>
+            "clipping" =@ T<bool>
+            "glslVersion" =@ T<string>
+            "uniformsNeedUpdate" =@ T<bool>
+
+            "clone" => Unit ^-> TSelf
+        ]
+        |> ignore
+
+    // ------------------------------------------------------------------
+    // Renderable objects
+    // ------------------------------------------------------------------
+
+    Mesh
+        |+> Static [
+            Constructor (!? BufferGeometry?geometry * !? Material?material)
+        ]
+        |+> Instance [
+            "geometry" =@ BufferGeometry
+            "material" =@ Material
+
+            "updateMorphTargets" => Unit ^-> Unit
+            "clone"              => !? T<bool>?``recursive`` ^-> TSelf
+        ]
+        |> ignore
+
+    Line
+        |+> Static [
+            Constructor (!? BufferGeometry?geometry * !? Material?material)
+        ]
+        |+> Instance [
+            "geometry" =@ BufferGeometry
+            "material" =@ Material
+
+            "computeLineDistances" => Unit ^-> TSelf
+            "clone"                => !? T<bool>?``recursive`` ^-> TSelf
+        ]
+        |> ignore
+
+    LineSegments
+        |+> Static [
+            Constructor (!? BufferGeometry?geometry * !? Material?material)
+        ]
+        |> ignore
+
+    LineLoop
+        |+> Static [
+            Constructor (!? BufferGeometry?geometry * !? Material?material)
+        ]
+        |> ignore
+
+    Points
+        |+> Static [
+            Constructor (!? BufferGeometry?geometry * !? Material?material)
+        ]
+        |+> Instance [
+            "geometry" =@ BufferGeometry
+            "material" =@ Material
+
+            "updateMorphTargets" => Unit ^-> Unit
+            "clone"              => !? T<bool>?``recursive`` ^-> TSelf
+        ]
+        |> ignore
+
+    Sprite
+        |+> Static [
+            Constructor (!? SpriteMaterial?material)
+        ]
+        |+> Instance [
+            "geometry" =@ BufferGeometry
+            "material" =@ SpriteMaterial
+            "center" =@ Vector2
+
+            "clone" => !? T<bool>?``recursive`` ^-> TSelf
+        ]
+        |> ignore
+
+    LOD
+        |+> Static [
+            Constructor Unit
+        ]
+        |+> Instance [
+            "levels" =? !| LODLevel
+            "autoUpdate" =@ T<bool>
+
+            "addLevel"             => Object3D?``object`` * !? T<float>?distance ^-> TSelf
+            "getObjectForDistance" => T<float>?distance ^-> Object3D
+            "update"               => Camera?camera ^-> Unit
+            "clone"                => !? T<bool>?``recursive`` ^-> TSelf
+        ]
+        |> ignore
+
+    InstancedMesh
+        |+> Static [
+            Constructor (!? BufferGeometry?geometry * !? Material?material * !? T<int>?count)
+        ]
+        |+> Instance [
+            "count" =@ T<int>
+            "instanceMatrix" =? BufferAttribute
+            "instanceColor" =@ BufferAttribute
+
+            "setMatrixAt" => T<int>?index * Matrix4?matrix ^-> Unit
+            "getMatrixAt" => T<int>?index * Matrix4?matrix ^-> Unit
+            "setColorAt"  => T<int>?index * Color?color ^-> Unit
+            "getColorAt"  => T<int>?index * Color?color ^-> Unit
+            "computeBoundingBox"    => Unit ^-> Unit
+            "computeBoundingSphere" => Unit ^-> Unit
+        ]
+        |> ignore
+
+    // ------------------------------------------------------------------
+    // Lights
+    // ------------------------------------------------------------------
+
+    Light
+        |+> Static [
+            Constructor (!? ColorRepresentation?color * !? T<float>?intensity)
+        ]
+        |+> Instance [
+            "color" =@ Color
+            "intensity" =@ T<float>
+
+            "clone" => Unit ^-> TSelf
+        ]
+        |> ignore
+
+    LightShadow
+        |+> Instance [
+            "bias" =@ T<float>
+            "normalBias" =@ T<float>
+            "radius" =@ T<float>
+            "blurSamples" =@ T<float>
+            "mapSize" =? Vector2
+            "map" =? Texture
+            "autoUpdate" =@ T<bool>
+            "needsUpdate" =@ T<bool>
+        ]
+        |> ignore
+
+    DirectionalLightShadow
+        |+> Instance [
+            "camera" =@ OrthographicCamera
+        ]
+        |> ignore
+
+    PointLightShadow
+        |+> Instance [
+            "camera" =@ PerspectiveCamera
+        ]
+        |> ignore
+
+    SpotLightShadow
+        |+> Instance [
+            "camera" =@ PerspectiveCamera
+        ]
+        |> ignore
+
+    AmbientLight
+        |+> Static [
+            Constructor (!? ColorRepresentation?color * !? T<float>?intensity)
+        ]
+        |> ignore
+
+    DirectionalLight
+        |+> Static [
+            Constructor (!? ColorRepresentation?color * !? T<float>?intensity)
+        ]
+        |+> Instance [
+            "target" =@ Object3D
+            "shadow" =@ DirectionalLightShadow
+        ]
+        |> ignore
+
+    HemisphereLight
+        |+> Static [
+            Constructor (!? ColorRepresentation?skyColor * !? ColorRepresentation?groundColor * !? T<float>?intensity)
+        ]
+        |+> Instance [
+            "groundColor" =@ Color
+        ]
+        |> ignore
+
+    PointLight
+        |+> Static [
+            Constructor (!? ColorRepresentation?color * !? T<float>?intensity * !? T<float>?distance * !? T<float>?decay)
+        ]
+        |+> Instance [
+            "distance" =@ T<float>
+            "decay" =@ T<float>
+            "shadow" =@ PointLightShadow
+        ]
+        |> ignore
+
+    SpotLight
+        |+> Static [
+            Constructor (!? ColorRepresentation?color * !? T<float>?intensity * !? T<float>?distance * !? T<float>?angle * !? T<float>?penumbra * !? T<float>?decay)
+        ]
+        |+> Instance [
+            "target" =@ Object3D
+            "distance" =@ T<float>
+            "angle" =@ T<float>
+            "penumbra" =@ T<float>
+            "decay" =@ T<float>
+            "shadow" =@ SpotLightShadow
+        ]
+        |> ignore
+
+    RectAreaLight
+        |+> Static [
+            Constructor (!? ColorRepresentation?color * !? T<float>?intensity * !? T<float>?width * !? T<float>?height)
+        ]
+        |+> Instance [
+            "width" =@ T<float>
+            "height" =@ T<float>
+        ]
+        |> ignore
+
+    // ------------------------------------------------------------------
+    // Fog
+    // ------------------------------------------------------------------
+
+    Fog
+        |+> Static [
+            Constructor (!? ColorRepresentation?color * !? T<float>?near * !? T<float>?far)
+        ]
+        |+> Instance [
+            "name" =@ T<string>
+            "color" =@ Color
+            "near" =@ T<float>
+            "far" =@ T<float>
+
+            "clone" => Unit ^-> TSelf
+        ]
+        |> ignore
+
+    FogExp2
+        |+> Static [
+            Constructor (!? ColorRepresentation?color * !? T<float>?density)
+        ]
+        |+> Instance [
+            "name" =@ T<string>
+            "color" =@ Color
             "density" =@ T<float>
 
-            "clone" => O ^-> FogExp2
+            "clone" => Unit ^-> TSelf
         ]
+        |> ignore
 
-    let Scene' =
-        Scene
-        |=> Inherits Object3D
+    // ------------------------------------------------------------------
+    // Renderer
+    // ------------------------------------------------------------------
+
+    WebGLShadowMap
+        |+> Instance [
+            "enabled" =@ T<bool>
+            "autoUpdate" =@ T<bool>
+            "needsUpdate" =@ T<bool>
+            "type" =@ ShadowMapType
+        ]
+        |> ignore
+
+    WebGLMemoryInfo
+        |+> Instance [
+            "geometries" =? T<int>
+            "textures" =? T<int>
+        ]
+        |> ignore
+
+    WebGLRenderInfo
+        |+> Instance [
+            "calls" =? T<int>
+            "frame" =? T<int>
+            "lines" =? T<int>
+            "points" =? T<int>
+            "triangles" =? T<int>
+        ]
+        |> ignore
+
+    WebGLInfo
+        |+> Instance [
+            "autoReset" =@ T<bool>
+            "memory" =? WebGLMemoryInfo
+            "render" =? WebGLRenderInfo
+            "programs" =? !| T<obj>
+
+            "reset" => Unit ^-> Unit
+        ]
+        |> ignore
+
+    WebGLRenderer
         |+> Static [
-            Constructor O
+            Constructor !? WebGLRendererOptions?parameters
         ]
         |+> Instance [
-            "fog"              =@ Fog
-            "overrideMaterial" =@ Material
-            "autoUpdate"       =@ T<bool>
-            "matrixAutoUpdate" =@ T<bool>
+            "domElement" =? T<JavaScript.HTMLCanvasElement>
+            "autoClear" =@ T<bool>
+            "autoClearColor" =@ T<bool>
+            "autoClearDepth" =@ T<bool>
+            "autoClearStencil" =@ T<bool>
+            "sortObjects" =@ T<bool>
+            "clippingPlanes" =@ !| Plane
+            "localClippingEnabled" =@ T<bool>
+            "outputColorSpace" =@ ColorSpace
+            "toneMapping" =@ ToneMapping
+            "toneMappingExposure" =@ T<float>
+            "info" =? WebGLInfo
+            "shadowMap" =? WebGLShadowMap
+            "capabilities" =? WebGLCapabilities
+            "xr" =? T<obj>
 
-            "clone" => !? Scene?``object`` ^-> Scene
+            "getContext"            => Unit ^-> T<JavaScript.WebGL.RenderingContext>
+            "getPixelRatio"         => Unit ^-> T<float>
+            "setPixelRatio"         => T<float>?value ^-> Unit
+            "getSize"               => Vector2?target ^-> Vector2
+            "setSize"               => T<int>?width * T<int>?height * !? T<bool>?updateStyle ^-> Unit
+            "getDrawingBufferSize"  => Vector2?target ^-> Vector2
+            "setDrawingBufferSize"  => T<int>?width * T<int>?height * T<float>?pixelRatio ^-> Unit
+            "getViewport"           => Vector4?target ^-> Vector4
+            "setViewport"           => T<int>?x * T<int>?y * T<int>?width * T<int>?height ^-> Unit
+            "getScissor"            => Vector4?target ^-> Vector4
+            "setScissor"            => T<int>?x * T<int>?y * T<int>?width * T<int>?height ^-> Unit
+            "setScissorTest"        => T<bool>?enable ^-> Unit
+            "getClearColor"         => Color?target ^-> Color
+            "setClearColor"         => ColorRepresentation?color * !? T<float>?alpha ^-> Unit
+            "getClearAlpha"         => Unit ^-> T<float>
+            "setClearAlpha"         => T<float>?alpha ^-> Unit
+            "clear"                 => !? T<bool>?color * !? T<bool>?depth * !? T<bool>?stencil ^-> Unit
+            "clearColor"            => Unit ^-> Unit
+            "clearDepth"            => Unit ^-> Unit
+            "clearStencil"          => Unit ^-> Unit
+            "render"                => Object3D?scene * Camera?camera ^-> Unit
+            "setAnimationLoop"      => (T<float> ^-> Unit)?callback ^-> Unit
+            "compile"               => Object3D?scene * Camera?camera ^-> T<obj>
+            "setRenderTarget"       => WebGLRenderTarget?renderTarget * !? T<int>?activeCubeFace * !? T<int>?activeMipmapLevel ^-> Unit
+            "getRenderTarget"       => Unit ^-> WebGLRenderTarget
+            "forceContextLoss"      => Unit ^-> Unit
+            "forceContextRestore"   => Unit ^-> Unit
+            "dispose"               => Unit ^-> Unit
         ]
+        |> ignore
 
-    let Texture' =
-        Texture
-        |=> Inherits EventDispatcher
+    WebGLRenderTarget
         |+> Static [
-            Constructor (T<Element>?image * !? T<int>?mapping * !? T<int>?wrapS * !? T<int>?wrapT * !? T<int>?magFilter * !? T<int>?minFilter * !? T<int>?format * !? T<int>?``type`` * !? T<int>?anisotropy)
+            Constructor (!? T<int>?width * !? T<int>?height * !? RenderTargetOptions?options)
         ]
         |+> Instance [
-            "id"                 =? T<int>
-            "uuid"               =? T<string>
-            "name"               =? T<string>
-            "image"              =@ T<Element>
-            "mipmaps"            =@ ArrayOf T<obj>
-            "mapping"            =@ T<int>
-            "wrapS"              =@ T<int>
-            "wrapT"              =@ T<int>
-            "magFilter"          =@ T<int>
-            "minFilter"          =@ T<int>
-            "anisotropy"         =@ T<int>
-            "format"             =@ T<int>
-            "type"               =@ T<int>
-            "offset"             =@ Vector2
-            "repeat"             =@ Vector2
-            "generateMipmaps"    =@ T<bool>
-            "premultiplyAlpha"   =@ T<bool>
-            "flipY"              =@ T<bool>
-            "unpackAlignment"    =@ T<int>
-            "onUpdate"           =@ O ^-> O
-            
-            "clone"   => !? Texture?texture ^-> O
-            "update"  => O ^-> O
-            "dispose" => O ^-> O
-        ]
+            "width" =@ T<int>
+            "height" =@ T<int>
+            "texture" =? Texture
+            "depthBuffer" =@ T<bool>
+            "stencilBuffer" =@ T<bool>
+            "samples" =@ T<int>
 
-    let CompressedTexture =
-        let CompressedTexture = Type.New ()
-        
-        Class "THREE.CompressedTexture"
-        |=> Inherits Texture
+            "setSize" => T<int>?width * T<int>?height ^-> Unit
+            "clone"   => Unit ^-> TSelf
+            "dispose" => Unit ^-> Unit
+        ]
+        |> ignore
+
+    // ------------------------------------------------------------------
+    // Animation
+    // ------------------------------------------------------------------
+
+    KeyframeTrack
         |+> Static [
-            Constructor ((ArrayOf T<obj>)?mipmaps * T<int>?width * T<int>?height * T<int>?format * T<int>?``type`` * T<int>?mapping * T<int>?wrapS * T<int>?wrapT * T<int>?magFilter * T<int>?minFilter * T<int>?anisotropy)
+            Constructor (T<string>?name * (!| T<float>)?times * (!| T<float>)?values * !? InterpolationMode?interpolation)
         ]
         |+> Instance [
-            "image"           =@ T<obj>
-            "mipmaps"         =@ ArrayOf T<obj>
-            "generateMipmaps" =@ T<bool>
-
-            "clone" => O ^-> CompressedTexture
+            "name" =@ T<string>
+            "times" =? T<JavaScript.Float32Array>
+            "values" =? T<JavaScript.Float32Array>
+            "getValueSize" => Unit ^-> T<int>
         ]
+        |> ignore
 
-    let DataTexture =
-        let DataTexture = Type.New ()
-
-        Class "THREE.DataTexture"
-        |=> Inherits Texture
+    NumberKeyframeTrack
         |+> Static [
-            Constructor (T<JavaScript.ArrayBufferView>?data * T<int>?width * T<int>?height * T<int>?format * T<int>?``type`` * T<int>?mapping * T<int>?wrapS * T<int>?wrapT * T<int>?magFilter * T<int>?minFilter * T<int>?anisotropy)
+            Constructor (T<string>?name * (!| T<float>)?times * (!| T<float>)?values * !? InterpolationMode?interpolation)
+        ]
+        |> ignore
+
+    VectorKeyframeTrack
+        |+> Static [
+            Constructor (T<string>?name * (!| T<float>)?times * (!| T<float>)?values * !? InterpolationMode?interpolation)
+        ]
+        |> ignore
+
+    ColorKeyframeTrack
+        |+> Static [
+            Constructor (T<string>?name * (!| T<float>)?times * (!| T<float>)?values * !? InterpolationMode?interpolation)
+        ]
+        |> ignore
+
+    QuaternionKeyframeTrack
+        |+> Static [
+            Constructor (T<string>?name * (!| T<float>)?times * (!| T<float>)?values * !? InterpolationMode?interpolation)
+        ]
+        |> ignore
+
+    BooleanKeyframeTrack
+        |+> Static [
+            Constructor (T<string>?name * (!| T<float>)?times * (!| T<float>)?values)
+        ]
+        |> ignore
+
+    StringKeyframeTrack
+        |+> Static [
+            Constructor (T<string>?name * (!| T<float>)?times * (!| T<float>)?values * !? InterpolationMode?interpolation)
+        ]
+        |> ignore
+
+    AnimationClip
+        |+> Static [
+            Constructor (!? T<string>?name * !? T<float>?duration * !? (!| KeyframeTrack)?tracks * !? LoopMode?blendMode)
         ]
         |+> Instance [
-            "image" =@ T<obj>
+            "name" =@ T<string>
+            "duration" =@ T<float>
+            "tracks" =@ !| KeyframeTrack
+            "uuid" =? T<string>
+            "blendMode" =@ LoopMode
+            "userData" =@ T<obj>
 
-            "clone" => O ^-> DataTexture
+            "resetDuration" => Unit ^-> TSelf
+            "trim"          => Unit ^-> TSelf
+            "clone"         => Unit ^-> TSelf
         ]
-    
-    let Path  = Type.New ()
-    let Shape = Type.New ()
+        |> ignore
 
-    let FontUtils =
-        Class "THREE.FontUtils"
-        |+> Static [
-            "faces"    =@ T<obj>
-            "face"     =@ T<string>
-            "weight"   =@ T<string>
-            "style"    =@ T<string>
-            "size"     =@ T<float>
-            "division" =@ T<float>
+    AnimationAction
+        |+> Instance [
+            "enabled" =@ T<bool>
+            "paused" =@ T<bool>
+            "time" =@ T<float>
+            "timeScale" =@ T<float>
+            "weight" =@ T<float>
+            "repetitions" =@ T<int>
+            "loop" =@ LoopMode
+            "clampWhenFinished" =@ T<bool>
+            "zeroSlopeAtStart" =@ T<bool>
+            "zeroSlopeAtEnd" =@ T<bool>
 
-            "getFace"            => O ^-> T<obj>
-            "loadFace"           => T<obj>?data ^-> T<obj>
-            "drawText"           => T<string>?text ^-> T<obj>
-            "extractGlyphPoints" => T<int>?c * Face3?face * T<float>?scale * T<int>?offset * Path?path ^-> T<obj>
-            "generateShapes"     => T<string>?text * !? T<obj>?parameters ^-> ArrayOf Shape
+            "play"                => Unit ^-> TSelf
+            "stop"                => Unit ^-> TSelf
+            "reset"               => Unit ^-> TSelf
+            "isRunning"           => Unit ^-> T<bool>
+            "isScheduled"         => Unit ^-> T<bool>
+            "startAt"             => T<float>?time ^-> TSelf
+            "setLoop"             => LoopMode?mode * T<int>?repetitions ^-> TSelf
+            "setEffectiveWeight"  => T<float>?weight ^-> TSelf
+            "getEffectiveWeight"  => Unit ^-> T<float>
+            "fadeIn"              => T<float>?duration ^-> TSelf
+            "fadeOut"             => T<float>?duration ^-> TSelf
+            "crossFadeFrom"       => AnimationAction?fadeOutAction * T<float>?duration * !? T<bool>?warp ^-> TSelf
+            "crossFadeTo"         => AnimationAction?fadeInAction * T<float>?duration * !? T<bool>?warp ^-> TSelf
+            "setEffectiveTimeScale" => T<float>?timeScale ^-> TSelf
+            "getEffectiveTimeScale" => Unit ^-> T<float>
+            "setDuration"         => T<float>?duration ^-> TSelf
+            "syncWith"            => AnimationAction?action ^-> TSelf
+            "halt"                => T<float>?duration ^-> TSelf
+            "getMixer"            => Unit ^-> AnimationMixer
+            "getClip"             => Unit ^-> AnimationClip
         ]
+        |> ignore
 
-    let GeometryUtils =
-        Class "THREE.GeometryUtils"
+    AnimationMixer
         |+> Static [
-            "merge"                  => Geometry?geometry1 * Geometry?geometry2 * T<int>?materialIndexOffset ^-> Geometry
-            "randomPointInTriangle"  => Vector3?VectorA * Vector3?VectorB * Vector3?VectorC ^-> Vector3
-            "randomPointInFace"      => Face3?Face * Geometry?Geometry * T<bool>?useCachedAreas ^-> Vector3
-            "randomPointsInGeometry" => Geometry?Geometry * (ArrayOf Vector3)?Points ^-> ArrayOf Vector3
-            "triangleArea"           => Vector3?VectorA * Vector3?VectorB * Vector3?VectorC ^-> T<float>
-            "center"                 => Geometry?Geometry ^-> Vector3
-        ]
-
-    let ImageUtils =
-        Class "THREE.ImageUtils"
-        |+> Static [
-            "crossOrigin" =@ T<string>
-
-            "loadTexture"               => T<string>?url * !? T<obj>?mapping * !? (!? Texture ^-> O)?onLoad * !? (!? T<obj> ^-> O)?onError ^-> Texture
-            "loadCompressedTexture"     => T<string>?url * T<obj>?mapping * !? (!? CompressedTexture ^-> O)?onLoad * !? (!? T<obj> ^-> O)?onError ^-> CompressedTexture
-            "loadTextureCube"           => (ArrayOf T<string>)?array * T<obj>?mapping * !? (!? Texture ^-> O)?onLoad * !? (!? T<obj> ^-> O)?onError ^-> Texture
-            "loadCompressedTextureCube" => (ArrayOf T<string>)?array * T<obj>?mapping * !? (!? CompressedTexture ^-> O)?onLoad * !? (!? T<obj> ^-> O)?onError ^-> Texture
-            "loadDDSTexture"            => T<string>?url * T<obj>?mapping * !? (!? CompressedTexture ^-> O)?onLoad * !? (!? T<obj> ^-> O)?onError ^-> CompressedTexture
-            "parseDDS"                  => T<obj>?buffer * T<bool>?loadMipmaps ^-> T<obj>
-            "getNormalMap"              => T<Element>?image * !? T<int>?depth ^-> T<Element>
-            "generateDataTexture"       => T<float>?width * T<float>?height * Color?color ^-> DataTexture
-        ]
-
-    let SceneUtils =
-        Class "THREE.SceneUtils"
-        |+> Static [
-            "createMultiMaterialObject" => Geometry?geometry * (ArrayOf Material)?materials ^-> Object3D
-            "attach"                    => Object3D?child * Scene?scene * Object3D?parent ^-> O
-        ]
-
-    let Animation =
-        Class "THREE.Animation"
-
-    let AnimationHandler =
-        Class "THREE.AnimationHandler"
-
-    let KeyFrameAnimation =
-        Class "THREE.KeyFrameAnimation"
-
-    let AnimationMorphTarget =
-        Class "THREE.AnimationMorphTarget"
-    
-    let CombiedCamera =
-        Class "THREE.CombinedCamera"
-        |=> Inherits Camera
-
-    let CubeCamera =
-        Class "THREE.CubeCamera"
-        |=> Inherits Object3D
-
-    let Curve =
-        Class "THREE.Curve"
-
-    let CurvePath =
-        Class "THREE.CurvePath"
-        |=> Inherits Curve
-
-    let Gyroscope =
-        Class "THREE.Gyroscope"
-        |=> Inherits Object3D
-
-    let PathClass =
-        Class "THREE.Path"
-        |=> Path
-        |=> Inherits CurvePath
-
-    let ShapeClass =
-        Class "THREE.Shape"
-        |=> Shape
-        |=> Inherits PathClass
-
-    let EllipseCurve =
-        Class "THREE.EllipseCurve"
-        |=> Inherits Curve
-
-    let ArcCurve =
-        Class "THREE.ArcCurve"
-        |=> Inherits EllipseCurve
-
-    let ClosedSplineCurve3 =
-        Class "THREE.ClosedSplineCurve3"
-        |=> Inherits Curve
-
-    let CubicBezierCurve =
-        Class "THREE.CubicBezierCurve"
-        |=> Inherits Curve
-
-    let CubicBezierCurve3 =
-        Class "THREE.CubicBezierCurve3"
-        |=> Inherits Curve
-
-    let LineCurve =
-        Class "THREE.LineCurve"
-        |=> Inherits Curve
-
-    let LineCurve3 =
-        Class "THREE.LineCurve3"
-        |=> Inherits Curve
-
-    let QuadraticBezierCurve =
-        Class "THREE.QuadraticBezierCurve"
-        |=> Inherits Curve
-
-    let QuadraticBezierCurve3 =
-        Class "THREE.QuadraticBezierCurve3"
-        |=> Inherits Curve
-
-    let SplineCurve =
-        Class "THREE.SplineCurve"
-        |=> Inherits Curve
-
-    let SplineCurve3 =
-        Class "THREE.SplineCurve3"
-        |=> Inherits Curve
-
-    let BoxGeometry =
-        Class "THREE.BoxGeometry"
-        |=> Inherits Geometry
-        |+> Static [
-            Constructor (T<float>?width * T<float>?height * T<float>?depth * !? T<int>?widthSegments * !? T<int>?heightSegments * !? T<int>?depthSegments)
+            Constructor Object3D?root
         ]
         |+> Instance [
-            "parameters"     =? T<obj>
-            "widthSegments"  =@ T<int>
-            "heightSegments" =@ T<int>
-            "depthSegments"  =@ T<int>
-        ]
+            "time" =@ T<float>
+            "timeScale" =@ T<float>
 
-    let CircleGeometry =
-        Class "THREE.CircleGeometry"
-        |=> Inherits Geometry
+            "clipAction"      => AnimationClip?clip * !? Object3D?optionalRoot * !? LoopMode?blendMode ^-> AnimationAction
+            "existingAction"  => AnimationClip?clip * !? Object3D?optionalRoot ^-> AnimationAction
+            "stopAllAction"   => Unit ^-> TSelf
+            "update"          => T<float>?deltaTime ^-> TSelf
+            "setTime"         => T<float>?time ^-> TSelf
+            "getRoot"         => Unit ^-> Object3D
+            "uncacheClip"     => AnimationClip?clip ^-> Unit
+            "uncacheRoot"     => Object3D?root ^-> Unit
+            "uncacheAction"   => AnimationClip?clip * !? Object3D?optionalRoot ^-> Unit
+        ]
+        |> ignore
+
+    // ------------------------------------------------------------------
+    // Curves
+    // ------------------------------------------------------------------
+
+    Curve
+        |+> Instance [
+            "arcLengthDivisions" =@ T<int>
+            "needsUpdate" =@ T<bool>
+
+            "getPoint"        => T<float>?t * !? Vector3?optionalTarget ^-> Vector3
+            "getPointAt"      => T<float>?u * !? Vector3?optionalTarget ^-> Vector3
+            "getPoints"       => !? T<int>?divisions ^-> !| Vector3
+            "getSpacedPoints" => !? T<int>?divisions ^-> !| Vector3
+            "getLength"       => Unit ^-> T<float>
+            "getLengths"      => !? T<int>?divisions ^-> !| T<float>
+            "updateArcLengths" => Unit ^-> Unit
+            "getTangent"      => T<float>?t * !? Vector3?optionalTarget ^-> Vector3
+            "getTangentAt"    => T<float>?u * !? Vector3?optionalTarget ^-> Vector3
+            "computeFrenetFrames" => T<int>?segments * T<bool>?closed ^-> FrenetFrames
+            "clone"           => Unit ^-> TSelf
+        ]
+        |> ignore
+
+    CatmullRomCurve3
         |+> Static [
-            Constructor (!? T<float>?radius * !? T<int>?segments * !? T<float>?thetaStart * !? T<float>?thetaLength)
+            Constructor (!? (!| Vector3)?points * !? T<bool>?closed * !? T<string>?curveType * !? T<float>?tension)
         ]
         |+> Instance [
-            "parameters" =? T<obj>
+            "points" =@ !| Vector3
+            "closed" =@ T<bool>
+            "curveType" =@ T<string>
+            "tension" =@ T<float>
         ]
+        |> ignore
 
-    let CylinderGeometry =
-        Class "THREE.CylinderGeometry"
-        |=> Inherits Geometry
+    LineCurve3
         |+> Static [
-            Constructor (!? T<float>?radiusTop * !? T<float>?radiusBottom * !? T<float>?height * !? T<int>?radialSegments * !? T<int>?heightSegments * !? T<bool>?openEnded)
+            Constructor (!? Vector3?v1 * !? Vector3?v2)
         ]
         |+> Instance [
-            "parameters" =? T<obj>
+            "v1" =@ Vector3
+            "v2" =@ Vector3
         ]
+        |> ignore
 
-    let ExtrudeGeometry =
-        Class "THREE.ExtrudeGeometry"
-        |=> Inherits Geometry
+    QuadraticBezierCurve3
         |+> Static [
-            Constructor (!? (ArrayOf Shape)?shapes * !? T<obj>?options)
+            Constructor (!? Vector3?v0 * !? Vector3?v1 * !? Vector3?v2)
         ]
         |+> Instance [
-            "shapebb" =? Box3
-
-            "addShapeList" => (ArrayOf Shape)?shapes * !? T<obj>?options ^-> O
-            "addShape"     => Shape?shape * !? T<obj>?options ^-> O
+            "v0" =@ Vector3
+            "v1" =@ Vector3
+            "v2" =@ Vector3
         ]
+        |> ignore
 
-    let IcosahedronGeometry =
-        Class "THREE.IcosahedronGeometry"
-        |=> Inherits Geometry
+    CubicBezierCurve3
         |+> Static [
-            Constructor (!? T<float>?radius * !? T<float>?detail)
+            Constructor (!? Vector3?v0 * !? Vector3?v1 * !? Vector3?v2 * !? Vector3?v3)
         ]
         |+> Instance [
-            "parameters" =? T<obj>
+            "v0" =@ Vector3
+            "v1" =@ Vector3
+            "v2" =@ Vector3
+            "v3" =@ Vector3
         ]
+        |> ignore
 
-    let LatheGeometry =
-        Class "THREE.LatheGeometry"
-        |=> Inherits Geometry
+    // ------------------------------------------------------------------
+    // Geometries
+    // ------------------------------------------------------------------
+
+    BoxGeometry
         |+> Static [
-            Constructor ((ArrayOf T<obj>)?points * !? T<int>?segments * !? T<float>?phiStart * !? T<float>?phiLength)
+            Constructor (!? T<float>?width * !? T<float>?height * !? T<float>?depth * !? T<int>?widthSegments * !? T<int>?heightSegments * !? T<int>?depthSegments)
         ]
+        |> ignore
 
-    let OctahedronGeometry =
-        Class "THREE.OctahedronGeometry"
-        |=> Inherits Geometry
-        |+> Static [
-            Constructor (!? T<float>?radius * !? T<float>?detail)
-        ]
-        |+> Instance [
-            "parameters" =? T<obj>
-        ]
-
-    let ParametricGeometry =
-        Class "THREE.ParametricGeometry"
-        |=> Inherits Geometry
-        |+> Static [
-            Constructor ((T<obj> * T<obj> ^-> T<obj>)?func * T<int>?slices * T<int>?stacks)
-        ]
-
-    let PlaneGeometry =
-        Class "THREE.PlaneGeometry"
-        |=> Inherits Geometry
-        |+> Static [
-            Constructor (T<float>?width * T<float>?height * !? T<int>?widthSegments * !? T<int>?heightSegments)
-        ]
-        |+> Instance [
-            "parameters" =? T<obj>
-        ]
-
-    let PolyhedronGeometry =
-        Class "THREE.PolyhedronGeometry"
-        |=> Inherits Geometry
-        |+> Static [
-            Constructor ((ArrayOf T<float>)?vertices * (ArrayOf T<float>)?indices * !? T<float>?radius * !? T<float>?detail)
-        ]
-        |+> Instance [
-            "boundingSphere" =? Sphere
-        ]
-
-    let RingGeometry =
-        Class "THREE.RingGeometry"
-        |=> Inherits Geometry
-        |+> Static [
-            Constructor (!? T<float>?innerRadius * !? T<float>?outerRadius * !? T<int>?thetaSegments * !? T<int>?phiSegments * !? T<float>?thetaLength * !? T<float>?phiLength)
-        ]
-        |+> Instance [
-            "boundingSphere" =? Sphere
-        ]
-
-    let ShapeGeometry =
-        Class "THREE.ShapeGeometry"
-        |=> Inherits Geometry
-        |+> Static [
-            Constructor (!? (ArrayOf Shape)?shapes * !? T<obj>?options)
-        ]
-        |+> Instance [
-            "shapebb" =? Box3
-
-            "addShapeList" => (ArrayOf Shape)?shapes * !? T<obj>?options ^-> O
-            "addShape"     => Shape?shape * !? T<obj>?options ^-> O
-        ]
-
-    let SphereGeometry =
-        Class "THREE.SphereGeometry"
-        |=> Inherits Geometry
+    SphereGeometry
         |+> Static [
             Constructor (!? T<float>?radius * !? T<int>?widthSegments * !? T<int>?heightSegments * !? T<float>?phiStart * !? T<float>?phiLength * !? T<float>?thetaStart * !? T<float>?thetaLength)
         ]
+        |> ignore
+
+    PlaneGeometry
+        |+> Static [
+            Constructor (!? T<float>?width * !? T<float>?height * !? T<int>?widthSegments * !? T<int>?heightSegments)
+        ]
+        |> ignore
+
+    CircleGeometry
+        |+> Static [
+            Constructor (!? T<float>?radius * !? T<int>?segments * !? T<float>?thetaStart * !? T<float>?thetaLength)
+        ]
+        |> ignore
+
+    CylinderGeometry
+        |+> Static [
+            Constructor (!? T<float>?radiusTop * !? T<float>?radiusBottom * !? T<float>?height * !? T<int>?radialSegments * !? T<int>?heightSegments * !? T<bool>?openEnded * !? T<float>?thetaStart * !? T<float>?thetaLength)
+        ]
+        |> ignore
+
+    ConeGeometry
+        |+> Static [
+            Constructor (!? T<float>?radius * !? T<float>?height * !? T<int>?radialSegments * !? T<int>?heightSegments * !? T<bool>?openEnded * !? T<float>?thetaStart * !? T<float>?thetaLength)
+        ]
+        |> ignore
+
+    TorusGeometry
+        |+> Static [
+            Constructor (!? T<float>?radius * !? T<float>?tube * !? T<int>?radialSegments * !? T<int>?tubularSegments * !? T<float>?arc * !? T<float>?thetaStart * !? T<float>?thetaLength)
+        ]
+        |> ignore
+
+    TorusKnotGeometry
+        |+> Static [
+            Constructor (!? T<float>?radius * !? T<float>?tube * !? T<int>?tubularSegments * !? T<int>?radialSegments * !? T<int>?p * !? T<int>?q)
+        ]
+        |> ignore
+
+    RingGeometry
+        |+> Static [
+            Constructor (!? T<float>?innerRadius * !? T<float>?outerRadius * !? T<int>?thetaSegments * !? T<int>?phiSegments * !? T<float>?thetaStart * !? T<float>?thetaLength)
+        ]
+        |> ignore
+
+    CapsuleGeometry
+        |+> Static [
+            Constructor (!? T<float>?radius * !? T<float>?height * !? T<int>?capSegments * !? T<int>?radialSegments * !? T<int>?heightSegments)
+        ]
+        |> ignore
+
+    PolyhedronGeometry
+        |+> Static [
+            Constructor (!? (!| T<float>)?vertices * !? (!| T<float>)?indices * !? T<float>?radius * !? T<int>?detail)
+        ]
+        |> ignore
+
+    IcosahedronGeometry
+        |+> Static [
+            Constructor (!? T<float>?radius * !? T<int>?detail)
+        ]
+        |> ignore
+
+    OctahedronGeometry
+        |+> Static [
+            Constructor (!? T<float>?radius * !? T<int>?detail)
+        ]
+        |> ignore
+
+    TetrahedronGeometry
+        |+> Static [
+            Constructor (!? T<float>?radius * !? T<int>?detail)
+        ]
+        |> ignore
+
+    DodecahedronGeometry
+        |+> Static [
+            Constructor (!? T<float>?radius * !? T<int>?detail)
+        ]
+        |> ignore
+
+    EdgesGeometry
+        |+> Static [
+            Constructor (!? BufferGeometry?geometry * !? T<float>?thresholdAngle)
+        ]
+        |> ignore
+
+    WireframeGeometry
+        |+> Static [
+            Constructor (!? BufferGeometry?geometry)
+        ]
+        |> ignore
+
+    LatheGeometry
+        |+> Static [
+            Constructor (!? (!| Vector2)?points * !? T<int>?segments * !? T<float>?phiStart * !? T<float>?phiLength)
+        ]
+        |> ignore
+
+    TubeGeometry
+        |+> Static [
+            Constructor (!? Curve?path * !? T<int>?tubularSegments * !? T<float>?radius * !? T<int>?radialSegments * !? T<bool>?closed)
+        ]
+        |> ignore
+
+    // ------------------------------------------------------------------
+    // Helpers
+    // ------------------------------------------------------------------
+
+    AxesHelper
+        |+> Static [
+            Constructor !? T<float>?size
+        ]
         |+> Instance [
-            "parameters"     =? T<obj>
-            "boundingSphere" =? Sphere
+            "setColors" => ColorRepresentation?xAxisColor * ColorRepresentation?yAxisColor * ColorRepresentation?zAxisColor ^-> TSelf
         ]
+        |> ignore
 
-    let TetrahedronGeometry =
-        Class "THREE.TetrahedronGeometry"
-        |=> Inherits Geometry
+    GridHelper
         |+> Static [
-            Constructor (!? T<float>?radius * !? T<float>?detail)
+            Constructor (!? T<float>?size * !? T<int>?divisions * !? ColorRepresentation?color1 * !? ColorRepresentation?color2)
         ]
+        |> ignore
 
-    let TextGeometry =
-        Class "THREE.TextGeometry"
-        |=> Inherits ExtrudeGeometry
+    PolarGridHelper
         |+> Static [
-            Constructor (T<string>?text * !? T<obj>?parameters)
+            Constructor (!? T<float>?radius * !? T<int>?sectors * !? T<int>?rings * !? T<int>?divisions * !? ColorRepresentation?color1 * !? ColorRepresentation?color2)
         ]
+        |> ignore
 
-    let TorusGeometry =
-        Class "THREE.TorusGeometry"
-        |=> Inherits Geometry
+    ArrowHelper
         |+> Static [
-            Constructor (!? T<float>?radius * !? T<float>?tube * !? T<int>?radialSegments * !? T<int>?tubularSegments * !? T<float>?arc)
+            Constructor (!? Vector3?dir * !? Vector3?origin * !? T<float>?length * !? ColorRepresentation?color * !? T<float>?headLength * !? T<float>?headWidth)
         ]
         |+> Instance [
-            "parameters" =? T<obj>
+            "setDirection" => Vector3?dir ^-> TSelf
+            "setLength"    => T<float>?length * !? T<float>?headLength * !? T<float>?headWidth ^-> TSelf
+            "setColor"     => ColorRepresentation?color ^-> TSelf
         ]
+        |> ignore
 
-    let TorusKnotGeometry =
-        Class "THREE.TorusKnotGeometry"
-        |=> Inherits Geometry
+    Box3Helper
         |+> Static [
-            Constructor (!? T<float>?radius * !? T<float>?tube * !? T<int>?radialSegments * !? T<int>?tubularSegments * !? T<float>?p * !? T<float>?q * !? T<float>?heightScale)
+            Constructor (Box3?box * !? ColorRepresentation?color)
         ]
         |+> Instance [
-            "parameters" =? T<obj>
+            "box" =@ Box3
         ]
+        |> ignore
 
-    let TubeGeometry =
-        Class "THREE.TubeGeometry"
-        |=> Inherits Geometry
+    BoxHelper
         |+> Static [
-            Constructor (T<obj>?path * !? T<int>?segments * !? T<float>?radius * !? T<int>?radiusSegments * !? T<bool>?closed * !? T<bool>?debug)
+            Constructor (!? Object3D?``object`` * !? ColorRepresentation?color)
         ]
         |+> Instance [
-            "parameters" =? T<obj>
-        ]
+            "object" =@ Object3D
 
-    let AxisHelper =
-        Class "THREE.AxisHelper"
-        |=> Inherits Line
-        |+> Static [
-            Constructor T<float>?size
+            "update"        => Unit ^-> Unit
+            "setFromObject" => Object3D?``object`` ^-> TSelf
         ]
+        |> ignore
 
-    let MorphAnimation =
-        Class "THREE.MorphAnimation"
+    CameraHelper
         |+> Static [
-            Constructor Mesh?mesh
+            Constructor Camera?camera
         ]
         |+> Instance [
-            "mesh"        =@ Mesh
-            "frames"      =@ T<int>
-            "currentTime" =@ T<int>
-            "duration"    =@ T<int>
-            "loop"        =@ T<bool>
-            "isPlaying"   =@ T<bool>
+            "camera" =@ Camera
 
-            "play"   => O ^-> O
-            "pause"  => O ^-> O
-            "update" => O ^-> O
+            "update" => Unit ^-> Unit
         ]
+        |> ignore
+
+    DirectionalLightHelper
+        |+> Static [
+            Constructor (DirectionalLight?light * !? T<float>?size * !? ColorRepresentation?color)
+        ]
+        |+> Instance [
+            "light" =@ DirectionalLight
+
+            "update" => Unit ^-> Unit
+        ]
+        |> ignore
+
+    PointLightHelper
+        |+> Static [
+            Constructor (PointLight?light * !? T<float>?sphereSize * !? ColorRepresentation?color)
+        ]
+        |+> Instance [
+            "light" =@ PointLight
+
+            "update" => Unit ^-> Unit
+        ]
+        |> ignore
+
+    SpotLightHelper
+        |+> Static [
+            Constructor (SpotLight?light * !? ColorRepresentation?color)
+        ]
+        |+> Instance [
+            "light" =@ SpotLight
+
+            "update" => Unit ^-> Unit
+        ]
+        |> ignore
+
+    // ------------------------------------------------------------------
+    // Controls (addon)
+    // ------------------------------------------------------------------
+
+    Controls
+        |+> Instance [
+            "object" =? Camera
+            "domElement" =@ T<JavaScript.HTMLElement>
+            "enabled" =@ T<bool>
+
+            "connect"    => T<JavaScript.HTMLElement>?element ^-> Unit
+            "disconnect" => Unit ^-> Unit
+            "dispose"    => Unit ^-> Unit
+        ]
+        |> ignore
+
+    OrbitControls
+        |+> Static [
+            Constructor (Camera?``object`` * !? T<JavaScript.HTMLElement>?domElement)
+        ]
+        |+> Instance [
+            "target" =@ Vector3
+            "cursor" =? Vector3
+            "minDistance" =@ T<float>
+            "maxDistance" =@ T<float>
+            "minZoom" =@ T<float>
+            "maxZoom" =@ T<float>
+            "minPolarAngle" =@ T<float>
+            "maxPolarAngle" =@ T<float>
+            "minAzimuthAngle" =@ T<float>
+            "maxAzimuthAngle" =@ T<float>
+            "enableDamping" =@ T<bool>
+            "dampingFactor" =@ T<float>
+            "enableZoom" =@ T<bool>
+            "zoomSpeed" =@ T<float>
+            "enableRotate" =@ T<bool>
+            "rotateSpeed" =@ T<float>
+            "enablePan" =@ T<bool>
+            "panSpeed" =@ T<float>
+            "screenSpacePanning" =@ T<bool>
+            "keyPanSpeed" =@ T<float>
+            "zoomToCursor" =@ T<bool>
+            "autoRotate" =@ T<bool>
+            "autoRotateSpeed" =@ T<float>
+
+            "getPolarAngle"        => Unit ^-> T<float>
+            "getAzimuthalAngle"    => Unit ^-> T<float>
+            "getDistance"          => Unit ^-> T<float>
+            "listenToKeyEvents"    => T<JavaScript.HTMLElement>?element ^-> Unit
+            "stopListenToKeyEvents" => Unit ^-> Unit
+            "saveState"            => Unit ^-> Unit
+            "reset"                => Unit ^-> Unit
+            "pan"                  => T<float>?deltaX * T<float>?deltaY ^-> Unit
+            "dollyIn"              => T<float>?dollyScale ^-> Unit
+            "dollyOut"             => T<float>?dollyScale ^-> Unit
+            "rotateLeft"           => T<float>?angle ^-> Unit
+            "rotateUp"             => T<float>?angle ^-> Unit
+            "update"               => !? T<float>?deltaTime ^-> T<bool>
+        ]
+        |> ignore
+
+    // ------------------------------------------------------------------
+    // Assembly
+    // ------------------------------------------------------------------
 
     let Assembly =
         Assembly [
             Namespace "WebSharper.ThreeJs" [
+                // Enumerations and shared shapes
+                Side
+                Blending
+                ShadowMapType
+                ToneMapping
+                Wrapping
+                TextureFilter
+                TextureMapping
+                TextureFormat
+                TextureType
+                Usage
+                LoopMode
+                InterpolationMode
+                ColorSpace
+                WebGLPowerPreference
+                ShaderPrecision
                 HSL
-                MorphTarget
-                MorphColor
-                MorphNormal
+                RGB
+                ThreeEvent
+                Face
                 Intersection
-                LineBasicMaterialConfiguration
-                LineDashedMaterialConfiguration
-                MeshBasicMaterialConfiguration
-                MeshDepthMaterialConfiguration
-                MeshLambertMaterialConfiguration
-                MeshNormalMaterialConfiguration
-                MeshPhongMaterialConfiguration
-                ParticleSystemMaterialConfiguration
-                ShaderMaterialConfiguration
-                SpriteCanvasMaterialConfiguration
-                SpriteMaterialConfiguration
-                CanvasRendererConfiguration
-                WebGLRendererConfiguration
-                ProjectionData
-                DefaultAttributeValues
-                MemoryInfo
-                RenderInfo
-                Info
-                WebGLRendererPrecision
-            ]
-            Namespace "WebSharper.ThreeJs.THREE" [
-                Camera
-                OrthographicCamera
-                PerspectiveCamera
-                BufferAttribute
-                BufferGeometry
-                Clock
-                EventDispatcher
-                Face3
-                Geometry
-                Object3D
-                Projector
-                Raycaster
-                AmbientLight
-                AreaLight
-                DirectionalLight
-                HemisphereLight
-                Light'
-                PointLight
-                SpotLight
-                BufferGeometryLoader
-                Cache
-                ImageLoader
-                JSONLoader
-                Loader
-                LoadingManager
-                MaterialLoader
-                ObjectLoader
-                SceneLoader
-                TextureLoader
-                XHRLoader
-                LineBasicMaterial
-                LineDashedMaterial
-                Material'
-                MeshBasicMaterial
-                MeshDepthMaterial
-                MeshFaceMaterial
-                MeshLambertMaterial
-                MeshNormalMaterial
-                MeshPhongMaterial
-                ParticleSystemMaterial
-                RawShaderMaterial
-                ShaderMaterial
-                SpriteCanvasMaterial
-                SpriteMaterial
-                Box2
-                Box3
-                ColorClass
-                Euler
-                Frustum
-                Line3
-                Math
-                Matrix3
-                Matrix4
-                Plane
-                Quaternion
-                Ray
-                Sphere
-                Spline
-                Triangle
+                RaycasterThreshold
+                RaycasterParameters
+                BufferAttributes
+                GeometryGroup
+                LODLevel
+                FrenetFrames
+                WebGLCapabilities
+                DrawRange
+                RenderTargetOptions
+                WebGLRendererOptions
+                MaterialParameters
+                MeshBasicMaterialParameters
+                MeshStandardMaterialParameters
+                MeshPhysicalMaterialParameters
+                MeshPhongMaterialParameters
+                MeshLambertMaterialParameters
+                MeshNormalMaterialParameters
+                MeshDepthMaterialParameters
+                MeshToonMaterialParameters
+                MeshMatcapMaterialParameters
+                PointsMaterialParameters
+                LineBasicMaterialParameters
+                LineDashedMaterialParameters
+                SpriteMaterialParameters
+                ShadowMaterialParameters
+                ShaderMaterialParameters
+                // Math
                 Vector2
                 Vector3
                 Vector4
-                Bone
-                Line
-                LOD
-                Mesh
-                MorphAnimMesh
-                ParticleSystem
-                SkinnedMesh'
-                Sprite
-                CanvasRenderer
-                WebGLRenderer
-                WebGLRenderTargetClass
-                WebGLRenderTargetCube
-                RenderableFace
-                RenderableLine
-                RenderableObject
-                RenderableSprite
-                RenderableVertexClass
-                FogClass
-                FogExp2
-                Scene'
-                CompressedTexture
+                Matrix3
+                Matrix4
+                Quaternion
+                Euler
+                Color
+                Box2
+                Box3
+                Sphere
+                Plane
+                Ray
+                Line3
+                Triangle
+                Frustum
+                Spherical
+                MathUtils
+                Clock
+                Timer
+                Layers
+                // Core scene graph
+                EventDispatcher
+                Object3D
+                Group
+                Scene
+                Camera
+                PerspectiveCamera
+                OrthographicCamera
+                BufferAttribute
+                BufferGeometry
+                Raycaster
+                // Textures and loaders
+                Texture
+                CanvasTexture
                 DataTexture
-                Texture'
-                FontUtils
-                GeometryUtils
-                ImageUtils
-                SceneUtils
-                Animation
-                AnimationHandler
-                KeyFrameAnimation
-                AnimationMorphTarget
-                CombiedCamera
-                CubeCamera
+                VideoTexture
+                CubeTexture
+                Loader
+                LoadingManager
+                TextureLoader
+                // Materials
+                Material
+                MeshBasicMaterial
+                MeshStandardMaterial
+                MeshPhysicalMaterial
+                MeshPhongMaterial
+                MeshLambertMaterial
+                MeshNormalMaterial
+                MeshDepthMaterial
+                MeshToonMaterial
+                MeshMatcapMaterial
+                PointsMaterial
+                LineBasicMaterial
+                LineDashedMaterial
+                SpriteMaterial
+                ShadowMaterial
+                ShaderMaterial
+                // Objects
+                Mesh
+                Line
+                LineSegments
+                LineLoop
+                Points
+                Sprite
+                LOD
+                InstancedMesh
+                // Lights
+                Light
+                LightShadow
+                DirectionalLightShadow
+                PointLightShadow
+                SpotLightShadow
+                AmbientLight
+                DirectionalLight
+                HemisphereLight
+                PointLight
+                SpotLight
+                RectAreaLight
+                // Fog
+                Fog
+                FogExp2
+                // Renderer
+                WebGLShadowMap
+                WebGLMemoryInfo
+                WebGLRenderInfo
+                WebGLInfo
+                WebGLRenderer
+                WebGLRenderTarget
+                // Animation
+                KeyframeTrack
+                NumberKeyframeTrack
+                VectorKeyframeTrack
+                ColorKeyframeTrack
+                QuaternionKeyframeTrack
+                BooleanKeyframeTrack
+                StringKeyframeTrack
+                AnimationClip
+                AnimationAction
+                AnimationMixer
+                // Curves
                 Curve
-                CurvePath
-                Gyroscope
-                PathClass
-                ShapeClass
-                ArcCurve
-                ClosedSplineCurve3
-                CubicBezierCurve
-                CubicBezierCurve3
-                EllipseCurve
-                LineCurve
+                CatmullRomCurve3
                 LineCurve3
-                QuadraticBezierCurve
                 QuadraticBezierCurve3
-                SplineCurve
-                SplineCurve3
+                CubicBezierCurve3
+                // Geometries
                 BoxGeometry
+                SphereGeometry
+                PlaneGeometry
                 CircleGeometry
                 CylinderGeometry
-                ExtrudeGeometry
-                IcosahedronGeometry
-                LatheGeometry
-                OctahedronGeometry
-                ParametricGeometry
-                PlaneGeometry
-                PolyhedronGeometry
-                RingGeometry
-                ShapeGeometry
-                SphereGeometry
-                TetrahedronGeometry
-                TextGeometry
+                ConeGeometry
                 TorusGeometry
                 TorusKnotGeometry
+                RingGeometry
+                CapsuleGeometry
+                PolyhedronGeometry
+                IcosahedronGeometry
+                OctahedronGeometry
+                TetrahedronGeometry
+                DodecahedronGeometry
+                EdgesGeometry
+                WireframeGeometry
+                LatheGeometry
                 TubeGeometry
-                AxisHelper
-                MorphAnimation
-            ]
-            Namespace "WebSharper.ThreeJs.Resources" [
-                (Resource "three.js" "three.min.js").AssemblyWide ()
+                // Helpers
+                AxesHelper
+                GridHelper
+                PolarGridHelper
+                ArrowHelper
+                Box3Helper
+                BoxHelper
+                CameraHelper
+                DirectionalLightHelper
+                PointLightHelper
+                SpotLightHelper
+                // Controls addon
+                Controls
+                OrbitControls
             ]
         ]
 
 [<Sealed>]
 type Extension () =
     interface IExtension with
-        member x.Assembly =
-            Definition.Assembly
+        member x.Assembly = Definition.Assembly
 
 [<assembly: Extension(typeof<Extension>)>]
 do ()
