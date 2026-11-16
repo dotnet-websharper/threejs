@@ -5,14 +5,15 @@ const name = 'WebSharper.ThreeJs.Sample'
 
 // The WebSharper-generated module imports the npm `three` package (and its
 // `three/addons/...` modules) plus the WebSharper runtime; bundle them into a
-// single IIFE for the static page.
+// single ES module for the static page. ESM is required by addons such as
+// `DRACOLoader`/`KTX2Loader`, which resolve their decoder paths against
+// `import.meta.url`.
 await build({
   entryPoints: [`./build/${name}.js`],
   bundle: true,
   minify: true,
-  format: 'iife',
-  outfile: `../dist/Scripts/${name}.min.js`,
-  globalName: 'wsbundle'
+  format: 'esm',
+  outfile: `../dist/Scripts/${name}.min.js`
 })
 
 copyFileSync('./site.css', '../dist/site.css')
