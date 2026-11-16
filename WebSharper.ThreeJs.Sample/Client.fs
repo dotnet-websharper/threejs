@@ -82,11 +82,16 @@ module Client =
             Timer: Timer
             Mixer: AnimationMixer
             Action: AnimationAction
+            Composer: EffectComposer
+            Bloom: UnrealBloomPass
+            FatLines: LineMaterial
         }
 
     let mutable app : App option = None
     let mutable helpersVisible = true
     let mutable debugVisible = false
+    let mutable postFx = false
+    let mutable addonClasses = 0
     let mutable frames = 0
     let mutable accumulated = 0.0
 
@@ -180,7 +185,8 @@ module Client =
     let private refreshCount () =
         withApp (fun a ->
             objectCount.Value <-
-                sprintf "%d objects · %d helpers · %d debug" a.Pickables.Count a.Helpers.Count a.Debug.Count)
+                sprintf "%d objects · %d helpers · %d debug · %d addon classes"
+                    a.Pickables.Count a.Helpers.Count a.Debug.Count addonClasses)
 
     let private removeObject (a: App) (o: Object3D) =
         a.Pickables.Remove(o) |> ignore
@@ -394,6 +400,12 @@ module Client =
             for h in a.Debug do
                 h.Visible <- debugVisible
             status.Value <- if debugVisible then "Light/camera debug helpers visible." else "Debug helpers hidden.")
+
+    let private togglePostFx () =
+        postFx <- not postFx
+        status.Value <-
+            if postFx then "Bloom on: EffectComposer → RenderPass → UnrealBloomPass → OutputPass."
+            else "Bloom off: rendering directly with WebGLRenderer."
 
     // ---------------------------------------------------------------
     // Theme
@@ -656,20 +668,40 @@ module Client =
             stars.Name <- "Stars"
             scene.Add(stars) |> ignore
 
-            // A dashed orbit line, built by hand and using computeLineDistances.
-            let orbitPoints = Float32Array(73 * 3)
+            // A wide line built with the addon fat-line classes (LineGeometry +
+            // LineMaterial + Line2), which support arbitrary widths.
+            let orbitPoints = Array.zeroCreate (73 * 3)
             for i in 0 .. 72 do
                 let angle = float i / 72.0 * System.Math.PI * 2.0
-                orbitPoints.Set(i * 3, float32 (3.2 * System.Math.Cos angle))
-                orbitPoints.Set(i * 3 + 1, 0.02f)
-                orbitPoints.Set(i * 3 + 2, float32 (3.2 * System.Math.Sin angle))
-            let orbitGeometry = BufferGeometry()
-            orbitGeometry.SetAttribute("position", BufferAttribute(orbitPoints, 3)) |> ignore
-            let orbitMaterial = LineDashedMaterial(LineDashedMaterialParameters(Color = "#a5b4fc", DashSize = 0.25, GapSize = 0.2))
-            let orbit = LineLoop(orbitGeometry, orbitMaterial)
+                orbitPoints.[i * 3] <- 3.1 * System.Math.Cos angle
+                orbitPoints.[i * 3 + 1] <- 0.06
+                orbitPoints.[i * 3 + 2] <- 3.1 * System.Math.Sin angle
+            let orbitGeometry = LineGeometry()
+            orbitGeometry.SetPositions(orbitPoints) |> ignore
+            let orbitMaterial =
+                LineMaterial(
+                    LineMaterialParameters(
+                        Color = "#6366f1",
+                        Linewidth = 3.5,
+                        Dashed = true,
+                        DashSize = 0.35,
+                        GapSize = 0.25))
+            orbitMaterial.Resolution <- Vector2(width, height)
+            let orbit = Line2(orbitGeometry, orbitMaterial)
             orbit.ComputeLineDistances() |> ignore
-            orbit.Name <- "Orbit"
+            orbit.Name <- "Fat orbit"
             scene.Add(orbit) |> ignore
+
+            // Merge two geometries into one with the BufferGeometryUtils addon.
+            let parts : BufferGeometry[] =
+                [| (BoxGeometry(0.55, 0.55, 0.55) :> BufferGeometry)
+                   (SphereGeometry(0.4, 20, 14) :> BufferGeometry) |]
+            let mergedGeometry = BufferGeometryUtils.MergeGeometries(parts, true)
+            let merged = Mesh(mergedGeometry, createMaterial 2)
+            merged.Position.Set(1.9, 0.7, -1.7) |> ignore
+            merged.CastShadow <- true
+            merged.Name <- "Merged (box + sphere)"
+            scene.Add(merged) |> ignore
 
             // Helpers
             let selection = BoxHelper()
@@ -717,6 +749,86 @@ module Client =
             let timer = Timer()
             timer.Connect(JS.Document)
 
+            // Post-processing: EffectComposer → RenderPass → UnrealBloomPass →
+            // OutputPass. Off by default; toggled from the panel.
+            let composer = EffectComposer(renderer)
+            composer.AddPass(RenderPass(scene, camera))
+            let bloom = UnrealBloomPass(Vector2(width, height), 0.35, 0.5, 0.92)
+            composer.AddPass(bloom)
+            composer.AddPass(OutputPass())
+            composer.SetSize(int width, int height)
+
+            // Construct the remaining addon loaders/exporters so the sample
+            // exercises the whole addon surface; it does not fetch any external
+            // asset (the 3D content is procedural).
+            let addonProbe : ResizeArray<obj> = ResizeArray()
+            addonProbe.Add(GLTFLoader())
+            addonProbe.Add(DRACOLoader())
+            addonProbe.Add(KTX2Loader())
+            addonProbe.Add(OBJLoader())
+            addonProbe.Add(MTLLoader())
+            addonProbe.Add(STLLoader())
+            addonProbe.Add(PLYLoader())
+            addonProbe.Add(FBXLoader())
+            addonProbe.Add(RGBELoader())
+            addonProbe.Add(EXRLoader())
+            addonProbe.Add(SVGLoader())
+            addonProbe.Add(FontLoader())
+            addonProbe.Add(TTFLoader())
+            addonProbe.Add(CubeTextureLoader())
+            addonProbe.Add(ImageBitmapLoader())
+            addonProbe.Add(Gyroscope())
+            addonProbe.Add(ColladaLoader())
+            addonProbe.Add(LWOLoader())
+            addonProbe.Add(LUT3dlLoader())
+            addonProbe.Add(Sky())
+            let waterNormals = DataTexture(Uint8Array(16), 2, 2)
+            addonProbe.Add(Water(PlaneGeometry(1., 1.), WaterOptions(TextureWidth = 256, TextureHeight = 256, WaterNormals = waterNormals)))
+            addonProbe.Add(Water2(PlaneGeometry(1., 1.), Water2Options(TextureWidth = 256, TextureHeight = 256, NormalMap0 = waterNormals, NormalMap1 = waterNormals)))
+            addonProbe.Add(Reflector(PlaneGeometry(1., 1.), ReflectorOptions(TextureWidth = 256, TextureHeight = 256)))
+            addonProbe.Add(Refractor(PlaneGeometry(1., 1.), ReflectorOptions(TextureWidth = 256, TextureHeight = 256)))
+            addonProbe.Add(
+                ConvexGeometry(
+                    [| Vector3(0., 0., 0.); Vector3(1., 0., 0.); Vector3(0., 1., 0.); Vector3(0., 0., 1.) |]))
+            addonProbe.Add(ConvexHull())
+            addonProbe.Add(SSAOPass(scene, camera))
+            addonProbe.Add(SMAAPass())
+            addonProbe.Add(BokehPass(scene, camera, BokehPassParameters(Focus = 1.0, Aperture = 0.025, Maxblur = 0.01)))
+            addonProbe.Add(FilmPass())
+            addonProbe.Add(AfterimagePass())
+            addonProbe.Add(WireframeGeometry2(BoxGeometry(1., 1., 1.)))
+            addonProbe.Add(LineSegments2())
+            addonProbe.Add(TAARenderPass(scene, camera))
+            addonProbe.Add(SkeletonUtils.Clone(merged))
+            addonProbe.Add(BufferGeometryUtils.MergeVertices(mergedGeometry))
+            addonProbe.Add(BloomPass())
+            addonProbe.Add(CubeTexturePass(camera))
+            addonProbe.Add(DotScreenPass())
+            addonProbe.Add(GlitchPass())
+            addonProbe.Add(HalftonePass(HalftonePassParameters()))
+            addonProbe.Add(OutlinePass(Vector2(256., 256.), scene, camera))
+            addonProbe.Add(RenderPixelatedPass(4, scene, camera))
+            addonProbe.Add(RenderTransitionPass(scene, camera, scene, camera))
+            addonProbe.Add(SSAARenderPass(scene, camera))
+            addonProbe.Add(SAOPass(scene, camera))
+            addonProbe.Add(SavePass())
+            addonProbe.Add(GTAOPass(scene, camera))
+            addonProbe.Add(LUTPass())
+            addonProbe.Add(FXAAPass())
+            addonProbe.Add(TexturePass())
+            addonProbe.Add(ClearMaskPass())
+            addonProbe.Add(MarchingCubes(20, MeshNormalMaterial()))
+            let csm = CSM(CSMParameters(Camera = camera, Parent = scene, Cascades = 3))
+            addonProbe.Add(csm)
+            addonProbe.Add(CSMHelper(csm))
+            addonProbe.Add(CSMFrustum())
+            addonProbe.Add(OBJExporter())
+            addonProbe.Add(STLExporter())
+            addonProbe.Add(PLYExporter())
+            addonProbe.Add(GLTFExporter())
+            addonProbe.Add(USDZExporter())
+            addonClasses <- addonProbe.Count
+
             let state =
                 {
                     Renderer = renderer
@@ -737,6 +849,9 @@ module Client =
                     Timer = timer
                     Mixer = mixer
                     Action = action
+                    Composer = composer
+                    Bloom = bloom
+                    FatLines = orbitMaterial
                 }
             app <- Some state
 
@@ -764,6 +879,8 @@ module Client =
                 withApp (fun a ->
                     let w, h = sizeOf host
                     a.Renderer.SetSize(int w, int h, false)
+                    a.Composer.SetSize(int w, int h)
+                    a.FatLines.Resolution <- Vector2(w, h)
                     a.Camera.Aspect <- w / h
                     a.Camera.UpdateProjectionMatrix())
 
@@ -788,7 +905,7 @@ module Client =
                     a.Pulse.Intensity <- 14.0 + 6.0 * System.Math.Sin(pulsePhase * 2.0)
 
                     cameraUpdate dt
-                    a.Renderer.Render(a.Scene, a.Camera)
+                    if postFx then a.Composer.Render(dt) else a.Renderer.Render(a.Scene, a.Camera)
 
                     frames <- frames + 1
                     accumulated <- accumulated + dt
@@ -833,6 +950,7 @@ module Client =
             .ToggleAnimation(fun _ -> toggleAnimation ())
             .ToggleHelpers(fun _ -> toggleHelpers ())
             .ToggleDebug(fun _ -> toggleDebug ())
+            .ToggleBloom(fun _ -> togglePostFx ())
             .Bind()
 
         init ()

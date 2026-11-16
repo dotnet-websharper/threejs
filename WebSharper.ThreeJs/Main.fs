@@ -371,6 +371,107 @@ module Definition =
     let DragControls = a3 "three/addons/controls/DragControls.js" "DragControls"
     let TransformControls = a3 "three/addons/controls/TransformControls.js" "TransformControls"
 
+    // Core classes the addons extend
+    let InstancedBufferGeometry = c3 "InstancedBufferGeometry"
+    let ExtrudeGeometry = c3 "ExtrudeGeometry"
+    let Shape = c3 "Shape"
+    let ShapePath = c3 "ShapePath"
+    let CompressedTexture = c3 "CompressedTexture"
+    let Data3DTexture = c3 "Data3DTexture"
+    let DataTextureLoader = c3 "DataTextureLoader"
+    let ImageBitmapLoader = c3 "ImageBitmapLoader"
+    let CubeTextureLoader = c3 "CubeTextureLoader"
+    let Skeleton = c3 "Skeleton"
+    let SkinnedMesh = c3 "SkinnedMesh"
+    let Bone = c3 "Bone"
+    let FileLoader = c3 "FileLoader"
+    let InterleavedBufferAttribute = c3 "InterleavedBufferAttribute"
+
+    // Addons: loaders
+    let GLTFLoader = a3 "three/addons/loaders/GLTFLoader.js" "GLTFLoader"
+    let DRACOLoader = a3 "three/addons/loaders/DRACOLoader.js" "DRACOLoader"
+    let KTX2Loader = a3 "three/addons/loaders/KTX2Loader.js" "KTX2Loader"
+    let OBJLoader = a3 "three/addons/loaders/OBJLoader.js" "OBJLoader"
+    let MTLLoader = a3 "three/addons/loaders/MTLLoader.js" "MTLLoader"
+    let STLLoader = a3 "three/addons/loaders/STLLoader.js" "STLLoader"
+    let PLYLoader = a3 "three/addons/loaders/PLYLoader.js" "PLYLoader"
+    let FBXLoader = a3 "three/addons/loaders/FBXLoader.js" "FBXLoader"
+    let ColladaLoader = a3 "three/addons/loaders/ColladaLoader.js" "ColladaLoader"
+    let LWOLoader = a3 "three/addons/loaders/LWOLoader.js" "LWOLoader"
+    let RGBELoader = a3 "three/addons/loaders/RGBELoader.js" "RGBELoader"
+    let EXRLoader = a3 "three/addons/loaders/EXRLoader.js" "EXRLoader"
+    let LUT3dlLoader = a3 "three/addons/loaders/LUT3dlLoader.js" "LUT3dlLoader"
+    let SVGLoader = a3 "three/addons/loaders/SVGLoader.js" "SVGLoader"
+    let FontLoader = a3 "three/addons/loaders/FontLoader.js" "FontLoader"
+    let Font = a3 "three/addons/loaders/FontLoader.js" "Font"
+    let TTFLoader = a3 "three/addons/loaders/TTFLoader.js" "TTFLoader"
+    let TextGeometry = a3 "three/addons/geometries/TextGeometry.js" "TextGeometry"
+
+    // Addons: post-processing
+    let Pass = a3 "three/addons/postprocessing/Pass.js" "Pass"
+    let EffectComposer = a3 "three/addons/postprocessing/EffectComposer.js" "EffectComposer"
+    let RenderPass = a3 "three/addons/postprocessing/RenderPass.js" "RenderPass"
+    let ShaderPass = a3 "three/addons/postprocessing/ShaderPass.js" "ShaderPass"
+    let MaskPass = a3 "three/addons/postprocessing/MaskPass.js" "MaskPass"
+    let ClearPass = a3 "three/addons/postprocessing/ClearPass.js" "ClearPass"
+    let OutputPass = a3 "three/addons/postprocessing/OutputPass.js" "OutputPass"
+    let UnrealBloomPass = a3 "three/addons/postprocessing/UnrealBloomPass.js" "UnrealBloomPass"
+    let SSAOPass = a3 "three/addons/postprocessing/SSAOPass.js" "SSAOPass"
+    let SMAAPass = a3 "three/addons/postprocessing/SMAAPass.js" "SMAAPass"
+    let BokehPass = a3 "three/addons/postprocessing/BokehPass.js" "BokehPass"
+    let FilmPass = a3 "three/addons/postprocessing/FilmPass.js" "FilmPass"
+    let AfterimagePass = a3 "three/addons/postprocessing/AfterimagePass.js" "AfterimagePass"
+    let TAARenderPass = a3 "three/addons/postprocessing/TAARenderPass.js" "TAARenderPass"
+    let BloomPass = a3 "three/addons/postprocessing/BloomPass.js" "BloomPass"
+    let CubeTexturePass = a3 "three/addons/postprocessing/CubeTexturePass.js" "CubeTexturePass"
+    let DotScreenPass = a3 "three/addons/postprocessing/DotScreenPass.js" "DotScreenPass"
+    let GlitchPass = a3 "three/addons/postprocessing/GlitchPass.js" "GlitchPass"
+    let HalftonePass = a3 "three/addons/postprocessing/HalftonePass.js" "HalftonePass"
+    let OutlinePass = a3 "three/addons/postprocessing/OutlinePass.js" "OutlinePass"
+    let RenderPixelatedPass = a3 "three/addons/postprocessing/RenderPixelatedPass.js" "RenderPixelatedPass"
+    let RenderTransitionPass = a3 "three/addons/postprocessing/RenderTransitionPass.js" "RenderTransitionPass"
+    let SAOPass = a3 "three/addons/postprocessing/SAOPass.js" "SAOPass"
+    let SavePass = a3 "three/addons/postprocessing/SavePass.js" "SavePass"
+    let SSAARenderPass = a3 "three/addons/postprocessing/SSAARenderPass.js" "SSAARenderPass"
+    let SSRPass = a3 "three/addons/postprocessing/SSRPass.js" "SSRPass"
+    let GTAOPass = a3 "three/addons/postprocessing/GTAOPass.js" "GTAOPass"
+    let LUTPass = a3 "three/addons/postprocessing/LUTPass.js" "LUTPass"
+    let FXAAPass = a3 "three/addons/postprocessing/FXAAPass.js" "FXAAPass"
+    let TexturePass = a3 "three/addons/postprocessing/TexturePass.js" "TexturePass"
+    let ClearMaskPass = a3 "three/addons/postprocessing/MaskPass.js" "ClearMaskPass"
+
+    // Addons: fat lines
+    let Line2 = a3 "three/addons/lines/Line2.js" "Line2"
+    let LineSegments2 = a3 "three/addons/lines/LineSegments2.js" "LineSegments2"
+    let LineGeometry = a3 "three/addons/lines/LineGeometry.js" "LineGeometry"
+    let LineSegmentsGeometry = a3 "three/addons/lines/LineSegmentsGeometry.js" "LineSegmentsGeometry"
+    let LineMaterial = a3 "three/addons/lines/LineMaterial.js" "LineMaterial"
+    let WireframeGeometry2 = a3 "three/addons/lines/WireframeGeometry2.js" "WireframeGeometry2"
+    let Wireframe = a3 "three/addons/lines/Wireframe.js" "Wireframe"
+
+    // Addons: exporters and objects
+    let GLTFExporter = a3 "three/addons/exporters/GLTFExporter.js" "GLTFExporter"
+    let OBJExporter = a3 "three/addons/exporters/OBJExporter.js" "OBJExporter"
+    let STLExporter = a3 "three/addons/exporters/STLExporter.js" "STLExporter"
+    let PLYExporter = a3 "three/addons/exporters/PLYExporter.js" "PLYExporter"
+    let USDZExporter = a3 "three/addons/exporters/USDZExporter.js" "USDZExporter"
+    let Sky = a3 "three/addons/objects/Sky.js" "Sky"
+    let Water = a3 "three/addons/objects/Water.js" "Water"
+    // `objects/Water2.js` exports its class as `Water` too, so alias the import.
+    let Water2 = Class "Water2" |> Import "Water" "three/addons/objects/Water2.js"
+    let Reflector = a3 "three/addons/objects/Reflector.js" "Reflector"
+    let Refractor = a3 "three/addons/objects/Refractor.js" "Refractor"
+    let Gyroscope = a3 "three/addons/misc/Gyroscope.js" "Gyroscope"
+    let MarchingCubes = a3 "three/addons/objects/MarchingCubes.js" "MarchingCubes"
+    let CSM = a3 "three/addons/csm/CSM.js" "CSM"
+    let CSMFrustum = a3 "three/addons/csm/CSMFrustum.js" "CSMFrustum"
+    let CSMHelper = a3 "three/addons/csm/CSMHelper.js" "CSMHelper"
+    let ConvexGeometry = a3 "three/addons/geometries/ConvexGeometry.js" "ConvexGeometry"
+    let ConvexHull = a3 "three/addons/math/ConvexHull.js" "ConvexHull"
+    let ARButton = a3 "three/addons/webxr/ARButton.js" "ARButton"
+    let VRButton = a3 "three/addons/webxr/VRButton.js" "VRButton"
+    let XRButton = a3 "three/addons/webxr/XRButton.js" "XRButton"
+
     // ------------------------------------------------------------------
     // Option and event shapes
     // ------------------------------------------------------------------
@@ -1193,6 +1294,76 @@ module Definition =
     ArcballControls |=> Inherits Controls |> ignore
     DragControls |=> Inherits Controls |> ignore
     TransformControls |=> Inherits Controls |> ignore
+
+    // Addon loaders
+    GLTFLoader |=> Inherits Loader |> ignore
+    DRACOLoader |=> Inherits Loader |> ignore
+    KTX2Loader |=> Inherits Loader |> ignore
+    OBJLoader |=> Inherits Loader |> ignore
+    MTLLoader |=> Inherits Loader |> ignore
+    STLLoader |=> Inherits Loader |> ignore
+    PLYLoader |=> Inherits Loader |> ignore
+    FBXLoader |=> Inherits Loader |> ignore
+    ColladaLoader |=> Inherits Loader |> ignore
+    LWOLoader |=> Inherits Loader |> ignore
+    RGBELoader |=> Inherits DataTextureLoader |> ignore
+    EXRLoader |=> Inherits DataTextureLoader |> ignore
+    LUT3dlLoader |=> Inherits Loader |> ignore
+    SVGLoader |=> Inherits Loader |> ignore
+    FontLoader |=> Inherits Loader |> ignore
+    TTFLoader |=> Inherits Loader |> ignore
+    ImageBitmapLoader |=> Inherits Loader |> ignore
+    CubeTextureLoader |=> Inherits Loader |> ignore
+
+    // Addon post-processing
+    RenderPass |=> Inherits Pass |> ignore
+    ShaderPass |=> Inherits Pass |> ignore
+    MaskPass |=> Inherits Pass |> ignore
+    ClearPass |=> Inherits Pass |> ignore
+    OutputPass |=> Inherits Pass |> ignore
+    UnrealBloomPass |=> Inherits Pass |> ignore
+    SSAOPass |=> Inherits Pass |> ignore
+    SMAAPass |=> Inherits Pass |> ignore
+    BokehPass |=> Inherits Pass |> ignore
+    FilmPass |=> Inherits Pass |> ignore
+    AfterimagePass |=> Inherits Pass |> ignore
+    TAARenderPass |=> Inherits Pass |> ignore
+    BloomPass |=> Inherits Pass |> ignore
+    CubeTexturePass |=> Inherits Pass |> ignore
+    DotScreenPass |=> Inherits Pass |> ignore
+    GlitchPass |=> Inherits Pass |> ignore
+    HalftonePass |=> Inherits Pass |> ignore
+    OutlinePass |=> Inherits Pass |> ignore
+    RenderPixelatedPass |=> Inherits Pass |> ignore
+    RenderTransitionPass |=> Inherits Pass |> ignore
+    SAOPass |=> Inherits Pass |> ignore
+    SavePass |=> Inherits Pass |> ignore
+    SSAARenderPass |=> Inherits Pass |> ignore
+    SSRPass |=> Inherits Pass |> ignore
+    GTAOPass |=> Inherits Pass |> ignore
+    LUTPass |=> Inherits ShaderPass |> ignore
+    FXAAPass |=> Inherits ShaderPass |> ignore
+    TexturePass |=> Inherits Pass |> ignore
+    ClearMaskPass |=> Inherits Pass |> ignore
+
+    // Addon fat lines, exporters, objects, misc
+    LineSegmentsGeometry |=> Inherits InstancedBufferGeometry |> ignore
+    LineGeometry |=> Inherits LineSegmentsGeometry |> ignore
+    WireframeGeometry2 |=> Inherits LineSegmentsGeometry |> ignore
+    LineSegments2 |=> Inherits Mesh |> ignore
+    Line2 |=> Inherits LineSegments2 |> ignore
+    LineMaterial |=> Inherits ShaderMaterial |> ignore
+    Wireframe |=> Inherits Mesh |> ignore
+    TextGeometry |=> Inherits ExtrudeGeometry |> ignore
+    Sky |=> Inherits Mesh |> ignore
+    Water |=> Inherits Mesh |> ignore
+    Water2 |=> Inherits Mesh |> ignore
+    Reflector |=> Inherits Mesh |> ignore
+    Refractor |=> Inherits Mesh |> ignore
+    Gyroscope |=> Inherits Object3D |> ignore
+    MarchingCubes |=> Inherits Mesh |> ignore
+    CSMHelper |=> Inherits Group |> ignore
+    ConvexGeometry |=> Inherits BufferGeometry |> ignore
 
     MeshBasicMaterial |=> Inherits Material |> ignore
     MeshStandardMaterial |=> Inherits Material |> ignore
@@ -3469,6 +3640,208 @@ module Definition =
     // Controls (addons)
     // ------------------------------------------------------------------
 
+    // ------------------------------------------------------------------
+    // Addon option shapes
+    // ------------------------------------------------------------------
+
+    /// The asset metadata block of a loaded glTF file.
+    let GLTFAsset =
+        Pattern.Config "GLTFAsset" {
+            Required = []
+            Optional = [
+                "copyright", T<string>
+                "generator", T<string>
+                "version", T<string>
+                "minVersion", T<string>
+                "extensions", T<obj>
+                "extras", T<obj>
+            ]
+        }
+
+    /// The result of `GLTFLoader.Load` / `GLTFLoader.Parse`.
+    let GLTF =
+        Pattern.Config "GLTF" {
+            Required = []
+            Optional = [
+                "animations", !| AnimationClip
+                "scene", Group.Type
+                "scenes", !| Group
+                "cameras", !| Camera
+                "asset", GLTFAsset.Type
+                "parser", T<obj>
+                "userData", T<obj>
+            ]
+        }
+
+    /// Parameters of a `TextGeometry`.
+    let TextGeometryParameters =
+        Pattern.Config "TextGeometryParameters" {
+            Required = [ "font", Font.Type ]
+            Optional = [
+                "size", T<float>
+                "depth", T<float>
+                "bevelEnabled", T<bool>
+                "bevelThickness", T<float>
+                "bevelSize", T<float>
+                "bevelSegments", T<int>
+                "curveSegments", T<int>
+                "direction", T<string>
+            ]
+        }
+
+    /// Options of a `Reflector` (and `Refractor`).
+    let ReflectorOptions =
+        Pattern.Config "ReflectorOptions" {
+            Required = []
+            Optional = [
+                "color", ColorRepresentation
+                "textureWidth", T<int>
+                "textureHeight", T<int>
+                "clipBias", T<float>
+                "multisample", T<int>
+                "shader", T<obj>
+            ]
+        }
+
+    /// Options of a `Water`.
+    let WaterOptions =
+        Pattern.Config "WaterOptions" {
+            Required = []
+            Optional = [
+                "textureWidth", T<int>
+                "textureHeight", T<int>
+                "clipBias", T<float>
+                "alpha", T<float>
+                "time", T<float>
+                "waterNormals", Texture.Type
+                "sunDirection", Vector3.Type
+                "sunColor", ColorRepresentation
+                "waterColor", ColorRepresentation
+                "eye", Vector3.Type
+                "distortionScale", T<float>
+                "side", Side.Type
+                "fog", T<bool>
+            ]
+        }
+
+    /// Options of a `Water2`.
+    let Water2Options =
+        Pattern.Config "Water2Options" {
+            Required = []
+            Optional = [
+                "color", ColorRepresentation
+                "textureWidth", T<int>
+                "textureHeight", T<int>
+                "clipBias", T<float>
+                "flowDirection", Vector2.Type
+                "flowSpeed", T<float>
+                "reflectivity", T<float>
+                "scale", T<float>
+                "flowMap", Texture.Type
+                "normalMap0", Texture.Type
+                "normalMap1", Texture.Type
+                "shader", T<obj>
+            ]
+        }
+
+    /// Parameters of a `BokehPass`.
+    let BokehPassParameters =
+        Pattern.Config "BokehPassParameters" {
+            Required = []
+            Optional = [
+                "focus", T<float>
+                "aspect", T<float>
+                "aperture", T<float>
+                "maxblur", T<float>
+            ]
+        }
+
+    /// The result of a `LUT3dlLoader`.
+    let LUT3dlResult =
+        Pattern.Config "LUT3dlResult" {
+            Required = []
+            Optional = [
+                "size", T<int>
+                "texture3D", Data3DTexture.Type
+            ]
+        }
+
+    /// The output channels of an `SSAOPass`.
+    let SSAOOutput =
+        Pattern.EnumInlines "SSAOOutput" [
+            "Default", "0"
+            "SSAO", "1"
+            "Blur", "2"
+            "Depth", "3"
+            "Normal", "4"
+        ]
+
+    /// Parameters of a `LineMaterial`.
+    let LineMaterialParameters =
+        Pattern.Config "LineMaterialParameters" {
+            Required = []
+            Optional = [
+                "color", ColorRepresentation
+                "linewidth", T<float>
+                "worldUnits", T<bool>
+                "dashed", T<bool>
+                "dashScale", T<float>
+                "dashSize", T<float>
+                "dashOffset", T<float>
+                "gapSize", T<float>
+                "resolution", Vector2.Type
+                "alphaToCoverage", T<bool>
+            ]
+        }
+
+    /// Parameters of a `HalftonePass`.
+    let HalftonePassParameters =
+        Pattern.Config "HalftonePassParameters" {
+            Required = []
+            Optional = [
+                "shape", T<float>
+                "radius", T<float>
+                "rotateR", T<float>
+                "rotateG", T<float>
+                "rotateB", T<float>
+                "scatter", T<float>
+                "blending", T<float>
+                "blendingMode", T<int>
+                "greyscale", T<bool>
+                "disable", T<bool>
+            ]
+        }
+
+    /// Parameters of a `LUTPass`.
+    let LUTPassParameters =
+        Pattern.Config "LUTPassParameters" {
+            Required = []
+            Optional = [
+                "lut", T<obj>
+                "intensity", T<float>
+            ]
+        }
+
+    /// Parameters of a `CSM` (cascaded shadow maps).
+    let CSMParameters =
+        Pattern.Config "CSMParameters" {
+            Required = []
+            Optional = [
+                "camera", Camera.Type
+                "parent", Object3D.Type
+                "cascades", T<int>
+                "maxFar", T<float>
+                "mode", T<string>
+                "shadowMapSize", T<int>
+                "shadowBias", T<float>
+                "lightDirection", Vector3.Type
+                "lightIntensity", T<float>
+                "lightNear", T<float>
+                "lightFar", T<float>
+                "lightMargin", T<float>
+            ]
+        }
+
     /// The `keys` map of `OrbitControls` (the four arrow keys by default).
     let OrbitControlsKeys =
         Pattern.Config "OrbitControlsKeys" {
@@ -3756,6 +4129,725 @@ module Definition =
         |> ignore
 
     // ------------------------------------------------------------------
+    // Addons: loaders
+    // ------------------------------------------------------------------
+
+    GLTFLoader
+        |+> Static [ Constructor !? LoadingManager?manager ]
+        |+> Instance [
+            "dracoLoader" =@ !? DRACOLoader
+            "ktx2Loader" =@ !? KTX2Loader
+
+            "setDRACOLoader"    => !? DRACOLoader?dracoLoader ^-> TSelf
+            "setKTX2Loader"     => !? KTX2Loader?ktx2Loader ^-> TSelf
+            "setMeshoptDecoder" => T<obj>?meshoptDecoder ^-> TSelf
+
+            "parse" => (T<JavaScript.ArrayBuffer> + T<string>)?data * T<string>?path * (GLTF ^-> Unit)?onLoad * !? (T<obj> ^-> Unit)?onError ^-> Unit
+            "load"  => T<string>?url * !? (GLTF ^-> Unit)?onLoad * !? (T<JavaScript.ProgressEvent> ^-> Unit)?onProgress * !? (T<obj> ^-> Unit)?onError ^-> Unit
+        ]
+        |> ignore
+
+    DRACOLoader
+        |+> Static [ Constructor !? LoadingManager?manager ]
+        |+> Instance [
+            "setDecoderPath"   => T<string>?path ^-> TSelf
+            "setDecoderConfig" => T<obj>?config ^-> TSelf
+            "setWorkerLimit"   => T<int>?workerLimit ^-> TSelf
+            "preload"          => Unit ^-> TSelf
+            "dispose"          => Unit ^-> TSelf
+            "parse" => T<JavaScript.ArrayBuffer>?buffer * !? (BufferGeometry ^-> Unit)?onLoad * !? (T<obj> ^-> Unit)?onError ^-> Unit
+            "load"  => T<string>?url * !? (BufferGeometry ^-> Unit)?onLoad * !? (T<JavaScript.ProgressEvent> ^-> Unit)?onProgress * !? (T<obj> ^-> Unit)?onError ^-> Unit
+        ]
+        |> ignore
+
+    KTX2Loader
+        |+> Static [ Constructor !? LoadingManager?manager ]
+        |+> Instance [
+            "setTranscoderPath" => T<string>?path ^-> TSelf
+            "setWorkerLimit"    => T<int>?limit ^-> TSelf
+            "detectSupport"     => WebGLRenderer?renderer ^-> TSelf
+            "dispose"           => Unit ^-> Unit
+            "parse" => T<JavaScript.ArrayBuffer>?buffer * !? (CompressedTexture ^-> Unit)?onLoad * !? (T<obj> ^-> Unit)?onError ^-> Unit
+            "load"  => T<string>?url * !? (CompressedTexture ^-> Unit)?onLoad * !? (T<JavaScript.ProgressEvent> ^-> Unit)?onProgress * !? (T<obj> ^-> Unit)?onError ^-> Unit
+        ]
+        |> ignore
+
+    OBJLoader
+        |+> Static [ Constructor !? LoadingManager?manager ]
+        |+> Instance [
+            "parse"        => T<string>?data ^-> Group
+            "setMaterials" => T<obj>?materials ^-> TSelf
+            "load" => T<string>?url * !? (Group ^-> Unit)?onLoad * !? (T<JavaScript.ProgressEvent> ^-> Unit)?onProgress * !? (T<obj> ^-> Unit)?onError ^-> Unit
+        ]
+        |> ignore
+
+    MTLLoader
+        |+> Static [ Constructor !? LoadingManager?manager ]
+        |+> Instance [
+            "parse"              => T<string>?text * T<string>?path ^-> T<obj>
+            "setMaterialOptions" => T<obj>?value ^-> Unit
+            "load" => T<string>?url * !? (T<obj> ^-> Unit)?onLoad * !? (T<JavaScript.ProgressEvent> ^-> Unit)?onProgress * !? (T<obj> ^-> Unit)?onError ^-> Unit
+        ]
+        |> ignore
+
+    STLLoader
+        |+> Static [ Constructor !? LoadingManager?manager ]
+        |+> Instance [
+            "parse" => (T<JavaScript.ArrayBuffer> + T<string>)?data ^-> BufferGeometry
+            "load"  => T<string>?url * !? (BufferGeometry ^-> Unit)?onLoad * !? (T<JavaScript.ProgressEvent> ^-> Unit)?onProgress * !? (T<obj> ^-> Unit)?onError ^-> Unit
+        ]
+        |> ignore
+
+    PLYLoader
+        |+> Static [ Constructor !? LoadingManager?manager ]
+        |+> Instance [
+            "parse"                    => (T<JavaScript.ArrayBuffer> + T<string>)?data ^-> BufferGeometry
+            "setPropertyNameMapping"   => T<obj>?mapping ^-> Unit
+            "load" => T<string>?url * !? (BufferGeometry ^-> Unit)?onLoad * !? (T<JavaScript.ProgressEvent> ^-> Unit)?onProgress * !? (T<obj> ^-> Unit)?onError ^-> Unit
+        ]
+        |> ignore
+
+    FBXLoader
+        |+> Static [ Constructor !? LoadingManager?manager ]
+        |+> Instance [
+            "trimAnimationClips" =@ T<bool>
+            "parse" => (T<JavaScript.ArrayBuffer> + T<string>)?buffer * T<string>?path ^-> Group
+            "load"  => T<string>?url * !? (Group ^-> Unit)?onLoad * !? (T<JavaScript.ProgressEvent> ^-> Unit)?onProgress * !? (T<obj> ^-> Unit)?onError ^-> Unit
+        ]
+        |> ignore
+
+    ColladaLoader
+        |+> Static [ Constructor !? LoadingManager?manager ]
+        |+> Instance [
+            "parse" => T<string>?text * T<string>?path ^-> T<obj>
+            "load"  => T<string>?url * !? (T<obj> ^-> Unit)?onLoad * !? (T<JavaScript.ProgressEvent> ^-> Unit)?onProgress * !? (T<obj> ^-> Unit)?onError ^-> Unit
+        ]
+        |> ignore
+
+    LWOLoader
+        |+> Static [ Constructor (!? LoadingManager?manager * !? T<obj>?parameters) ]
+        |+> Instance [
+            "parse" => T<JavaScript.ArrayBuffer>?data * T<string>?path * T<string>?modelName ^-> T<obj>
+            "load"  => T<string>?url * !? (T<obj> ^-> Unit)?onLoad * !? (T<JavaScript.ProgressEvent> ^-> Unit)?onProgress * !? (T<obj> ^-> Unit)?onError ^-> Unit
+        ]
+        |> ignore
+
+    RGBELoader
+        |+> Static [ Constructor !? LoadingManager?manager ]
+        |+> Instance [
+            "setDataType" => T<obj>?``type`` ^-> TSelf
+        ]
+        |> ignore
+
+    EXRLoader
+        |+> Static [ Constructor !? LoadingManager?manager ]
+        |+> Instance [
+            "setDataType"     => T<obj>?``type`` ^-> TSelf
+            "setOutputFormat" => T<obj>?value ^-> TSelf
+            "setPart"         => T<int>?value ^-> TSelf
+        ]
+        |> ignore
+
+    LUT3dlLoader
+        |+> Static [ Constructor !? LoadingManager?manager ]
+        |+> Instance [
+            "setType" => T<obj>?``type`` ^-> TSelf
+            "parse"   => T<string>?input ^-> LUT3dlResult
+            "load"    => T<string>?url * !? (LUT3dlResult ^-> Unit)?onLoad * !? (T<JavaScript.ProgressEvent> ^-> Unit)?onProgress * !? (T<obj> ^-> Unit)?onError ^-> Unit
+        ]
+        |> ignore
+
+    SVGLoader
+        |+> Static [ Constructor !? LoadingManager?manager ]
+        |+> Instance [
+            "defaultDPI"  =@ T<float>
+            "defaultUnit" =@ T<string>
+            "parse" => T<string>?text ^-> T<obj>
+            "load"  => T<string>?url * !? (T<obj> ^-> Unit)?onLoad * !? (T<JavaScript.ProgressEvent> ^-> Unit)?onProgress * !? (T<obj> ^-> Unit)?onError ^-> Unit
+        ]
+        |> ignore
+
+    FontLoader
+        |+> Static [ Constructor !? LoadingManager?manager ]
+        |+> Instance [
+            "parse" => T<obj>?json ^-> Font
+            "load"  => T<string>?url * !? (Font ^-> Unit)?onLoad * !? (T<JavaScript.ProgressEvent> ^-> Unit)?onProgress * !? (T<obj> ^-> Unit)?onError ^-> Unit
+        ]
+        |> ignore
+
+    Font
+        |+> Static [ Constructor T<obj>?data ]
+        |+> Instance [
+            "type" =? T<string>
+            "data" =? T<obj>
+            "generateShapes" => T<string>?text * !? T<float>?size * !? T<string>?direction ^-> !| Shape
+        ]
+        |> ignore
+
+    TTFLoader
+        |+> Static [ Constructor !? LoadingManager?manager ]
+        |+> Instance [
+            "reversed" =@ T<bool>
+            "parse" => T<JavaScript.ArrayBuffer>?arraybuffer ^-> T<obj>
+            "load"  => T<string>?url * !? (T<obj> ^-> Unit)?onLoad * !? (T<JavaScript.ProgressEvent> ^-> Unit)?onProgress * !? (T<obj> ^-> Unit)?onError ^-> Unit
+        ]
+        |> ignore
+
+    TextGeometry
+        |+> Static [ Constructor (T<string>?text * !? TextGeometryParameters?parameters) ]
+        |+> Instance [ "parameters" =? T<obj> ]
+        |> ignore
+
+    ImageBitmapLoader
+        |+> Static [ Constructor !? LoadingManager?manager ]
+        |+> Instance [
+            "options"    =@ T<obj>
+            "setOptions" => T<obj>?options ^-> TSelf
+            "load" => T<string>?url * !? (T<obj> ^-> Unit)?onLoad * !? (T<JavaScript.ProgressEvent> ^-> Unit)?onProgress * !? (T<obj> ^-> Unit)?onError ^-> Unit
+        ]
+        |> ignore
+
+    CubeTextureLoader
+        |+> Static [ Constructor !? LoadingManager?manager ]
+        |+> Instance [
+            "load" => (!| T<string>)?urls * !? (CubeTexture ^-> Unit)?onLoad * !? (T<JavaScript.ProgressEvent> ^-> Unit)?onProgress * !? (T<obj> ^-> Unit)?onError ^-> CubeTexture
+        ]
+        |> ignore
+
+    DataTextureLoader
+        |+> Static [ Constructor !? LoadingManager?manager ]
+        |+> Instance [
+            "load" => T<string>?url * !? (DataTexture ^-> Unit)?onLoad * !? (T<JavaScript.ProgressEvent> ^-> Unit)?onProgress * !? (T<obj> ^-> Unit)?onError ^-> DataTexture
+        ]
+        |> ignore
+
+    // ------------------------------------------------------------------
+    // Addons: post-processing
+    // ------------------------------------------------------------------
+
+    Pass
+        |+> Static [ Constructor Unit ]
+        |+> Instance [
+            "isPass"         =? T<bool>
+            "enabled"        =@ T<bool>
+            "needsSwap"      =@ T<bool>
+            "clear"          =@ T<bool>
+            "renderToScreen" =@ T<bool>
+
+            "setSize" => T<int>?width * T<int>?height ^-> Unit
+            "render"  => WebGLRenderer?renderer * WebGLRenderTarget?writeBuffer * WebGLRenderTarget?readBuffer * T<float>?deltaTime * T<bool>?maskActive ^-> Unit
+            "dispose" => Unit ^-> Unit
+        ]
+        |> ignore
+
+    EffectComposer
+        |+> Static [ Constructor (WebGLRenderer?renderer * !? WebGLRenderTarget?renderTarget) ]
+        |+> Instance [
+            "renderer"       =@ WebGLRenderer
+            "renderTarget1"  =@ WebGLRenderTarget
+            "renderTarget2"  =@ WebGLRenderTarget
+            "writeBuffer"    =@ WebGLRenderTarget
+            "readBuffer"     =@ WebGLRenderTarget
+            "renderToScreen" =@ T<bool>
+            "passes"         =@ !| Pass
+
+            "swapBuffers"       => Unit ^-> Unit
+            "addPass"           => Pass?pass ^-> Unit
+            "insertPass"        => Pass?pass * T<int>?index ^-> Unit
+            "removePass"        => Pass?pass ^-> Unit
+            "isLastEnabledPass" => T<int>?passIndex ^-> T<bool>
+            "render"            => !? T<float>?deltaTime ^-> Unit
+            "reset"             => !? WebGLRenderTarget?renderTarget ^-> Unit
+            "setSize"           => T<int>?width * T<int>?height ^-> Unit
+            "setPixelRatio"     => T<float>?pixelRatio ^-> Unit
+            "dispose"           => Unit ^-> Unit
+        ]
+        |> ignore
+
+    RenderPass
+        |+> Static [ Constructor (Scene?scene * Camera?camera * !? Material?overrideMaterial * !? Color?clearColor * !? T<float>?clearAlpha) ]
+        |+> Instance [
+            "scene"            =@ Scene
+            "camera"           =@ Camera
+            "overrideMaterial" =@ !? Material
+            "clearColor"       =@ !? Color
+            "clearAlpha"       =@ !? T<float>
+            "clearDepth"       =@ T<bool>
+        ]
+        |> ignore
+
+    ShaderPass
+        |+> Static [ Constructor (T<obj>?shader * !? T<string>?textureID) ]
+        |+> Instance [
+            "textureID" =@ T<string>
+            "uniforms"  =@ T<obj>
+            "material"  =@ ShaderMaterial
+        ]
+        |> ignore
+
+    MaskPass
+        |+> Static [ Constructor (Scene?scene * Camera?camera) ]
+        |+> Instance [
+            "scene"   =@ Scene
+            "camera"  =@ Camera
+            "inverse" =@ T<bool>
+        ]
+        |> ignore
+
+    ClearPass
+        |+> Static [ Constructor (!? ColorRepresentation?clearColor * !? T<float>?clearAlpha) ]
+        |+> Instance [
+            "clearColor" =@ ColorRepresentation
+            "clearAlpha" =@ T<float>
+        ]
+        |> ignore
+
+    OutputPass
+        |+> Static [ Constructor Unit ]
+        |+> Instance [ "uniforms" =@ T<obj> ]
+        |> ignore
+
+    UnrealBloomPass
+        |+> Static [ Constructor (Vector2?resolution * T<float>?strength * T<float>?radius * T<float>?threshold) ]
+        |+> Instance [
+            "strength"    =@ T<float>
+            "radius"      =@ T<float>
+            "threshold"   =@ T<float>
+            "resolution"  =@ Vector2
+            "clearColor"  =@ Color
+            "needsUpdate" =@ T<bool>
+        ]
+        |> ignore
+
+    SSAOPass
+        |+> Static [ Constructor (Scene?scene * Camera?camera * !? T<int>?width * !? T<int>?height * !? T<int>?kernelSize) ]
+        |+> Instance [
+            "output"       =@ SSAOOutput
+            "kernelRadius" =@ T<float>
+            "minDistance"  =@ T<float>
+            "maxDistance"  =@ T<float>
+            "width"        =@ T<int>
+            "height"       =@ T<int>
+        ]
+        |> ignore
+
+    SMAAPass
+        |+> Static [ Constructor Unit ]
+        |> ignore
+
+    BokehPass
+        |+> Static [ Constructor (Scene?scene * Camera?camera * BokehPassParameters?parameters) ]
+        |+> Instance [
+            "scene"  =@ Scene
+            "camera" =@ Camera
+        ]
+        |> ignore
+
+    FilmPass
+        |+> Static [ Constructor (!? T<float>?intensity * !? T<bool>?grayscale) ]
+        |> ignore
+
+    AfterimagePass
+        |+> Static [ Constructor !? T<float>?damp ]
+        |+> Instance [ "damp" =@ T<float> ]
+        |> ignore
+
+    TAARenderPass
+        |+> Static [ Constructor (Scene?scene * Camera?camera * !? ColorRepresentation?clearColor * !? T<float>?clearAlpha) ]
+        |+> Instance [
+            "scene"  =@ Scene
+            "camera" =@ Camera
+        ]
+        |> ignore
+
+    BloomPass
+        |+> Static [ Constructor (!? T<float>?strength * !? T<int>?kernelSize * !? T<float>?sigma) ]
+        |> ignore
+
+    CubeTexturePass
+        |+> Static [ Constructor (PerspectiveCamera?camera * !? CubeTexture?envMap * !? T<float>?opacity) ]
+        |+> Instance [
+            "camera"   =@ PerspectiveCamera
+            "envMap"   =@ CubeTexture
+            "opacity"  =@ T<float>
+            "cubeMesh" =@ Mesh
+        ]
+        |> ignore
+
+    DotScreenPass
+        |+> Static [ Constructor (!? Vector2?center * !? T<float>?angle * !? T<float>?scale) ]
+        |> ignore
+
+    GlitchPass
+        |+> Static [ Constructor !? T<float>?dtSize ]
+        |+> Instance [ "goWild" =@ T<bool> ]
+        |> ignore
+
+    HalftonePass
+        |+> Static [ Constructor !? HalftonePassParameters?parameters ]
+        |> ignore
+
+    OutlinePass
+        |+> Static [ Constructor (Vector2?resolution * Scene?scene * Camera?camera * !? (!| Object3D)?selectedObjects) ]
+        |+> Instance [
+            "selectedObjects"     =@ !| Object3D
+            "visibleEdgeColor"    =@ Color
+            "hiddenEdgeColor"     =@ Color
+            "edgeGlow"            =@ T<float>
+            "edgeThickness"       =@ T<float>
+            "edgeStrength"        =@ T<float>
+            "downSampleRatio"     =@ T<float>
+            "pulsePeriod"         =@ T<float>
+            "resolution"          =@ Vector2
+            "usePatternTexture"   =@ T<bool>
+        ]
+        |> ignore
+
+    RenderPixelatedPass
+        |+> Static [ Constructor (T<int>?pixelSize * Scene?scene * Camera?camera * !? T<obj>?options) ]
+        |+> Instance [
+            "pixelSize"          =@ T<int>
+            "normalEdgeStrength" =@ T<float>
+            "depthEdgeStrength"  =@ T<float>
+            "setPixelSize"       => T<int>?pixelSize ^-> Unit
+        ]
+        |> ignore
+
+    RenderTransitionPass
+        |+> Static [ Constructor (Object3D?sceneA * Camera?cameraA * Object3D?sceneB * Camera?cameraB) ]
+        |+> Instance [
+            "setTransition"       => T<float>?value ^-> Unit
+            "useTexture"          => T<bool>?value ^-> Unit
+            "setTexture"          => !? Texture?value ^-> Unit
+            "setTextureThreshold" => T<float>?value ^-> Unit
+        ]
+        |> ignore
+
+    SAOPass
+        |+> Static [ Constructor (Scene?scene * Camera?camera * !? Vector2?resolution) ]
+        |+> Instance [
+            "params"     =@ T<obj>
+            "resolution" =@ Vector2
+        ]
+        |> ignore
+
+    SavePass
+        |+> Static [ Constructor !? WebGLRenderTarget?renderTarget ]
+        |+> Instance [
+            "textureID"    =@ T<string>
+            "renderTarget" =@ WebGLRenderTarget
+        ]
+        |> ignore
+
+    SSAARenderPass
+        |+> Static [ Constructor (Scene?scene * Camera?camera * !? ColorRepresentation?clearColor * !? T<float>?clearAlpha) ]
+        |+> Instance [
+            "sampleLevel" =@ T<float>
+            "unbiased"    =@ T<bool>
+            "scene"       =@ Scene
+            "camera"      =@ Camera
+        ]
+        |> ignore
+
+    SSRPass
+        |+> Static [ Constructor T<obj>?parameters ]
+        |+> Instance [
+            "opacity"     =@ T<float>
+            "output"      =@ T<int>
+            "maxDistance" =@ T<float>
+            "thickness"   =@ T<float>
+            "selective"   =@ T<bool>
+            "blur"        =@ T<bool>
+        ]
+        |> ignore
+
+    GTAOPass
+        |+> Static [ Constructor (Scene?scene * Camera?camera * !? T<int>?width * !? T<int>?height * !? T<obj>?parameters) ]
+        |+> Instance [
+            "output"          =@ T<int>
+            "blendIntensity"  =@ T<float>
+        ]
+        |> ignore
+
+    LUTPass
+        |+> Static [ Constructor !? LUTPassParameters?parameters ]
+        |+> Instance [
+            "lut"       =@ T<obj>
+            "intensity" =@ T<float>
+        ]
+        |> ignore
+
+    FXAAPass
+        |+> Static [ Constructor Unit ]
+        |> ignore
+
+    TexturePass
+        |+> Static [ Constructor (!? Texture?map * !? T<float>?opacity) ]
+        |+> Instance [
+            "map"     =@ !? Texture
+            "opacity" =@ T<float>
+        ]
+        |> ignore
+
+    ClearMaskPass
+        |+> Static [ Constructor Unit ]
+        |> ignore
+
+    // ------------------------------------------------------------------
+    // Addons: fat lines
+    // ------------------------------------------------------------------
+
+    LineSegmentsGeometry
+        |+> Static [ Constructor Unit ]
+        |+> Instance [
+            "setPositions"           => ((!| T<float>) + T<JavaScript.Float32Array>)?array ^-> TSelf
+            "setColors"              => ((!| T<float>) + T<JavaScript.Float32Array>)?array ^-> TSelf
+            "fromWireframeGeometry"  => WireframeGeometry?geometry ^-> TSelf
+            "fromEdgesGeometry"      => EdgesGeometry?geometry ^-> TSelf
+            "fromMesh"               => Mesh?mesh ^-> TSelf
+            "fromLineSegments"       => LineSegments?lineSegments ^-> TSelf
+        ]
+        |> ignore
+
+    LineGeometry
+        |+> Static [ Constructor Unit ]
+        |+> Instance [ "fromLine" => Line?line ^-> TSelf ]
+        |> ignore
+
+    LineMaterial
+        |+> Static [ Constructor !? LineMaterialParameters?parameters ]
+        |+> Instance [
+            "color"      =@ Color
+            "worldUnits" =@ T<bool>
+            "dashed"     =@ T<bool>
+            "dashScale"  =@ T<float>
+            "dashSize"   =@ T<float>
+            "dashOffset" =@ T<float>
+            "gapSize"    =@ T<float>
+            "resolution" =@ Vector2
+        ]
+        |> ignore
+
+    LineSegments2
+        |+> Static [ Constructor (!? LineSegmentsGeometry?geometry * !? LineMaterial?material) ]
+        |+> Instance [
+            "resolution" =@ Vector2
+            "computeLineDistances" => Unit ^-> TSelf
+        ]
+        |> ignore
+
+    Line2
+        |+> Static [ Constructor (!? LineGeometry?geometry * !? LineMaterial?material) ]
+        |> ignore
+
+    WireframeGeometry2
+        |+> Static [ Constructor BufferGeometry?geometry ]
+        |> ignore
+
+    Wireframe
+        |+> Static [ Constructor (!? LineSegmentsGeometry?geometry * !? LineMaterial?material) ]
+        |> ignore
+
+    // ------------------------------------------------------------------
+    // Addons: utilities, exporters, objects, misc
+    // ------------------------------------------------------------------
+
+    let BufferGeometryUtils =
+        Class "BufferGeometryUtils"
+        |+> Static [
+            "mergeGeometries" => (!| BufferGeometry)?geometries * !? T<bool>?useGroups ^-> BufferGeometry
+            |> Import "mergeGeometries" "three/addons/utils/BufferGeometryUtils.js"
+            "mergeAttributes" => (!| BufferAttribute)?attributes ^-> BufferAttribute
+            |> Import "mergeAttributes" "three/addons/utils/BufferGeometryUtils.js"
+            "interleaveAttributes" => (!| BufferAttribute)?attributes ^-> InterleavedBufferAttribute
+            |> Import "interleaveAttributes" "three/addons/utils/BufferGeometryUtils.js"
+            "estimateBytesUsed" => BufferGeometry?geometry ^-> T<float>
+            |> Import "estimateBytesUsed" "three/addons/utils/BufferGeometryUtils.js"
+            "mergeVertices" => BufferGeometry?geometry * !? T<float>?tolerance ^-> BufferGeometry
+            |> Import "mergeVertices" "three/addons/utils/BufferGeometryUtils.js"
+            "mergeGroups" => BufferGeometry?geometry ^-> BufferGeometry
+            |> Import "mergeGroups" "three/addons/utils/BufferGeometryUtils.js"
+            "toTrianglesDrawMode" => BufferGeometry?geometry * T<int>?drawMode ^-> BufferGeometry
+            |> Import "toTrianglesDrawMode" "three/addons/utils/BufferGeometryUtils.js"
+            "computeMorphedAttributes" => Object3D?``object`` ^-> T<obj>
+            |> Import "computeMorphedAttributes" "three/addons/utils/BufferGeometryUtils.js"
+            "toCreasedNormals" => BufferGeometry?geometry * !? T<float>?creaseAngle ^-> BufferGeometry
+            |> Import "toCreasedNormals" "three/addons/utils/BufferGeometryUtils.js"
+        ]
+
+    let SkeletonUtils =
+        Class "SkeletonUtils"
+        |+> Static [
+            "clone" => Object3D?source ^-> Object3D
+            |> Import "clone" "three/addons/utils/SkeletonUtils.js"
+            "retarget" => (Object3D + Skeleton)?target * (Object3D + Skeleton)?source * !? T<obj>?options ^-> Unit
+            |> Import "retarget" "three/addons/utils/SkeletonUtils.js"
+            "retargetClip" => (Object3D + Skeleton)?target * (Object3D + Skeleton)?source * AnimationClip?clip * !? T<obj>?options ^-> AnimationClip
+            |> Import "retargetClip" "three/addons/utils/SkeletonUtils.js"
+        ]
+
+    GLTFExporter
+        |+> Static [ Constructor Unit ]
+        |+> Instance [
+            "parse" => (Object3D + (!| Object3D))?input * (T<obj> ^-> Unit)?onDone * !? (T<obj> ^-> Unit)?onError * !? T<obj>?options ^-> Unit
+        ]
+        |> ignore
+
+    OBJExporter
+        |+> Static [ Constructor Unit ]
+        |+> Instance [ "parse" => Object3D?``object`` ^-> T<string> ]
+        |> ignore
+
+    STLExporter
+        |+> Static [ Constructor Unit ]
+        |+> Instance [
+            "parse" => Object3D?scene ^-> T<string>
+            "parse" => Object3D?scene * T<obj>?options ^-> T<obj>
+        ]
+        |> ignore
+
+    PLYExporter
+        |+> Static [ Constructor Unit ]
+        |+> Instance [
+            "parse" => Object3D?``object`` * (T<obj> ^-> Unit)?onDone * !? T<obj>?options ^-> T<obj>
+        ]
+        |> ignore
+
+    USDZExporter
+        |+> Static [ Constructor Unit ]
+        |+> Instance [
+            "parse" => Object3D?scene * (T<JavaScript.Uint8Array> ^-> Unit)?onDone * (T<obj> ^-> Unit)?onError * !? T<obj>?options ^-> Unit
+        ]
+        |> ignore
+
+    Sky
+        |+> Static [ Constructor Unit ]
+        |> ignore
+
+    Water
+        |+> Static [ Constructor (BufferGeometry?geometry * !? WaterOptions?options) ]
+        |> ignore
+
+    Water2
+        |+> Static [ Constructor (BufferGeometry?geometry * !? Water2Options?options) ]
+        |> ignore
+
+    Reflector
+        |+> Static [ Constructor (BufferGeometry?geometry * !? ReflectorOptions?options) ]
+        |+> Instance [ "forceUpdate" =@ T<bool> ]
+        |> ignore
+
+    Refractor
+        |+> Static [ Constructor (!? BufferGeometry?geometry * !? ReflectorOptions?options) ]
+        |> ignore
+
+    Gyroscope
+        |+> Static [ Constructor Unit ]
+        |> ignore
+
+    MarchingCubes
+        |+> Static [ Constructor (T<int>?resolution * Material?material * !? T<bool>?enableUvs * !? T<bool>?enableColors * !? T<int>?maxPolyCount) ]
+        |+> Instance [
+            "enableUvs"    =@ T<bool>
+            "enableColors" =@ T<bool>
+            "resolution"   =@ T<int>
+            "isolation"    =@ T<float>
+            "size"         =@ T<float>
+            "count"        =@ T<int>
+            "hasPositions" =? T<bool>
+            "hasNormals"   =? T<bool>
+
+            "init"             => T<int>?resolution ^-> Unit
+            "begin"            => Unit ^-> Unit
+            "end"              => Unit ^-> Unit
+            "addBall"          => T<float>?x * T<float>?y * T<float>?z * T<float>?strength * T<float>?subtract * !? Color?colors ^-> Unit
+            "addPlaneX"        => T<float>?strength * T<float>?subtract ^-> Unit
+            "addPlaneY"        => T<float>?strength * T<float>?subtract ^-> Unit
+            "addPlaneZ"        => T<float>?strength * T<float>?subtract ^-> Unit
+            "setCell"          => T<int>?x * T<int>?y * T<int>?z * T<float>?value ^-> Unit
+            "getCell"          => T<int>?x * T<int>?y * T<int>?z ^-> T<float>
+            "blur"             => T<float>?intensity ^-> Unit
+            "reset"            => Unit ^-> Unit
+            "update"           => Unit ^-> Unit
+            "generateGeometry" => Unit ^-> BufferGeometry
+        ]
+        |> ignore
+
+    CSM
+        |+> Static [ Constructor !? CSMParameters?data ]
+        |+> Instance [
+            "camera"         =@ Camera
+            "parent"         =@ Object3D
+            "cascades"       =@ T<int>
+            "maxFar"         =@ T<float>
+            "mode"           =@ T<string>
+            "shadowMapSize"  =@ T<int>
+            "shadowBias"     =@ T<float>
+            "lightDirection" =@ Vector3
+            "lightIntensity" =@ T<float>
+            "lightNear"      =@ T<float>
+            "lightFar"       =@ T<float>
+            "lightMargin"    =@ T<float>
+            "fade"           =@ T<bool>
+            "lights"         =@ !| DirectionalLight
+
+            "createLights"      => Unit ^-> Unit
+            "initCascades"      => Unit ^-> Unit
+            "updateShadowBounds" => Unit ^-> Unit
+            "update"            => Unit ^-> Unit
+            "setupMaterial"     => Material?material ^-> Unit
+            "updateUniforms"    => Unit ^-> Unit
+            "getExtendedBreaks" => (!| Vector2)?target ^-> Unit
+            "updateFrustums"    => Unit ^-> Unit
+            "remove"            => Unit ^-> Unit
+            "dispose"           => Unit ^-> Unit
+        ]
+        |> ignore
+
+    CSMFrustum
+        |+> Static [ Constructor !? T<obj>?data ]
+        |> ignore
+
+    CSMHelper
+        |+> Static [ Constructor CSM?csm ]
+        |+> Instance [
+            "csm"                 =@ CSM
+            "displayFrustum"      =@ T<bool>
+            "displayPlanes"       =@ T<bool>
+            "displayShadowBounds" =@ T<bool>
+
+            "updateVisibility" => Unit ^-> Unit
+            "update"           => Unit ^-> Unit
+            "dispose"          => Unit ^-> Unit
+        ]
+        |> ignore
+
+    ConvexGeometry
+        |+> Static [ Constructor (!| Vector3)?points ]
+        |> ignore
+
+    ConvexHull
+        |+> Static [ Constructor Unit ]
+        |+> Instance [
+            "setFromPoints" => (!| Vector3)?points * !? T<int>?nth ^-> TSelf
+            "containsPoint" => Vector3?point ^-> T<bool>
+            "compute"       => Unit ^-> TSelf
+        ]
+        |> ignore
+
+    ARButton
+        |+> Static [ "createButton" => WebGLRenderer?renderer * !? T<obj>?sessionInit ^-> T<JavaScript.HTMLElement> ]
+        |> ignore
+
+    VRButton
+        |+> Static [ "createButton" => WebGLRenderer?renderer * !? T<obj>?sessionInit ^-> T<JavaScript.HTMLElement> ]
+        |> ignore
+
+    XRButton
+        |+> Static [ "createButton" => WebGLRenderer?renderer * !? T<obj>?sessionInit ^-> T<JavaScript.HTMLElement> ]
+        |> ignore
+
+    // ------------------------------------------------------------------
     // Assembly
     // ------------------------------------------------------------------
 
@@ -3795,6 +4887,19 @@ module Definition =
                 TransformControlsEvent
                 DragControlsObjectEvent
                 TransformControlsEventPayload
+                GLTFAsset
+                GLTF
+                TextGeometryParameters
+                ReflectorOptions
+                WaterOptions
+                Water2Options
+                BokehPassParameters
+                LUT3dlResult
+                SSAOOutput
+                LineMaterialParameters
+                HalftonePassParameters
+                LUTPassParameters
+                CSMParameters
                 Face
                 Intersection
                 RaycasterThreshold
@@ -3865,6 +4970,20 @@ module Definition =
                 Loader
                 LoadingManager
                 TextureLoader
+                CompressedTexture
+                Data3DTexture
+                DataTextureLoader
+                ImageBitmapLoader
+                CubeTextureLoader
+                InstancedBufferGeometry
+                ExtrudeGeometry
+                Shape
+                ShapePath
+                Skeleton
+                SkinnedMesh
+                Bone
+                FileLoader
+                InterleavedBufferAttribute
                 // Materials
                 Material
                 MeshBasicMaterial
@@ -3973,6 +5092,88 @@ module Definition =
                 DragControls
                 TransformControls
                 OrbitControlsKeys
+                // Addon loaders
+                GLTFLoader
+                DRACOLoader
+                KTX2Loader
+                OBJLoader
+                MTLLoader
+                STLLoader
+                PLYLoader
+                FBXLoader
+                ColladaLoader
+                LWOLoader
+                RGBELoader
+                EXRLoader
+                LUT3dlLoader
+                SVGLoader
+                FontLoader
+                Font
+                TTFLoader
+                TextGeometry
+                // Addon post-processing
+                Pass
+                EffectComposer
+                RenderPass
+                ShaderPass
+                MaskPass
+                ClearPass
+                OutputPass
+                UnrealBloomPass
+                SSAOPass
+                SMAAPass
+                BokehPass
+                FilmPass
+                AfterimagePass
+                TAARenderPass
+                BloomPass
+                CubeTexturePass
+                DotScreenPass
+                GlitchPass
+                HalftonePass
+                OutlinePass
+                RenderPixelatedPass
+                RenderTransitionPass
+                SAOPass
+                SavePass
+                SSAARenderPass
+                SSRPass
+                GTAOPass
+                LUTPass
+                FXAAPass
+                TexturePass
+                ClearMaskPass
+                // Addon fat lines
+                LineSegmentsGeometry
+                LineGeometry
+                LineMaterial
+                LineSegments2
+                Line2
+                WireframeGeometry2
+                Wireframe
+                // Addon utilities, exporters, objects, misc
+                BufferGeometryUtils
+                SkeletonUtils
+                GLTFExporter
+                OBJExporter
+                STLExporter
+                PLYExporter
+                USDZExporter
+                Sky
+                Water
+                Water2
+                Reflector
+                Refractor
+                Gyroscope
+                MarchingCubes
+                ConvexGeometry
+                ConvexHull
+                CSM
+                CSMFrustum
+                CSMHelper
+                ARButton
+                VRButton
+                XRButton
             ]
         ]
 
