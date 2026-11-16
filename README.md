@@ -19,7 +19,7 @@ This repository contains:
 
 | Project | Purpose |
 | --- | --- |
-| `WebSharper.ThreeJs` | The binding: ~220 classes, configs and enums covering the math, core, camera, geometry, material, light, helper, renderer, loader and animation APIs; all nine addon controls; the addon loaders (`GLTFLoader`, `DRACOLoader`, `KTX2Loader`, `OBJLoader`, `MTLLoader`, `STLLoader`, `PLYLoader`, `FBXLoader`, `ColladaLoader`, `LWOLoader`, `RGBELoader`, `EXRLoader`, `SVGLoader`, `FontLoader`/`TextGeometry`, `TTFLoader`, `LUT3dlLoader`, `CubeTextureLoader`, `ImageBitmapLoader`); post-processing (`Pass`, `EffectComposer`, `RenderPass`, `ShaderPass`, `MaskPass`, `ClearPass`, `OutputPass`, `UnrealBloomPass`, `SSAOPass`, `SMAAPass`, `BokehPass`, `FilmPass`, `AfterimagePass`, `TAARenderPass`); fat lines (`Line2`, `LineSegments2`, `LineGeometry`, `LineSegmentsGeometry`, `LineMaterial`, `Wireframe`, `WireframeGeometry2`); object addons (`Sky`, `Water`, `Water2`, `Reflector`, `Refractor`); utilities (`BufferGeometryUtils`, `SkeletonUtils`); exporters (`GLTFExporter`, `OBJExporter`, `STLExporter`, `PLYExporter`, `USDZExporter`); `ConvexGeometry`/`ConvexHull`, `Gyroscope`; and the WebXR buttons. |
+| `WebSharper.ThreeJs` | The binding: ~220 classes, configs and enums covering the math, core, camera, geometry, material, light, helper, renderer, loader and animation APIs; all nine addon controls; the addon loaders (`GLTFLoader`, `DRACOLoader`, `KTX2Loader`, `OBJLoader`, `MTLLoader`, `STLLoader`, `PLYLoader`, `FBXLoader`, `ColladaLoader`, `LWOLoader`, `RGBELoader`, `EXRLoader`, `SVGLoader`, `FontLoader`/`TextGeometry`, `TTFLoader`, `LUT3dlLoader`, `CubeTextureLoader`, `ImageBitmapLoader`); post-processing (`EffectComposer` and the full pass set: `Pass`, `RenderPass`, `ShaderPass`, `MaskPass`/`ClearMaskPass`, `ClearPass`, `OutputPass`, `UnrealBloomPass`, `BloomPass`, `SSAOPass`, `SAOPass`, `GTAOPass`, `SSRPass`, `SMAAPass`, `BokehPass`, `FilmPass`, `GlitchPass`, `AfterimagePass`, `DotScreenPass`, `HalftonePass`, `OutlinePass`, `RenderPixelatedPass`, `RenderTransitionPass`, `SSAARenderPass`, `TAARenderPass`, `LUTPass`, `FXAAPass`, `TexturePass`, `SavePass`, `CubeTexturePass`); fat lines (`Line2`, `LineSegments2`, `LineGeometry`, `LineSegmentsGeometry`, `LineMaterial`, `Wireframe`, `WireframeGeometry2`); object addons (`Sky`, `Water`, `Water2`, `Reflector`, `Refractor`, `MarchingCubes`); cascaded shadow maps (`CSM`, `CSMFrustum`, `CSMHelper`); utilities (`BufferGeometryUtils`, `SkeletonUtils`); exporters (`GLTFExporter`, `OBJExporter`, `STLExporter`, `PLYExporter`, `USDZExporter`); `ConvexGeometry`/`ConvexHull`, `Gyroscope`; and the WebXR buttons. |
 | `WebSharper.ThreeJs.Sample` | A WebSharper SPA (esbuild → `dist/`, ES module) with a live 3D scene, pointer picking, a camera-control switcher (orbit/map/trackball/fly/first-person/arcball/pointer-lock), a `TransformControls` gizmo and a `DragControls` mode, a bloom `EffectComposer` toggle, a `Line2` fat line built with `LineGeometry`/`LineMaterial`, a `BufferGeometryUtils.MergeGeometries` object, an instanced mesh, a hand-built `BufferGeometry` starfield, `DataTexture`/`TextureLoader` textures, an `AnimationMixer` clip and a light/dark theme. |
 
 ## Live demos
@@ -362,8 +362,10 @@ checker.NeedsUpdate <- true
   render-to-target helpers are typed.
 - **Deliberately unbound.** `Geometry`/`Face3`, `CanvasRenderer`, `Projector`,
   `JSONLoader`, `SceneLoader`, `XHRLoader`, `ParticleSystem`, `MeshFaceMaterial`
-  and `Spline` were removed upstream, so they are not in this binding. The
-  shader/compute and TSL (WebGPU node) APIs are also out of scope.
+  and `Spline` were removed upstream, so they are not in this binding; so was
+  `LottieLoader` (there is no `three/addons/loaders/LottieLoader.js` in 0.187).
+  The shader/compute and TSL (WebGPU node) APIs are also out of scope, which
+  includes `csm/CSMShadowNode`.
 - **Places where `obj` is kept on purpose.** The genuinely dynamic payloads are
   `*Material.UserData`/`Object3D.UserData` (user-owned records),
   `ShaderMaterial.Uniforms`/`Defines` (arbitrary uniform values), `Texture.Image`
