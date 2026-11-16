@@ -422,6 +422,23 @@ module Definition =
     let FilmPass = a3 "three/addons/postprocessing/FilmPass.js" "FilmPass"
     let AfterimagePass = a3 "three/addons/postprocessing/AfterimagePass.js" "AfterimagePass"
     let TAARenderPass = a3 "three/addons/postprocessing/TAARenderPass.js" "TAARenderPass"
+    let BloomPass = a3 "three/addons/postprocessing/BloomPass.js" "BloomPass"
+    let CubeTexturePass = a3 "three/addons/postprocessing/CubeTexturePass.js" "CubeTexturePass"
+    let DotScreenPass = a3 "three/addons/postprocessing/DotScreenPass.js" "DotScreenPass"
+    let GlitchPass = a3 "three/addons/postprocessing/GlitchPass.js" "GlitchPass"
+    let HalftonePass = a3 "three/addons/postprocessing/HalftonePass.js" "HalftonePass"
+    let OutlinePass = a3 "three/addons/postprocessing/OutlinePass.js" "OutlinePass"
+    let RenderPixelatedPass = a3 "three/addons/postprocessing/RenderPixelatedPass.js" "RenderPixelatedPass"
+    let RenderTransitionPass = a3 "three/addons/postprocessing/RenderTransitionPass.js" "RenderTransitionPass"
+    let SAOPass = a3 "three/addons/postprocessing/SAOPass.js" "SAOPass"
+    let SavePass = a3 "three/addons/postprocessing/SavePass.js" "SavePass"
+    let SSAARenderPass = a3 "three/addons/postprocessing/SSAARenderPass.js" "SSAARenderPass"
+    let SSRPass = a3 "three/addons/postprocessing/SSRPass.js" "SSRPass"
+    let GTAOPass = a3 "three/addons/postprocessing/GTAOPass.js" "GTAOPass"
+    let LUTPass = a3 "three/addons/postprocessing/LUTPass.js" "LUTPass"
+    let FXAAPass = a3 "three/addons/postprocessing/FXAAPass.js" "FXAAPass"
+    let TexturePass = a3 "three/addons/postprocessing/TexturePass.js" "TexturePass"
+    let ClearMaskPass = a3 "three/addons/postprocessing/MaskPass.js" "ClearMaskPass"
 
     // Addons: fat lines
     let Line2 = a3 "three/addons/lines/Line2.js" "Line2"
@@ -445,6 +462,10 @@ module Definition =
     let Reflector = a3 "three/addons/objects/Reflector.js" "Reflector"
     let Refractor = a3 "three/addons/objects/Refractor.js" "Refractor"
     let Gyroscope = a3 "three/addons/misc/Gyroscope.js" "Gyroscope"
+    let MarchingCubes = a3 "three/addons/objects/MarchingCubes.js" "MarchingCubes"
+    let CSM = a3 "three/addons/csm/CSM.js" "CSM"
+    let CSMFrustum = a3 "three/addons/csm/CSMFrustum.js" "CSMFrustum"
+    let CSMHelper = a3 "three/addons/csm/CSMHelper.js" "CSMHelper"
     let ConvexGeometry = a3 "three/addons/geometries/ConvexGeometry.js" "ConvexGeometry"
     let ConvexHull = a3 "three/addons/math/ConvexHull.js" "ConvexHull"
     let ARButton = a3 "three/addons/webxr/ARButton.js" "ARButton"
@@ -1307,6 +1328,23 @@ module Definition =
     FilmPass |=> Inherits Pass |> ignore
     AfterimagePass |=> Inherits Pass |> ignore
     TAARenderPass |=> Inherits Pass |> ignore
+    BloomPass |=> Inherits Pass |> ignore
+    CubeTexturePass |=> Inherits Pass |> ignore
+    DotScreenPass |=> Inherits Pass |> ignore
+    GlitchPass |=> Inherits Pass |> ignore
+    HalftonePass |=> Inherits Pass |> ignore
+    OutlinePass |=> Inherits Pass |> ignore
+    RenderPixelatedPass |=> Inherits Pass |> ignore
+    RenderTransitionPass |=> Inherits Pass |> ignore
+    SAOPass |=> Inherits Pass |> ignore
+    SavePass |=> Inherits Pass |> ignore
+    SSAARenderPass |=> Inherits Pass |> ignore
+    SSRPass |=> Inherits Pass |> ignore
+    GTAOPass |=> Inherits Pass |> ignore
+    LUTPass |=> Inherits ShaderPass |> ignore
+    FXAAPass |=> Inherits ShaderPass |> ignore
+    TexturePass |=> Inherits Pass |> ignore
+    ClearMaskPass |=> Inherits Pass |> ignore
 
     // Addon fat lines, exporters, objects, misc
     LineSegmentsGeometry |=> Inherits InstancedBufferGeometry |> ignore
@@ -1323,6 +1361,8 @@ module Definition =
     Reflector |=> Inherits Mesh |> ignore
     Refractor |=> Inherits Mesh |> ignore
     Gyroscope |=> Inherits Object3D |> ignore
+    MarchingCubes |=> Inherits Mesh |> ignore
+    CSMHelper |=> Inherits Group |> ignore
     ConvexGeometry |=> Inherits BufferGeometry |> ignore
 
     MeshBasicMaterial |=> Inherits Material |> ignore
@@ -3754,6 +3794,54 @@ module Definition =
             ]
         }
 
+    /// Parameters of a `HalftonePass`.
+    let HalftonePassParameters =
+        Pattern.Config "HalftonePassParameters" {
+            Required = []
+            Optional = [
+                "shape", T<float>
+                "radius", T<float>
+                "rotateR", T<float>
+                "rotateG", T<float>
+                "rotateB", T<float>
+                "scatter", T<float>
+                "blending", T<float>
+                "blendingMode", T<int>
+                "greyscale", T<bool>
+                "disable", T<bool>
+            ]
+        }
+
+    /// Parameters of a `LUTPass`.
+    let LUTPassParameters =
+        Pattern.Config "LUTPassParameters" {
+            Required = []
+            Optional = [
+                "lut", T<obj>
+                "intensity", T<float>
+            ]
+        }
+
+    /// Parameters of a `CSM` (cascaded shadow maps).
+    let CSMParameters =
+        Pattern.Config "CSMParameters" {
+            Required = []
+            Optional = [
+                "camera", Camera.Type
+                "parent", Object3D.Type
+                "cascades", T<int>
+                "maxFar", T<float>
+                "mode", T<string>
+                "shadowMapSize", T<int>
+                "shadowBias", T<float>
+                "lightDirection", Vector3.Type
+                "lightIntensity", T<float>
+                "lightNear", T<float>
+                "lightFar", T<float>
+                "lightMargin", T<float>
+            ]
+        }
+
     /// The `keys` map of `OrbitControls` (the four arrow keys by default).
     let OrbitControlsKeys =
         Pattern.Config "OrbitControlsKeys" {
@@ -4372,6 +4460,139 @@ module Definition =
         ]
         |> ignore
 
+    BloomPass
+        |+> Static [ Constructor (!? T<float>?strength * !? T<int>?kernelSize * !? T<float>?sigma) ]
+        |> ignore
+
+    CubeTexturePass
+        |+> Static [ Constructor (PerspectiveCamera?camera * !? CubeTexture?envMap * !? T<float>?opacity) ]
+        |+> Instance [
+            "camera"   =@ PerspectiveCamera
+            "envMap"   =@ CubeTexture
+            "opacity"  =@ T<float>
+            "cubeMesh" =@ Mesh
+        ]
+        |> ignore
+
+    DotScreenPass
+        |+> Static [ Constructor (!? Vector2?center * !? T<float>?angle * !? T<float>?scale) ]
+        |> ignore
+
+    GlitchPass
+        |+> Static [ Constructor !? T<float>?dtSize ]
+        |+> Instance [ "goWild" =@ T<bool> ]
+        |> ignore
+
+    HalftonePass
+        |+> Static [ Constructor !? HalftonePassParameters?parameters ]
+        |> ignore
+
+    OutlinePass
+        |+> Static [ Constructor (Vector2?resolution * Scene?scene * Camera?camera * !? (!| Object3D)?selectedObjects) ]
+        |+> Instance [
+            "selectedObjects"     =@ !| Object3D
+            "visibleEdgeColor"    =@ Color
+            "hiddenEdgeColor"     =@ Color
+            "edgeGlow"            =@ T<float>
+            "edgeThickness"       =@ T<float>
+            "edgeStrength"        =@ T<float>
+            "downSampleRatio"     =@ T<float>
+            "pulsePeriod"         =@ T<float>
+            "resolution"          =@ Vector2
+            "usePatternTexture"   =@ T<bool>
+        ]
+        |> ignore
+
+    RenderPixelatedPass
+        |+> Static [ Constructor (T<int>?pixelSize * Scene?scene * Camera?camera * !? T<obj>?options) ]
+        |+> Instance [
+            "pixelSize"          =@ T<int>
+            "normalEdgeStrength" =@ T<float>
+            "depthEdgeStrength"  =@ T<float>
+            "setPixelSize"       => T<int>?pixelSize ^-> Unit
+        ]
+        |> ignore
+
+    RenderTransitionPass
+        |+> Static [ Constructor (Object3D?sceneA * Camera?cameraA * Object3D?sceneB * Camera?cameraB) ]
+        |+> Instance [
+            "setTransition"       => T<float>?value ^-> Unit
+            "useTexture"          => T<bool>?value ^-> Unit
+            "setTexture"          => !? Texture?value ^-> Unit
+            "setTextureThreshold" => T<float>?value ^-> Unit
+        ]
+        |> ignore
+
+    SAOPass
+        |+> Static [ Constructor (Scene?scene * Camera?camera * !? Vector2?resolution) ]
+        |+> Instance [
+            "params"     =@ T<obj>
+            "resolution" =@ Vector2
+        ]
+        |> ignore
+
+    SavePass
+        |+> Static [ Constructor !? WebGLRenderTarget?renderTarget ]
+        |+> Instance [
+            "textureID"    =@ T<string>
+            "renderTarget" =@ WebGLRenderTarget
+        ]
+        |> ignore
+
+    SSAARenderPass
+        |+> Static [ Constructor (Scene?scene * Camera?camera * !? ColorRepresentation?clearColor * !? T<float>?clearAlpha) ]
+        |+> Instance [
+            "sampleLevel" =@ T<float>
+            "unbiased"    =@ T<bool>
+            "scene"       =@ Scene
+            "camera"      =@ Camera
+        ]
+        |> ignore
+
+    SSRPass
+        |+> Static [ Constructor T<obj>?parameters ]
+        |+> Instance [
+            "opacity"     =@ T<float>
+            "output"      =@ T<int>
+            "maxDistance" =@ T<float>
+            "thickness"   =@ T<float>
+            "selective"   =@ T<bool>
+            "blur"        =@ T<bool>
+        ]
+        |> ignore
+
+    GTAOPass
+        |+> Static [ Constructor (Scene?scene * Camera?camera * !? T<int>?width * !? T<int>?height * !? T<obj>?parameters) ]
+        |+> Instance [
+            "output"          =@ T<int>
+            "blendIntensity"  =@ T<float>
+        ]
+        |> ignore
+
+    LUTPass
+        |+> Static [ Constructor !? LUTPassParameters?parameters ]
+        |+> Instance [
+            "lut"       =@ T<obj>
+            "intensity" =@ T<float>
+        ]
+        |> ignore
+
+    FXAAPass
+        |+> Static [ Constructor Unit ]
+        |> ignore
+
+    TexturePass
+        |+> Static [ Constructor (!? Texture?map * !? T<float>?opacity) ]
+        |+> Instance [
+            "map"     =@ !? Texture
+            "opacity" =@ T<float>
+        ]
+        |> ignore
+
+    ClearMaskPass
+        |+> Static [ Constructor Unit ]
+        |> ignore
+
     // ------------------------------------------------------------------
     // Addons: fat lines
     // ------------------------------------------------------------------
@@ -4524,6 +4745,83 @@ module Definition =
         |+> Static [ Constructor Unit ]
         |> ignore
 
+    MarchingCubes
+        |+> Static [ Constructor (T<int>?resolution * Material?material * !? T<bool>?enableUvs * !? T<bool>?enableColors * !? T<int>?maxPolyCount) ]
+        |+> Instance [
+            "enableUvs"    =@ T<bool>
+            "enableColors" =@ T<bool>
+            "resolution"   =@ T<int>
+            "isolation"    =@ T<float>
+            "size"         =@ T<float>
+            "count"        =@ T<int>
+            "hasPositions" =? T<bool>
+            "hasNormals"   =? T<bool>
+
+            "init"             => T<int>?resolution ^-> Unit
+            "begin"            => Unit ^-> Unit
+            "end"              => Unit ^-> Unit
+            "addBall"          => T<float>?x * T<float>?y * T<float>?z * T<float>?strength * T<float>?subtract * !? Color?colors ^-> Unit
+            "addPlaneX"        => T<float>?strength * T<float>?subtract ^-> Unit
+            "addPlaneY"        => T<float>?strength * T<float>?subtract ^-> Unit
+            "addPlaneZ"        => T<float>?strength * T<float>?subtract ^-> Unit
+            "setCell"          => T<int>?x * T<int>?y * T<int>?z * T<float>?value ^-> Unit
+            "getCell"          => T<int>?x * T<int>?y * T<int>?z ^-> T<float>
+            "blur"             => T<float>?intensity ^-> Unit
+            "reset"            => Unit ^-> Unit
+            "update"           => Unit ^-> Unit
+            "generateGeometry" => Unit ^-> BufferGeometry
+        ]
+        |> ignore
+
+    CSM
+        |+> Static [ Constructor !? CSMParameters?data ]
+        |+> Instance [
+            "camera"         =@ Camera
+            "parent"         =@ Object3D
+            "cascades"       =@ T<int>
+            "maxFar"         =@ T<float>
+            "mode"           =@ T<string>
+            "shadowMapSize"  =@ T<int>
+            "shadowBias"     =@ T<float>
+            "lightDirection" =@ Vector3
+            "lightIntensity" =@ T<float>
+            "lightNear"      =@ T<float>
+            "lightFar"       =@ T<float>
+            "lightMargin"    =@ T<float>
+            "fade"           =@ T<bool>
+            "lights"         =@ !| DirectionalLight
+
+            "createLights"      => Unit ^-> Unit
+            "initCascades"      => Unit ^-> Unit
+            "updateShadowBounds" => Unit ^-> Unit
+            "update"            => Unit ^-> Unit
+            "setupMaterial"     => Material?material ^-> Unit
+            "updateUniforms"    => Unit ^-> Unit
+            "getExtendedBreaks" => (!| Vector2)?target ^-> Unit
+            "updateFrustums"    => Unit ^-> Unit
+            "remove"            => Unit ^-> Unit
+            "dispose"           => Unit ^-> Unit
+        ]
+        |> ignore
+
+    CSMFrustum
+        |+> Static [ Constructor !? T<obj>?data ]
+        |> ignore
+
+    CSMHelper
+        |+> Static [ Constructor CSM?csm ]
+        |+> Instance [
+            "csm"                 =@ CSM
+            "displayFrustum"      =@ T<bool>
+            "displayPlanes"       =@ T<bool>
+            "displayShadowBounds" =@ T<bool>
+
+            "updateVisibility" => Unit ^-> Unit
+            "update"           => Unit ^-> Unit
+            "dispose"          => Unit ^-> Unit
+        ]
+        |> ignore
+
     ConvexGeometry
         |+> Static [ Constructor (!| Vector3)?points ]
         |> ignore
@@ -4599,6 +4897,9 @@ module Definition =
                 LUT3dlResult
                 SSAOOutput
                 LineMaterialParameters
+                HalftonePassParameters
+                LUTPassParameters
+                CSMParameters
                 Face
                 Intersection
                 RaycasterThreshold
@@ -4825,6 +5126,23 @@ module Definition =
                 FilmPass
                 AfterimagePass
                 TAARenderPass
+                BloomPass
+                CubeTexturePass
+                DotScreenPass
+                GlitchPass
+                HalftonePass
+                OutlinePass
+                RenderPixelatedPass
+                RenderTransitionPass
+                SAOPass
+                SavePass
+                SSAARenderPass
+                SSRPass
+                GTAOPass
+                LUTPass
+                FXAAPass
+                TexturePass
+                ClearMaskPass
                 // Addon fat lines
                 LineSegmentsGeometry
                 LineGeometry
@@ -4847,8 +5165,12 @@ module Definition =
                 Reflector
                 Refractor
                 Gyroscope
+                MarchingCubes
                 ConvexGeometry
                 ConvexHull
+                CSM
+                CSMFrustum
+                CSMHelper
                 ARButton
                 VRButton
                 XRButton
