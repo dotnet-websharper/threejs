@@ -26,6 +26,7 @@ module Client =
 
     let geometryName = Var.Create "Box"
     let materialName = Var.Create "Standard"
+    let controlMode = Var.Create "Orbit"
 
     let status = Var.Create "Building the scene…"
     let picked = Var.Create "Picked: —"
@@ -66,7 +67,6 @@ module Client =
             Renderer: WebGLRenderer
             Scene: Scene
             Camera: PerspectiveCamera
-            Controls: OrbitControls
             Spin: Group
             SpinMesh: Mesh
             Instanced: InstancedMesh
@@ -89,6 +89,22 @@ module Client =
     let mutable debugVisible = false
     let mutable frames = 0
     let mutable accumulated = 0.0
+
+    // The active camera control (one of the addon controls) and, for the
+    // "Transform"/"Drag" modes, the extra object manipulator that coexists with
+    // the orbiting camera.
+    let mutable cameraControl : Controls option = None
+    let mutable cameraUpdate : float -> unit = ignore
+    let mutable cameraReset : unit -> unit = ignore
+    let mutable extraControl : Controls option = None
+    let mutable extraHelper : Object3D option = None
+    let mutable dragControl : DragControls option = None
+
+    // Keep an active DragControls' object list in sync with the rig.
+    let private refreshDragTargets (a: App) =
+        match dragControl with
+        | Some d -> d.Objects <- a.Pickables.ToArray()
+        | None -> ()
 
     let palette =
         [| "#6366f1"; "#0ea5e9"; "#14b8a6"; "#f59e0b"; "#ef4444"; "#a855f7"; "#22c55e"; "#e11d48" |]
@@ -192,6 +208,7 @@ module Client =
             if a.Pickables.Count > 16 then
                 removeObject a a.Pickables.[0]
 
+            refreshDragTargets a
             refreshCount ()
             status.Value <- sprintf "Added %s with a %s material." geometryName.Value materialName.Value)
 
@@ -201,6 +218,7 @@ module Client =
                 removeObject a o
             a.Selection.Visible <- false
             picked.Value <- "Picked: —"
+            refreshDragTargets a
             refreshCount ()
             status.Value <- "Cleared the rig.")
 
@@ -208,9 +226,152 @@ module Client =
         withApp (fun a ->
             a.Camera.Position.Set(7., 6., 10.) |> ignore
             a.Camera.LookAt(Vector3(0., 1., 0.))
-            a.Controls.Target.Set(0., 1., 0.) |> ignore
-            a.Controls.Update() |> ignore
+            a.Camera.UpdateProjectionMatrix()
+            cameraReset ()
             status.Value <- "Camera reset.")
+
+    // ---------------------------------------------------------------
+    // Addon controls
+    // ---------------------------------------------------------------
+
+    let private disposeControls (a: App) =
+        match cameraControl with
+        | Some c -> c.Dispose()
+        | None -> ()
+        cameraControl <- None
+        cameraUpdate <- ignore
+        cameraReset <- ignore
+        match extraControl with
+        | Some c -> c.Dispose()
+        | None -> ()
+        extraControl <- None
+        dragControl <- None
+        match extraHelper with
+        | Some h -> a.Scene.Remove(h) |> ignore
+        | None -> ()
+        extraHelper <- None
+
+    /// Creates the camera control (or object manipulator) selected in the panel.
+    let private applyControlMode (a: App) =
+        disposeControls a
+        let canvas = a.Renderer.DomElement
+
+        // A fresh OrbitControls rig, used directly and as the camera control
+        // behind the Transform/Drag modes.
+        let orbit () =
+            let c = OrbitControls(a.Camera, canvas)
+            c.Target.Set(0., 1., 0.) |> ignore
+            c.EnableDamping <- true
+            c.DampingFactor <- 0.06
+            c.MinDistance <- 4.
+            c.MaxDistance <- 26.
+            c.MaxPolarAngle <- System.Math.PI / 2.0 - 0.05
+            c.AutoRotateSpeed <- 0.6
+            cameraControl <- Some (c :> Controls)
+            cameraUpdate <- fun dt -> c.Update(dt) |> ignore
+            cameraReset <- fun () -> c.Reset()
+
+        match controlMode.Value with
+        | "Map" ->
+            let c = MapControls(a.Camera, canvas)
+            c.Target.Set(0., 1., 0.) |> ignore
+            c.EnableDamping <- true
+            c.DampingFactor <- 0.08
+            c.ScreenSpacePanning <- true
+            c.MinDistance <- 4.
+            c.MaxDistance <- 26.
+            cameraControl <- Some (c :> Controls)
+            cameraUpdate <- fun dt -> c.Update(dt) |> ignore
+            cameraReset <- fun () -> c.Reset()
+            status.Value <- "Map controls: left-drag pans, right-drag orbits, the wheel zooms."
+        | "Trackball" ->
+            let c = TrackballControls(a.Camera, canvas)
+            c.RotateSpeed <- 2.4
+            c.ZoomSpeed <- 1.4
+            c.PanSpeed <- 0.6
+            c.StaticMoving <- false
+            c.DynamicDampingFactor <- 0.12
+            c.Target.Set(0., 1., 0.) |> ignore
+            cameraControl <- Some (c :> Controls)
+            cameraUpdate <- fun _ -> c.Update()
+            cameraReset <- fun () -> c.Reset()
+            status.Value <- "Trackball controls: drag to spin the camera freely, the wheel zooms."
+        | "Fly" ->
+            let c = FlyControls(a.Camera, canvas)
+            c.MovementSpeed <- 6.
+            c.RollSpeed <- 0.6
+            c.DragToLook <- true
+            cameraControl <- Some (c :> Controls)
+            cameraUpdate <- fun dt -> c.Update(dt)
+            status.Value <- "Fly controls: drag to look around, W/S/A/D/R/F to move."
+        | "First person" ->
+            let c = FirstPersonControls(a.Camera, canvas)
+            c.MovementSpeed <- 4.
+            c.LookSpeed <- 0.09
+            c.LookAt(Vector3(0., 1., 0.)) |> ignore
+            cameraControl <- Some (c :> Controls)
+            cameraUpdate <- fun dt -> c.Update(dt)
+            status.Value <- "First-person controls: move the mouse to look, W/S to walk, Q to freeze."
+        | "Arcball" ->
+            let c = ArcballControls(a.Camera, canvas, a.Scene)
+            c.RotateSpeed <- 1.4
+            c.EnableAnimations <- true
+            c.SetGizmosVisible(true)
+            cameraControl <- Some (c :> Controls)
+            cameraUpdate <- fun _ -> c.Update()
+            cameraReset <- fun () -> c.Reset()
+            status.Value <- "Arcball controls: drag to spin a virtual trackball, double-click to focus."
+        | "Pointer lock" ->
+            let c = PointerLockControls(a.Camera, canvas)
+            c.PointerSpeed <- 1.2
+            c.AddEventListener(PointerLockControlsEvent.Lock, fun _ ->
+                status.Value <- "Pointer locked — move the mouse to look, Esc to release.")
+            |> ignore
+            c.AddEventListener(PointerLockControlsEvent.Unlock, fun _ ->
+                status.Value <- "Pointer unlocked.")
+            |> ignore
+            cameraControl <- Some (c :> Controls)
+            cameraUpdate <- ignore
+            listen canvas "click" (fun _ -> c.Lock())
+            status.Value <- "Pointer lock: click the viewport to capture the pointer."
+        | "Transform" ->
+            orbit ()
+            let c = TransformControls(a.Camera, canvas)
+            c.SetSize(0.9)
+            let target : Object3D =
+                if a.Pickables.Count = 0 then upcast a.SpinMesh
+                else a.Pickables.[0]
+            c.Attach(target) |> ignore
+            let helper = c.GetHelper()
+            a.Scene.Add(helper) |> ignore
+            extraControl <- Some (c :> Controls)
+            extraHelper <- Some helper
+            c.AddEventListener(TransformControlsEvent.DraggingChanged, fun e ->
+                match cameraControl with
+                | Some cam -> cam.Enabled <- not e.Value
+                | None -> ())
+            |> ignore
+            c.AddEventListener(TransformControlsEvent.ObjectChange, fun _ ->
+                status.Value <- "The transform gizmo moved an object.")
+            |> ignore
+            status.Value <- "Transform gizmo: drag the arrows, rings and handles to move, rotate or scale the object."
+        | "Drag" ->
+            orbit ()
+            let objects = a.Pickables.ToArray()
+            let c = DragControls(objects, a.Camera, canvas)
+            c.Recursive <- false
+            c.AddEventListener(DragControlsEvent.DragStart, fun e ->
+                status.Value <- "Dragging " + e.Object.Name + " — release to drop it.")
+            |> ignore
+            c.AddEventListener(DragControlsEvent.DragEnd, fun _ ->
+                status.Value <- "Drag finished.")
+            |> ignore
+            extraControl <- Some (c :> Controls)
+            dragControl <- Some c
+            status.Value <- "Drag control: grab an object and move it in the camera plane."
+        | _ ->
+            orbit ()
+            status.Value <- "Orbit controls: drag to orbit, scroll to zoom, right-drag to pan."
 
     let private toggleAnimation () =
         withApp (fun a ->
@@ -359,15 +520,6 @@ module Client =
             let camera = PerspectiveCamera(50., width / height, 0.1, 200.)
             camera.Position.Set(7., 6., 10.) |> ignore
             camera.LookAt(Vector3(0., 1., 0.))
-
-            let controls = OrbitControls(camera, renderer.DomElement)
-            controls.Target.Set(0., 1., 0.) |> ignore
-            controls.EnableDamping <- true
-            controls.DampingFactor <- 0.06
-            controls.MinDistance <- 4.
-            controls.MaxDistance <- 26.
-            controls.MaxPolarAngle <- System.Math.PI / 2.0 - 0.05
-            controls.AutoRotateSpeed <- 0.6
 
             // Lights
             let ambient = AmbientLight("#ffffff", 0.9)
@@ -570,7 +722,6 @@ module Client =
                     Renderer = renderer
                     Scene = scene
                     Camera = camera
-                    Controls = controls
                     Spin = spin
                     SpinMesh = spinMesh
                     Instanced = instanced
@@ -595,6 +746,11 @@ module Client =
                 geometryName.Value <- name
                 addObject ()
             geometryName.Value <- "Box"
+
+            // Create the addon control selected in the panel, and swap it out
+            // whenever the selection changes. `View.Sink` also fires now, which
+            // is what creates the initial OrbitControls.
+            View.Sink (fun _ -> withApp (fun a -> applyControlMode a)) controlMode.View
 
             // Pointer picking on the canvas.
             listen renderer.DomElement "pointermove" (fun ev -> withApp (fun a -> updatePicking a ev))
@@ -631,7 +787,7 @@ module Client =
                     a.Pulse.Position.Y <- 3.5 + System.Math.Sin pulsePhase * 1.6
                     a.Pulse.Intensity <- 14.0 + 6.0 * System.Math.Sin(pulsePhase * 2.0)
 
-                    a.Controls.Update() |> ignore
+                    cameraUpdate dt
                     a.Renderer.Render(a.Scene, a.Camera)
 
                     frames <- frames + 1
@@ -669,6 +825,7 @@ module Client =
             .animationState(animationState.V)
             .Geometry(geometryName)
             .Material(materialName)
+            .ControlMode(controlMode)
             .ToggleTheme(fun _ -> toggleTheme ())
             .AddObject(fun _ -> addObject ())
             .ClearObjects(fun _ -> clearObjects ())

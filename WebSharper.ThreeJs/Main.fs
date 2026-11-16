@@ -180,6 +180,28 @@ module Definition =
             "LinearSRGBColorSpace", "'srgb-linear'"
         ]
 
+    /// The roles the controls assign to mouse buttons (the `mouseButtons` map).
+    /// `Left`/`Middle`/`Right` mirror `OrbitControls`; `Rotate`/`Dolly`/`Pan`
+    /// are the equivalent `TrackballControls` aliases.
+    let MouseButton =
+        Pattern.EnumInlines "MouseButton" [
+            "Left", "0"
+            "Middle", "1"
+            "Right", "2"
+            "Rotate", "0"
+            "Dolly", "1"
+            "Pan", "2"
+        ]
+
+    /// The roles the controls assign to touch gestures (the `touches` map).
+    let TouchAction =
+        Pattern.EnumInlines "TouchAction" [
+            "Rotate", "0"
+            "Pan", "1"
+            "DollyPan", "2"
+            "DollyRotate", "3"
+        ]
+
     // ------------------------------------------------------------------
     // Class handles — every three.js value we bind, with its npm import.
     // ------------------------------------------------------------------
@@ -337,9 +359,17 @@ module Definition =
     let PointLightHelper = c3 "PointLightHelper"
     let SpotLightHelper = c3 "SpotLightHelper"
 
-    // Controls (addon)
+    // Controls (addons)
     let Controls = c3 "Controls"
     let OrbitControls = a3 "three/addons/controls/OrbitControls.js" "OrbitControls"
+    let MapControls = a3 "three/addons/controls/MapControls.js" "MapControls"
+    let TrackballControls = a3 "three/addons/controls/TrackballControls.js" "TrackballControls"
+    let FlyControls = a3 "three/addons/controls/FlyControls.js" "FlyControls"
+    let FirstPersonControls = a3 "three/addons/controls/FirstPersonControls.js" "FirstPersonControls"
+    let PointerLockControls = a3 "three/addons/controls/PointerLockControls.js" "PointerLockControls"
+    let ArcballControls = a3 "three/addons/controls/ArcballControls.js" "ArcballControls"
+    let DragControls = a3 "three/addons/controls/DragControls.js" "DragControls"
+    let TransformControls = a3 "three/addons/controls/TransformControls.js" "TransformControls"
 
     // ------------------------------------------------------------------
     // Option and event shapes
@@ -381,6 +411,127 @@ module Definition =
             ]
             Optional = [
                 "target", Object3D.Type
+            ]
+        }
+
+    /// The mouse-button roles the controls assign in their `mouseButtons` map.
+    let MouseButtons =
+        Pattern.Config "MouseButtons" {
+            Required = []
+            Optional = [
+                "LEFT", MouseButton.Type
+                "MIDDLE", MouseButton.Type
+                "RIGHT", MouseButton.Type
+            ]
+        }
+
+    /// The touch-gesture roles the controls assign in their `touches` map.
+    let Touches =
+        Pattern.Config "Touches" {
+            Required = []
+            Optional = [
+                "ONE", TouchAction.Type
+                "TWO", TouchAction.Type
+            ]
+        }
+
+    /// The screen rectangle `TrackballControls` maintains for its gestures.
+    let TrackballControlsScreen =
+        Pattern.Config "TrackballControlsScreen" {
+            Required = []
+            Optional = [
+                "left", T<float>
+                "top", T<float>
+                "width", T<float>
+                "height", T<float>
+            ]
+        }
+
+    // Event names of the addon controls. Each enum stands in for the event-name
+    // string, so `AddEventListener` stays strongly typed per control.
+
+    /// Events of `OrbitControls` and `MapControls`.
+    let OrbitControlsEvent =
+        Pattern.EnumInlines "OrbitControlsEvent" [
+            "Change", "'change'"
+            "Start", "'start'"
+            "End", "'end'"
+        ]
+
+    /// Events of `TrackballControls`.
+    let TrackballControlsEvent =
+        Pattern.EnumInlines "TrackballControlsEvent" [
+            "Change", "'change'"
+            "Start", "'start'"
+            "End", "'end'"
+        ]
+
+    /// Events of `ArcballControls`.
+    let ArcballControlsEvent =
+        Pattern.EnumInlines "ArcballControlsEvent" [
+            "Change", "'change'"
+            "Start", "'start'"
+            "End", "'end'"
+        ]
+
+    /// Events of `FlyControls`.
+    let FlyControlsEvent =
+        Pattern.EnumInlines "FlyControlsEvent" [
+            "Change", "'change'"
+        ]
+
+    /// Events of `PointerLockControls`.
+    let PointerLockControlsEvent =
+        Pattern.EnumInlines "PointerLockControlsEvent" [
+            "Change", "'change'"
+            "Lock", "'lock'"
+            "Unlock", "'unlock'"
+        ]
+
+    /// Events of `DragControls`.
+    let DragControlsEvent =
+        Pattern.EnumInlines "DragControlsEvent" [
+            "HoverOn", "'hoveron'"
+            "HoverOff", "'hoveroff'"
+            "DragStart", "'dragstart'"
+            "Drag", "'drag'"
+            "DragEnd", "'dragend'"
+        ]
+
+    /// Events of `TransformControls`.
+    let TransformControlsEvent =
+        Pattern.EnumInlines "TransformControlsEvent" [
+            "Change", "'change'"
+            "MouseDown", "'mouseDown'"
+            "MouseUp", "'mouseUp'"
+            "ObjectChange", "'objectChange'"
+            "DraggingChanged", "'dragging-changed'"
+        ]
+
+    /// Payload of a `DragControls` event: the object being hovered or dragged.
+    let DragControlsObjectEvent =
+        Pattern.Config "DragControlsObjectEvent" {
+            Required = [
+                "type", T<string>
+            ]
+            Optional = [
+                "target", Object3D.Type
+                "object", Object3D.Type
+            ]
+        }
+
+    /// Payload of a `TransformControls` event. Only the field relevant to the
+    /// fired event is set: `mode` on `mouseDown`/`mouseUp`, `value` on
+    /// `dragging-changed`.
+    let TransformControlsEventPayload =
+        Pattern.Config "TransformControlsEventPayload" {
+            Required = [
+                "type", T<string>
+            ]
+            Optional = [
+                "target", Object3D.Type
+                "mode", T<string>
+                "value", T<bool>
             ]
         }
 
@@ -1034,6 +1185,14 @@ module Definition =
     CubeTexture |=> Inherits Texture |> ignore
     Controls |=> Inherits EventDispatcher |> ignore
     OrbitControls |=> Inherits Controls |> ignore
+    MapControls |=> Inherits OrbitControls |> ignore
+    TrackballControls |=> Inherits Controls |> ignore
+    FlyControls |=> Inherits Controls |> ignore
+    FirstPersonControls |=> Inherits Controls |> ignore
+    PointerLockControls |=> Inherits Controls |> ignore
+    ArcballControls |=> Inherits Controls |> ignore
+    DragControls |=> Inherits Controls |> ignore
+    TransformControls |=> Inherits Controls |> ignore
 
     MeshBasicMaterial |=> Inherits Material |> ignore
     MeshStandardMaterial |=> Inherits Material |> ignore
@@ -3307,8 +3466,20 @@ module Definition =
         |> ignore
 
     // ------------------------------------------------------------------
-    // Controls (addon)
+    // Controls (addons)
     // ------------------------------------------------------------------
+
+    /// The `keys` map of `OrbitControls` (the four arrow keys by default).
+    let OrbitControlsKeys =
+        Pattern.Config "OrbitControlsKeys" {
+            Required = []
+            Optional = [
+                "LEFT", T<string>
+                "UP", T<string>
+                "RIGHT", T<string>
+                "BOTTOM", T<string>
+            ]
+        }
 
     Controls
         |+> Instance [
@@ -3331,6 +3502,8 @@ module Definition =
             "cursor" =? Vector3
             "minDistance" =@ T<float>
             "maxDistance" =@ T<float>
+            "minTargetRadius" =@ T<float>
+            "maxTargetRadius" =@ T<float>
             "minZoom" =@ T<float>
             "maxZoom" =@ T<float>
             "minPolarAngle" =@ T<float>
@@ -3343,6 +3516,7 @@ module Definition =
             "zoomSpeed" =@ T<float>
             "enableRotate" =@ T<bool>
             "rotateSpeed" =@ T<float>
+            "keyRotateSpeed" =@ T<float>
             "enablePan" =@ T<bool>
             "panSpeed" =@ T<float>
             "screenSpacePanning" =@ T<bool>
@@ -3350,6 +3524,10 @@ module Definition =
             "zoomToCursor" =@ T<bool>
             "autoRotate" =@ T<bool>
             "autoRotateSpeed" =@ T<float>
+            "cursorStyle" =@ T<string>
+            "keys" =@ OrbitControlsKeys
+            "mouseButtons" =@ MouseButtons
+            "touches" =@ Touches
 
             "getPolarAngle"        => Unit ^-> T<float>
             "getAzimuthalAngle"    => Unit ^-> T<float>
@@ -3364,6 +3542,216 @@ module Definition =
             "rotateLeft"           => T<float>?angle ^-> Unit
             "rotateUp"             => T<float>?angle ^-> Unit
             "update"               => !? T<float>?deltaTime ^-> T<bool>
+
+            "addEventListener" => OrbitControlsEvent?``event`` * (ThreeEvent ^-> Unit)?listener ^-> TSelf
+        ]
+        |> ignore
+
+    // MapControls is OrbitControls with map-style mouse/touch bindings.
+    MapControls
+        |+> Static [
+            Constructor (Camera?``object`` * !? T<JavaScript.HTMLElement>?domElement)
+        ]
+        |> ignore
+
+    TrackballControls
+        |+> Static [
+            Constructor (Camera?camera * !? T<JavaScript.HTMLElement>?domElement)
+        ]
+        |+> Instance [
+            "screen" =@ TrackballControlsScreen
+            "rotateSpeed" =@ T<float>
+            "zoomSpeed" =@ T<float>
+            "panSpeed" =@ T<float>
+            "rollSpeed" =@ T<float>
+            "noRotate" =@ T<bool>
+            "noZoom" =@ T<bool>
+            "noPan" =@ T<bool>
+            "multiTouchRoll" =@ T<bool>
+            "staticMoving" =@ T<bool>
+            "dynamicDampingFactor" =@ T<float>
+            "minDistance" =@ T<float>
+            "maxDistance" =@ T<float>
+            "minZoom" =@ T<float>
+            "maxZoom" =@ T<float>
+            "keys" =@ !| T<string>
+            "mouseButtons" =@ MouseButtons
+            "target" =@ Vector3
+
+            "handleResize" => Unit ^-> Unit
+            "update"       => Unit ^-> Unit
+            "reset"        => Unit ^-> Unit
+
+            "addEventListener" => TrackballControlsEvent?``event`` * (ThreeEvent ^-> Unit)?listener ^-> TSelf
+        ]
+        |> ignore
+
+    FlyControls
+        |+> Static [
+            Constructor (Camera?``object`` * !? T<JavaScript.HTMLElement>?domElement)
+        ]
+        |+> Instance [
+            "movementSpeed" =@ T<float>
+            "rollSpeed" =@ T<float>
+            "dragToLook" =@ T<bool>
+            "autoForward" =@ T<bool>
+
+            "update" => T<float>?delta ^-> Unit
+
+            "addEventListener" => FlyControlsEvent?``event`` * (ThreeEvent ^-> Unit)?listener ^-> TSelf
+        ]
+        |> ignore
+
+    FirstPersonControls
+        |+> Static [
+            Constructor (Camera?``object`` * !? T<JavaScript.HTMLElement>?domElement)
+        ]
+        |+> Instance [
+            "movementSpeed" =@ T<float>
+            "lookSpeed" =@ T<float>
+            "dampingFactor" =@ T<float>
+            "lookVertical" =@ T<bool>
+            "autoForward" =@ T<bool>
+            "heightSpeed" =@ T<bool>
+            "heightCoef" =@ T<float>
+            "heightMin" =@ T<float>
+            "heightMax" =@ T<float>
+            "constrainVertical" =@ T<bool>
+            "verticalMin" =@ T<float>
+            "verticalMax" =@ T<float>
+            "mouseDragOn" =? T<bool>
+
+            "update" => T<float>?delta ^-> Unit
+            "lookAt" => Vector3?vector ^-> TSelf
+            "lookAt" => T<float>?x * T<float>?y * T<float>?z ^-> TSelf
+            "handleResize" => Unit ^-> Unit
+        ]
+        |> ignore
+
+    PointerLockControls
+        |+> Static [
+            Constructor (Camera?camera * !? T<JavaScript.HTMLElement>?domElement)
+        ]
+        |+> Instance [
+            "isLocked" =? T<bool>
+            "minPolarAngle" =@ T<float>
+            "maxPolarAngle" =@ T<float>
+            "pointerSpeed" =@ T<float>
+
+            "getDirection" => Vector3?v ^-> Vector3
+            "moveForward"  => T<float>?distance ^-> Unit
+            "moveRight"    => T<float>?distance ^-> Unit
+            "lock"         => !? T<bool>?unadjustedMovement ^-> Unit
+            "unlock"       => Unit ^-> Unit
+
+            "addEventListener" => PointerLockControlsEvent?``event`` * (ThreeEvent ^-> Unit)?listener ^-> TSelf
+        ]
+        |> ignore
+
+    ArcballControls
+        |+> Static [
+            Constructor (Camera?camera * !? T<JavaScript.HTMLElement>?domElement * !? Scene?scene)
+        ]
+        |+> Instance [
+            "scene" =@ !? Scene
+            "radiusFactor" =@ T<float>
+            "focusAnimationTime" =@ T<float>
+            "adjustNearFar" =@ T<bool>
+            "scaleFactor" =@ T<float>
+            "dampingFactor" =@ T<float>
+            "wMax" =@ T<float>
+            "enableAnimations" =@ T<bool>
+            "enableFocus" =@ T<bool>
+            "enableGrid" =@ T<bool>
+            "cursorZoom" =@ T<bool>
+            "rotateSpeed" =@ T<float>
+            "enablePan" =@ T<bool>
+            "enableRotate" =@ T<bool>
+            "enableZoom" =@ T<bool>
+            "minDistance" =@ T<float>
+            "maxDistance" =@ T<float>
+            "minZoom" =@ T<float>
+            "maxZoom" =@ T<float>
+
+            "setMouseAction"    => T<string>?operation * (T<int> + T<string>)?mouse * !? T<string>?key ^-> T<bool>
+            "unsetMouseAction"  => (T<int> + T<string>)?mouse * !? T<string>?key ^-> T<bool>
+            "activateGizmos"    => T<bool>?isActive ^-> Unit
+            "setCamera"         => Camera?camera ^-> Unit
+            "setGizmosVisible"  => T<bool>?value ^-> Unit
+            "setTbRadius"       => T<float>?value ^-> Unit
+            "reset"             => Unit ^-> Unit
+            "copyState"         => Unit ^-> Unit
+            "pasteState"        => Unit ^-> Unit
+            "saveState"         => Unit ^-> Unit
+            "getRaycaster"      => Unit ^-> Raycaster
+            "update"            => Unit ^-> Unit
+
+            "addEventListener" => ArcballControlsEvent?``event`` * (ThreeEvent ^-> Unit)?listener ^-> TSelf
+        ]
+        |> ignore
+
+    DragControls
+        |+> Static [
+            Constructor ((!| Object3D)?objects * Camera?camera * !? T<JavaScript.HTMLElement>?domElement)
+        ]
+        |+> Instance [
+            "objects" =@ !| Object3D
+            "recursive" =@ T<bool>
+            "transformGroup" =@ T<bool>
+            "rotateSpeed" =@ T<float>
+            "raycaster" =? Raycaster
+            "mouseButtons" =@ MouseButtons
+            "touches" =@ Touches
+
+            "addEventListener" => DragControlsEvent?``event`` * (DragControlsObjectEvent ^-> Unit)?listener ^-> TSelf
+        ]
+        |> ignore
+
+    TransformControls
+        |+> Static [
+            Constructor (Camera?camera * !? T<JavaScript.HTMLElement>?domElement)
+        ]
+        |+> Instance [
+            "camera" =@ Camera
+            "axis" =? T<string>
+            "mode" =@ T<string>
+            "translationSnap" =@ !? T<float>
+            "rotationSnap" =@ !? T<float>
+            "scaleSnap" =@ !? T<float>
+            "space" =@ T<string>
+            "size" =@ T<float>
+            "viewport" =@ !? Vector4
+            "dragging" =? T<bool>
+            "showX" =@ T<bool>
+            "showY" =@ T<bool>
+            "showZ" =@ T<bool>
+            "showXY" =@ T<bool>
+            "showYZ" =@ T<bool>
+            "showXZ" =@ T<bool>
+            "showXYZE" =@ T<bool>
+            "showE" =@ T<bool>
+            "minX" =@ T<float>
+            "maxX" =@ T<float>
+            "minY" =@ T<float>
+            "maxY" =@ T<float>
+            "minZ" =@ T<float>
+            "maxZ" =@ T<float>
+
+            "getHelper"          => Unit ^-> Object3D
+            "attach"             => Object3D?``object`` ^-> TSelf
+            "detach"             => Unit ^-> TSelf
+            "reset"              => Unit ^-> Unit
+            "getRaycaster"       => Unit ^-> Raycaster
+            "getMode"            => Unit ^-> T<string>
+            "setMode"            => T<string>?mode ^-> Unit
+            "setTranslationSnap" => !? T<float>?translationSnap ^-> Unit
+            "setRotationSnap"    => !? T<float>?rotationSnap ^-> Unit
+            "setScaleSnap"       => !? T<float>?scaleSnap ^-> Unit
+            "setSize"            => T<float>?size ^-> Unit
+            "setSpace"           => T<string>?space ^-> Unit
+            "setColors"          => ColorRepresentation?xAxis * ColorRepresentation?yAxis * ColorRepresentation?zAxis * ColorRepresentation?active ^-> Unit
+
+            "addEventListener" => TransformControlsEvent?``event`` * (TransformControlsEventPayload ^-> Unit)?listener ^-> TSelf
         ]
         |> ignore
 
@@ -3388,11 +3776,25 @@ module Definition =
                 LoopMode
                 InterpolationMode
                 ColorSpace
+                MouseButton
+                TouchAction
                 WebGLPowerPreference
                 ShaderPrecision
                 HSL
                 RGB
                 ThreeEvent
+                MouseButtons
+                Touches
+                TrackballControlsScreen
+                OrbitControlsEvent
+                TrackballControlsEvent
+                ArcballControlsEvent
+                FlyControlsEvent
+                PointerLockControlsEvent
+                DragControlsEvent
+                TransformControlsEvent
+                DragControlsObjectEvent
+                TransformControlsEventPayload
                 Face
                 Intersection
                 RaycasterThreshold
@@ -3559,9 +3961,18 @@ module Definition =
                 DirectionalLightHelper
                 PointLightHelper
                 SpotLightHelper
-                // Controls addon
+                // Controls addons
                 Controls
                 OrbitControls
+                MapControls
+                TrackballControls
+                FlyControls
+                FirstPersonControls
+                PointerLockControls
+                ArcballControls
+                DragControls
+                TransformControls
+                OrbitControlsKeys
             ]
         ]
 
