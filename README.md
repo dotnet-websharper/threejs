@@ -4,8 +4,10 @@
 
 WebSharper bindings for [three.js](https://threejs.org/) 0.187 — typed F# and C#
 access to WebGL rendering, the scene graph, geometries, materials, lights,
-textures, animation, raycasting and the addon controls (`OrbitControls`,
-`TrackballControls`, `TransformControls`, …).
+textures, animation and raycasting, plus the `three/addons/…` surface: the nine
+controls, the common loaders (`GLTFLoader`, `DRACOLoader`, `OBJLoader`, …),
+post-processing (`EffectComposer` and its passes), fat lines (`Line2`), utility
+modules and exporters.
 
 The binding is **npm based**: every class is a named import from the
 [`three`](https://www.npmjs.com/package/three) package
@@ -17,8 +19,8 @@ This repository contains:
 
 | Project | Purpose |
 | --- | --- |
-| `WebSharper.ThreeJs` | The binding: ~160 classes and enums covering the math, core, camera, geometry, material, light, helper, renderer, loader and animation APIs, plus all nine addon controls (`OrbitControls`, `MapControls`, `TrackballControls`, `FlyControls`, `FirstPersonControls`, `PointerLockControls`, `ArcballControls`, `DragControls`, `TransformControls`). |
-| `WebSharper.ThreeJs.Sample` | A WebSharper SPA (esbuild → `dist/`) with a live 3D scene, pointer picking, a camera-control switcher (orbit/map/trackball/fly/first-person/arcball/pointer-lock), a `TransformControls` gizmo and a `DragControls` mode, an instanced mesh, a hand-built `BufferGeometry` starfield, `DataTexture`/`TextureLoader` textures, an `AnimationMixer` clip and a light/dark theme. |
+| `WebSharper.ThreeJs` | The binding: ~220 classes, configs and enums covering the math, core, camera, geometry, material, light, helper, renderer, loader and animation APIs; all nine addon controls; the addon loaders (`GLTFLoader`, `DRACOLoader`, `KTX2Loader`, `OBJLoader`, `MTLLoader`, `STLLoader`, `PLYLoader`, `FBXLoader`, `ColladaLoader`, `LWOLoader`, `RGBELoader`, `EXRLoader`, `SVGLoader`, `FontLoader`/`TextGeometry`, `TTFLoader`, `LUT3dlLoader`, `CubeTextureLoader`, `ImageBitmapLoader`); post-processing (`Pass`, `EffectComposer`, `RenderPass`, `ShaderPass`, `MaskPass`, `ClearPass`, `OutputPass`, `UnrealBloomPass`, `SSAOPass`, `SMAAPass`, `BokehPass`, `FilmPass`, `AfterimagePass`, `TAARenderPass`); fat lines (`Line2`, `LineSegments2`, `LineGeometry`, `LineSegmentsGeometry`, `LineMaterial`, `Wireframe`, `WireframeGeometry2`); object addons (`Sky`, `Water`, `Water2`, `Reflector`, `Refractor`); utilities (`BufferGeometryUtils`, `SkeletonUtils`); exporters (`GLTFExporter`, `OBJExporter`, `STLExporter`, `PLYExporter`, `USDZExporter`); `ConvexGeometry`/`ConvexHull`, `Gyroscope`; and the WebXR buttons. |
+| `WebSharper.ThreeJs.Sample` | A WebSharper SPA (esbuild → `dist/`, ES module) with a live 3D scene, pointer picking, a camera-control switcher (orbit/map/trackball/fly/first-person/arcball/pointer-lock), a `TransformControls` gizmo and a `DragControls` mode, a bloom `EffectComposer` toggle, a `Line2` fat line built with `LineGeometry`/`LineMaterial`, a `BufferGeometryUtils.MergeGeometries` object, an instanced mesh, a hand-built `BufferGeometry` starfield, `DataTexture`/`TextureLoader` textures, an `AnimationMixer` clip and a light/dark theme. |
 
 ## Live demos
 
@@ -30,13 +32,17 @@ The sample doubles as the binding's [test case](#running-the-test-case): it
 renders a scene with `WebGLRenderer` (shadows, ACES tone mapping, sRGB output),
 lets you switch between the addon camera controls (orbit, map, trackball, fly,
 first person, arcball, pointer lock) and attaches a `TransformControls` gizmo or
-a `DragControls` manipulator to the objects, adds objects from twelve geometries
-and eight materials, picks them with `Raycaster` (the yellow `BoxHelper` follows
-the hit and the readout shows its world-space `Box3`), drives one mesh with an
-`AnimationMixer` clip, shows `InstancedMesh`, `Points`, a dashed `LineLoop`, the
-grid/axes/polar/light/camera helpers, and recomputes a set of math results from
-the live scene every tick. It is light-themed by default and has a light/dark
-switcher (persisted in `localStorage`).
+a `DragControls` manipulator to the objects, toggles a bloom rig built with
+`EffectComposer`/`UnrealBloomPass`/`OutputPass`, draws a `Line2` fat line
+(`LineGeometry` + `LineMaterial`) and an object built by
+`BufferGeometryUtils.MergeGeometries`, adds objects from twelve geometries and
+eight materials, picks them with `Raycaster` (the yellow `BoxHelper` follows the
+hit and the readout shows its world-space `Box3`), drives one mesh with an
+`AnimationMixer` clip, shows `InstancedMesh`, `Points`, the
+grid/axes/polar/light/camera helpers, constructs the whole addon loader/exporter
+surface, and recomputes a set of math results from the live scene every tick. It
+is light-themed by default and has a light/dark switcher (persisted in
+`localStorage`).
 
 - **Sample (this repository):** <https://dotnet-websharper.github.io/threejs/>
 - **Sample in the WebSharper samples gallery:** <https://websharper-samples.github.io/ThreeJS/>
@@ -193,6 +199,67 @@ The `mouseButtons` / `touches` maps are typed too, via the `MouseButton` and
 controls.MouseButtons <- MouseButtons(LEFT = MouseButton.Rotate, RIGHT = MouseButton.Pan)
 ```
 
+### Loaders, post-processing, lines, utilities and exporters
+
+The addon families beyond the controls are bound too; each is a named import from
+its `three/addons/…` module.
+
+**Loaders.** `GLTFLoader` returns a `GLTF` (`Scene`, `Scenes`, `Animations`,
+`Cameras`, `Asset`); attach the Draco/KTX2 decoders with `SetDRACOLoader` /
+`SetKTX2Loader`. The other loaders share the `Load(url, onLoad, …)` shape.
+
+```fsharp
+let gltf = GLTFLoader()
+gltf.SetDRACOLoader(DRACOLoader().SetDecoderPath("/draco/")) |> ignore
+
+gltf.Load("/model.glb", fun (result: GLTF) ->
+    scene.Add(result.Scene) |> ignore)
+
+STLLoader().Load("/part.stl", fun (geometry: BufferGeometry) ->
+    scene.Add(Mesh(geometry, MeshStandardMaterial())) |> ignore)
+```
+
+**Post-processing.** Build an `EffectComposer` from the renderer, add passes, and
+call `Composer.Render(delta)` instead of `Renderer.Render`:
+
+```fsharp
+let composer = EffectComposer(renderer)
+composer.AddPass(RenderPass(scene, camera))
+let bloom = UnrealBloomPass(Vector2(width, height), 0.35, 0.5, 0.92)
+composer.AddPass(bloom)
+composer.AddPass(OutputPass())         // tone mapping + color space
+
+// in the loop:  composer.Render(delta)
+// on resize:    composer.SetSize(w, h)
+```
+
+**Fat lines.** `Line2` uses `LineGeometry` (vertex positions) and `LineMaterial`
+(screen- or world-space width). Keep the material's `Resolution` in sync with the
+viewport:
+
+```fsharp
+let geometry = LineGeometry()
+geometry.SetPositions([| 0.; 0.; 0.;  4.; 2.; 1. |]) |> ignore
+
+let material =
+    LineMaterial(LineMaterialParameters(Color = "#6366f1", Linewidth = 3., Dashed = true))
+material.Resolution <- Vector2(width, height)
+
+let line = Line2(geometry, material)
+line.ComputeLineDistances() |> ignore
+scene.Add(line) |> ignore
+```
+
+**Utilities and exporters.** Module functions are bound as static members:
+
+```fsharp
+let merged = BufferGeometryUtils.MergeGeometries([| boxGeometry; sphereGeometry |], true)
+let copy   = SkeletonUtils.Clone(rig)             // deep clone incl. skinned meshes
+
+let objText = OBJExporter().Parse(scene)          // string
+let stlText = STLExporter().Parse(scene)          // string; the binary overload returns a DataView
+```
+
 ### Geometries, materials, lights
 
 Geometries extend `BufferGeometry` (there is no `Geometry`/`Face3` any more),
@@ -278,10 +345,16 @@ checker.NeedsUpdate <- true
 - **`PCFSoftShadowMap` is gone.** It was removed in 0.187 (it silently fell back
   to `PCFShadowMap`); use `ShadowMapType.PCFShadowMap` or
   `ShadowMapType.VSMShadowMap`.
-- **Addons** are imported from their `three/addons/…` module: the controls come
-  from `three/addons/controls/<Name>.js`. No extra npm package is needed; the
-  addons ship inside `three`. All nine controls are bound — see
-  [The other addon controls](#the-other-addon-controls).
+- **Addons** are imported from their `three/addons/…` module (the controls from
+  `three/addons/controls/<Name>.js`, `GLTFLoader` from
+  `three/addons/loaders/GLTFLoader.js`, and so on). No extra npm package is
+  needed; the addons ship inside `three`. See [The other addon
+  controls](#the-other-addon-controls) and [Loaders, post-processing, lines,
+  utilities and exporters](#loaders-post-processing-lines-utilities-and-exporters).
+- **Bundle addons as ESM.** `DRACOLoader`/`KTX2Loader` resolve their decoder
+  paths against `import.meta.url` at module load, so an IIFE bundle throws
+  `Failed to construct 'URL'`. Bundle with `format: 'esm'` (as the sample's
+  esbuild config does) and load the output with `<script type="module">`.
 - **Renderer surface.** `OutputColorSpace`, `ToneMapping`,
   `ToneMappingExposure`, `ShadowMap` (`WebGLShadowMap`: `Enabled`, `Type`,
   `AutoUpdate`), `Info` (calls/triangles/points per frame), `SetAnimationLoop`,
@@ -342,8 +415,11 @@ What to try:
    grab the rig objects with `DragControls`.
 3. Pick a geometry/material and press **Add object**; **Clear** empties the rig.
 4. Toggle **Pause spin** to pause the `AnimationMixer` clip (the rig still
-   turns), **Toggle helpers** for the grid/axes/polar helpers, **Toggle debug**
-   for the light gizmos, the camera frustum and the `Box3Helper`.
+   turns), **Toggle helpers** for the grid/axes/polar helpers, **Toggle bloom**
+   for the `EffectComposer`/`UnrealBloomPass` post-processing rig, and **Toggle
+   debug** for the light gizmos, the camera frustum and the `Box3Helper`.
+   The pill under the Scene card reports how many addon classes the sample
+   instantiated.
 5. Switch the theme; the choice is remembered in `localStorage`.
 
 ## Build from source
