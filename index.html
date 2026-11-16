@@ -75,6 +75,20 @@
                         </select>
                     </label>
                 </div>
+                <label class="field">
+                    Camera control
+                    <select ws-var="ControlMode">
+                        <option value="Orbit">Orbit</option>
+                        <option value="Map">Map (pan · zoom)</option>
+                        <option value="Trackball">Trackball</option>
+                        <option value="Fly">Fly</option>
+                        <option value="First person">First person</option>
+                        <option value="Arcball">Arcball</option>
+                        <option value="Pointer lock">Pointer lock</option>
+                        <option value="Transform">Transform gizmo</option>
+                        <option value="Drag">Drag objects</option>
+                    </select>
+                </label>
                 <div class="toolbar">
                     <button class="btn primary" ws-onclick="AddObject">Add object</button>
                     <button class="btn" ws-onclick="ClearObjects">Clear</button>
